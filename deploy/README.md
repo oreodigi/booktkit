@@ -17,6 +17,7 @@ Deployment state: `/home/booktkit/booktkit-deploy/state.json`.
 Deployment log: `/home/booktkit/booktkit-deploy/deploy.log`.
 Failure status: `/home/booktkit/booktkit-deploy/failure.json`.
 Backups: `/home/booktkit/booktkit-backups/git-deploy/`.
+Restore the active deployment: `python3 /home/booktkit/booktkit-deploy/rollback.py BACKUP_DIRECTORY`. Rollback pauses the scheduled job.
 Pause: create `/home/booktkit/booktkit-deploy/PAUSED`.
 Resume: remove that pause file after reviewing the reason for the pause.
 

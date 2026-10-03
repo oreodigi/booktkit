@@ -183,6 +183,7 @@ def deploy():
                 (CONTROL / 'failure.json').unlink()
             print('Deployed ' + commit + ' (' + str(len(changed)) + ' changed files)')
         except Exception:
+            (CONTROL / 'PAUSED').write_text('Deployment failed during activation; review failure.json before resuming.\n')
             for name, was_present in existed.items():
                 target = safe_target(name)
                 if was_present:
