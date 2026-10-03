@@ -1,0 +1,282 @@
+<?php
+
+namespace App\Providers;
+
+use App\Models\Currency;
+use App\Models\Language;
+use App\Models\ContactPage;
+use App\Models\Journal\Blog;
+use App\Models\HomePage\Section;
+use App\Models\BasicSettings\SEO;
+use App\Models\BasicSettings\Basic;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\ServiceProvider;
+use App\Models\BasicSettings\PageHeading;
+use App\Models\BasicSettings\SocialMedia;
+
+class AppServiceProvider extends ServiceProvider
+{
+  private function getSelectedCurrency()
+  {
+    return Currency::getSelectedCurrency(Session::get('currency'));
+  }
+
+  private function applySelectedCurrency($basicData, $currency)
+  {
+    if (!empty($basicData) && !empty($currency)) {
+      $basicData->base_currency_symbol = $currency->symbol;
+      $basicData->base_currency_symbol_position = $currency->symbol_position;
+      $basicData->base_currency_text = $currency->text;
+      $basicData->base_currency_text_position = $currency->text_position;
+      $basicData->base_currency_rate = $currency->value;
+    }
+
+    return $basicData;
+  }
+
+  /**
+   * Register any application services.
+   *
+   * @return void
+   */
+  public function register()
+  {
+    //
+  }
+
+  /**
+   * Bootstrap any application services.
+   *
+   * @return void
+   */
+  public function boot()
+  {
+
+    if (!app()->runningInConsole()) {
+      # code...
+      Paginator::useBootstrap();
+
+      $data = Basic::select('favicon', 'website_title', 'logo', 'timezone', 'preloader', 'event_guest_checkout_status', 'primary_color')->first();
+
+      // send this information to only back-end view files
+      View::composer('backend.*', function ($view) {
+        if (Auth::guard('admin')->check() == true) {
+          $authAdmin = Auth::guard('admin')->user();
+          $role = null;
+
+          if (!is_null($authAdmin->role_id)) {
+            $role = $authAdmin->role()->first();
+          }
+        }
+
+        $language = Language::where('is_default', 1)->first();
+        $websiteSettings =  Basic::select(
+          'event_country_status',
+          'event_state_status',
+          'admin_theme_version',
+          'base_currency_symbol_position',
+          'base_currency_symbol',
+          'base_currency_text',
+          'google_map_status',
+          'google_map_api_key'
+        )
+          ->first();
+
+        $footerText = $language->footerContent()->first();
+
+        if (Auth::guard('admin')->check() == true) {
+          $view->with('roleInfo', $role);
+        }
+
+        $defaultCurrency = Currency::getDefaultCurrency();
+
+        $view->with('defaultCurrency', $defaultCurrency);
+        $view->with('defaultLang', $language);
+        $view->with('settings', $websiteSettings);
+        $view->with('footerTextInfo', $footerText);
+      });
+
+      // send this information to only back-end view files
+      View::composer('organizer.*', function ($view) {
+        $language = Language::where('is_default', 1)->first();
+        $websiteSettings = Basic::select(
+          'admin_theme_version',
+          'base_currency_symbol',
+          'base_currency_symbol_position',
+          'base_currency_text',
+          'base_currency_text_position',
+          'base_currency_rate',
+          'organizer_email_verification',
+          'ai_system_status',
+          'event_state_status',
+          'google_map_status',
+          'google_map_api_key',
+          'event_country_status',
+          'event_state_status'
+        )->first();
+
+        $footerText = $language->footerContent()->first();
+
+        $defaultCurrency = Currency::getDefaultCurrency();
+
+        $aiEngines = [];
+
+        if (Auth::guard('organizer')->check()) {
+          $aiEngines = \App\Models\OrganizerAiBalance::where(
+            'organizer_id',
+            Auth::guard('organizer')->id()
+          )
+            ->pluck('ai_engine')
+            ->unique()
+            ->values()
+            ->toArray();
+        }
+
+        $view->with('defaultCurrency', $defaultCurrency);
+        $view->with('defaultLang', $language);
+        $view->with('settings', $websiteSettings);
+        $view->with('footerTextInfo', $footerText);
+        $view->with('aiEngines', $aiEngines);
+      });
+
+
+      // send this information to only front-end view files
+      View::composer('frontend.*', function ($view) {
+        // get basic info
+        $basicData = Basic::select(
+          'theme_version',
+          'footer_logo',
+          'primary_color',
+          'breadcrumb_overlay_color',
+          'breadcrumb_overlay_opacity',
+          'breadcrumb',
+          'email_address',
+          'contact_number',
+          'address',
+          'latitude',
+          'longitude',
+          'base_currency_symbol',
+          'base_currency_symbol_position',
+          'base_currency_text',
+          'base_currency_text_position',
+          'base_currency_rate',
+          'is_shop_rating',
+          'facebook_login_status',
+          'google_login_status',
+          'google_recaptcha_status',
+          'event_country_status',
+          'event_state_status',
+          'google_map_status',
+          'google_map_api_key',
+        )->first();
+
+        $currentCurrency = $this->getSelectedCurrency();
+        $allCurrencies = Currency::latest()->get();
+        $basicData = $this->applySelectedCurrency($basicData, $currentCurrency);
+
+
+        // get all the languages of this system
+        $allLanguages = Language::all();
+
+        // get the current locale of this website
+        if (Session::has('lang')) {
+          $locale = Session::get('lang');
+        }
+        if (empty($locale)) {
+          $language = Language::where('is_default', 1)->first();
+        } else {
+          $language = Language::where('code', $locale)->first();
+          if (empty($language)) {
+            $language = Language::where('is_default', 1)->first();
+          }
+        }
+
+        // get all the social medias
+        $socialMedias = SocialMedia::orderBy('serial_number')->get();
+
+        //seo
+        $seo = SEO::where('language_id', $language->id)->first();
+        //seo
+        $pageHeading = PageHeading::where('language_id', $language->id)->first();
+
+        // get the menus of this website
+        $siteMenuInfo = $language->menuInfo;
+
+        if (is_null($siteMenuInfo)) {
+          $menus = json_encode([]);
+        } else {
+          $menus = $siteMenuInfo->menus;
+        }
+
+        // get the announcement popups
+        $popups = $language->announcementPopup()->where('status', 1)->orderBy('serial_number', 'asc')->get();
+
+        // get the cookie alert info
+        $cookieAlert = $language->cookieAlertInfo()->first();
+
+        // get footer section status (enable/disable) information
+        $footerSectionStatus = Section::query()->pluck('footer_section_status')->first();
+
+        if ($footerSectionStatus == 1) {
+          // get the footer info
+          $footerData = $language->footerContent()->first();
+
+          // get the quick links of footer
+          $quickLinks = $language->footerQuickLink()->orderBy('serial_number', 'asc')->get();
+
+          // get latest blogs
+          if ($basicData->theme_version != 3) {
+            $blogs = Blog::join('blog_informations', 'blogs.id', '=', 'blog_informations.blog_id')
+              ->where('blog_informations.language_id', '=', $language->id)
+              ->select('blogs.image', 'blogs.created_at', 'blog_informations.title', 'blog_informations.slug')
+              ->orderByDesc('blogs.created_at')
+              ->limit(3)
+              ->get();
+          }
+
+          // get newsletter title
+          if ($basicData->theme_version == 2) {
+            $newsletterTitle = $language->newsletterSec()->pluck('title')->first();
+          }
+        }
+
+        $bex = ContactPage::where('language_id', $language->id)->first();
+
+        $view->with('basicInfo', $basicData);
+        $view->with('seo', $seo);
+        $view->with('bex', $bex);
+        $view->with('allLanguageInfos', $allLanguages);
+        $view->with('allCurrencyInfos', $allCurrencies);
+        $view->with('currentLanguageInfo', $language);
+        $view->with('currentCurrencyInfo', $currentCurrency);
+        $view->with('socialMediaInfos', $socialMedias);
+        $view->with('menuInfos', $menus);
+        $view->with('popupInfos', $popups);
+        $view->with('cookieAlertInfo', $cookieAlert);
+        $view->with('footerSecStatus', $footerSectionStatus);
+        $view->with('pageHeading', $pageHeading);
+
+
+        if ($footerSectionStatus == 1) {
+          $view->with('footerInfo', $footerData);
+          $view->with('quickLinkInfos', $quickLinks);
+
+          if ($basicData->theme_version != 3) {
+            $view->with('latestBlogInfos', $blogs);
+          }
+
+          if ($basicData->theme_version == 2) {
+            $view->with('newsletterTitle', $newsletterTitle);
+          }
+        }
+      });
+
+
+      // send this information to both front-end & back-end view files
+      View::share(['websiteInfo' => $data]);
+    }
+  }
+}

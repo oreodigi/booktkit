@@ -1,0 +1,4151 @@
+{
+  "info": {
+    "_postman_id": "76a07cdd-dbc8-4c29-ad03-e3eb3cff42ca",
+    "name": "Booktkit",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "23789334"
+  },
+  "item": [
+    {
+      "name": "Customer Api",
+      "item": [
+        {
+          "name": "api.index",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request GET 'https://booktkit.com/api/'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/events",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "events"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request GET 'https://booktkit.com/api/events'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.event.details",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "https://booktkit.com/api/events/details/?event_id=105",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "events",
+                "details",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "event_id",
+                  "value": "105"
+                }
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request GET 'https://booktkit.com/api/events/details'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.event.booking.store",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/event-booking",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "event-booking"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request POST 'https://booktkit.com/api/event-booking'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.product.review.store",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/product/review/store",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "product",
+                "review",
+                "store"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request POST 'https://booktkit.com/api/product/review/store'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.organizers.index",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/organizers",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "organizers"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request GET 'https://booktkit.com/api/organizers'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.customer.signup",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/customer/signup",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "customer",
+                "signup"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request GET 'https://booktkit.com/api/customer/signup'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.customer.signup_submit",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/customer/signup/submit",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "customer",
+                "signup",
+                "submit"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request POST 'https://booktkit.com/api/customer/signup/submit'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.customer.login",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/customer/login",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "customer",
+                "login"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request GET 'https://booktkit.com/api/customer/login'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.customer.authentication.fail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/customer/authentication-fail",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "customer",
+                "authentication-fail"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request GET 'https://booktkit.com/api/customer/authentication-fail'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.customer.login_submit",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "username",
+                  "value": "goutam",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "000000",
+                  "type": "text"
+                },
+                {
+                  "key": "device_name",
+                  "value": "customer",
+                  "type": "text",
+                  "uuid": "31b833d9-16ff-4949-8025-7904ef9c9c9b"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{url}}/customer/login/submit",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "customer",
+                "login",
+                "submit"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request POST 'https://booktkit.com/api/customer/login/submit'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.customers.dashboard",
+          "protocolProfileBehavior": {
+            "disabledSystemHeaders": {}
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/customers/dashboard",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "customers",
+                "dashboard"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request GET 'https://booktkit.com/api/customers/dashboard'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.customers.bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/customers/bookings",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "customers",
+                "bookings"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request GET 'https://booktkit.com/api/customers/bookings'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.customers.booking.details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/customers/booking/details?booking_id= 118",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "customers",
+                "booking",
+                "details"
+              ],
+              "query": [
+                {
+                  "key": "booking_id",
+                  "value": " 118"
+                }
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request GET 'https://booktkit.com/api/customers/booking/details'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.customers.wishlists.index",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/customers/wishlists",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "customers",
+                "wishlists"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request GET 'https://booktkit.com/api/customers/wishlists'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.customers.wishlists.store",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/customers/wishlists/store",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "customers",
+                "wishlists",
+                "store"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request POST 'https://booktkit.com/api/customers/wishlists/store'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.customers.product_orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/customers/product-orders",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "customers",
+                "product-orders"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request GET 'https://booktkit.com/api/customers/product-orders'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.customers.product_order.details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/customers/product-order/details",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "customers",
+                "product-order",
+                "details"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request GET 'https://booktkit.com/api/customers/product-order/details'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.customers.support_tickets.store",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/customers/support-ticket/store",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "customers",
+                "support-ticket",
+                "store"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request POST 'https://booktkit.com/api/customers/support-ticket/store'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.customers.wishlists.delete",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/customers/wishlists/delete",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "customers",
+                "wishlists",
+                "delete"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request GET 'https://booktkit.com/api/customers/wishlists/delete'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.customers.support_tickets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/customers/support-tickets",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "customers",
+                "support-tickets"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request GET 'https://booktkit.com/api/customers/support-tickets'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.customers.support_tickets.details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/customers/support-ticket/details",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "customers",
+                "support-ticket",
+                "details"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request GET 'https://booktkit.com/api/customers/support-ticket/details'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.customers.support_tickets.reply",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://booktkit.com/api/customers/support-ticket/reply",
+              "protocol": "https",
+              "host": [
+                "booktkit",
+                "com"
+              ],
+              "path": [
+                "api",
+                "customers",
+                "support-ticket",
+                "reply"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request POST 'https://booktkit.com/api/customers/support-ticket/reply'"
+          },
+          "response": []
+        },
+        {
+          "name": "api.language",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Organizer Api",
+      "item": [
+        {
+          "name": "Basic Api",
+          "item": [
+            {
+              "name": "Get Currency",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/get-currency",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "get-currency"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Organizer Signup",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/signup",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "signup"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Organizer Signup Submit",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "username",
+                      "value": "azim",
+                      "type": "text"
+                    },
+                    {
+                      "key": "email",
+                      "value": "azimahmed11041@gmail.com",
+                      "type": "text"
+                    },
+                    {
+                      "key": "password",
+                      "value": "12345678",
+                      "type": "text"
+                    },
+                    {
+                      "key": "password_confirmation",
+                      "value": "12345678",
+                      "type": "text"
+                    },
+                    {
+                      "key": "name",
+                      "value": "azim",
+                      "type": "text",
+                      "uuid": "b2d9752c-9889-480e-ba26-be051762e747"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/signup/submit",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "signup",
+                    "submit"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Organizer Login",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/login",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "login"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Organizer Login Submit",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "let jsonData = {};\r",
+                      "pm.test(\"Response is valid JSON\", function () {\r",
+                      "    jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData).to.be.an(\"object\");\r",
+                      "});\r",
+                      "\r",
+                      "if (jsonData.status === \"success\" && jsonData.token) {\r",
+                      "    // Try to save in environment (works only if an environment is selected)\r",
+                      "    try { pm.environment.set(\"token\", jsonData.token); } catch (e) { }\r",
+                      "\r",
+                      "    // Always save to collection as well (more reliable across runs)\r",
+                      "    pm.collectionVariables.set(\"token\", jsonData.token);\r",
+                      "\r",
+                      "    pm.test(\"Token exists\", function () {\r",
+                      "        pm.expect(jsonData.token).to.be.a(\"string\").and.not.empty;\r",
+                      "    });\r",
+                      "} else {\r",
+                      "    pm.test(\"Login failed: token missing\", function () {\r",
+                      "        pm.expect(jsonData).to.have.property(\"token\");\r",
+                      "    });\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "username",
+                      "value": "organizer",
+                      "type": "text"
+                    },
+                    {
+                      "key": "password",
+                      "value": "123456",
+                      "type": "text"
+                    },
+                    {
+                      "key": "device_name",
+                      "value": "org_device",
+                      "type": "text",
+                      "uuid": "49ce906f-cc71-48fb-a7ed-e2efca7f1fe6"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/login/submit",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "login",
+                    "submit"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Organizer Dashboard",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/dashboard",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "dashboard"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Organizer Monthly Income",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/monthly-income?year=2025",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "monthly-income"
+                  ],
+                  "query": [
+                    {
+                      "key": "year",
+                      "value": "2025"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Organizer Edit Profile",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/edit-profile",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "edit-profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Organizer Update Profile",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "email",
+                      "value": "azimahmed11041@gmail.com",
+                      "type": "text",
+                      "uuid": "81fe2bac-ce39-4eb2-b11b-662cbd8a181e"
+                    },
+                    {
+                      "key": "phone",
+                      "value": "+34535463546546354",
+                      "type": "text",
+                      "uuid": "a8350c8c-0ecc-48db-ad3e-b025b78ef0f3"
+                    },
+                    {
+                      "key": "username",
+                      "value": "azim",
+                      "type": "text",
+                      "uuid": "69383ce3-4852-4c5d-9f06-4230e83c16ba"
+                    },
+                    {
+                      "key": "facebook",
+                      "value": "https://www.facebook.com/",
+                      "type": "text",
+                      "uuid": "54774550-728a-45ab-b865-8c2e24aca50d"
+                    },
+                    {
+                      "key": "twitter",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "b671eeff-a4fc-48f6-93b9-79dee89cbc27"
+                    },
+                    {
+                      "key": "linkedin",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "bd0ea8f3-1e64-41b5-a6b1-627eae9cbb43"
+                    },
+                    {
+                      "key": "en_name",
+                      "value": "AZIM",
+                      "type": "text",
+                      "uuid": "8500c2f5-2ea5-4667-8639-506259519ba3"
+                    },
+                    {
+                      "key": "en_designation",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "16710266-d574-42fe-89b2-775a740e3a5d"
+                    },
+                    {
+                      "key": "en_country",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "8e673e14-74ed-4492-9784-f60cb39ad9a3"
+                    },
+                    {
+                      "key": "en_city",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "f608294e-d634-49ee-aa83-4cbdf9ff567b"
+                    },
+                    {
+                      "key": "en_state",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "87214012-3ddf-4a30-b362-4c3ef14f7622"
+                    },
+                    {
+                      "key": "en_zip_code",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "1627a987-3e69-4aff-a91c-625fea887c1b"
+                    },
+                    {
+                      "key": "en_address",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "e4efe5c9-5e42-4b27-bc83-966c92603302"
+                    },
+                    {
+                      "key": "en_details",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "7fb80ae6-720e-4b83-a1c0-642f48151173"
+                    },
+                    {
+                      "key": "ar_name",
+                      "value": "ok",
+                      "type": "text",
+                      "uuid": "b59dfb74-0100-4953-9987-0d7376cc2d78"
+                    },
+                    {
+                      "key": "ar_designation",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "bad76b2b-b7e8-4866-9cb9-f7933af6765b"
+                    },
+                    {
+                      "key": "ar_country",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "2a20c25e-1179-4dfb-83ff-b86668824248"
+                    },
+                    {
+                      "key": "ar_city",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "62efa899-e4fc-448d-bbba-413b7ab9c32a"
+                    },
+                    {
+                      "key": "ar_state",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "58415061-7976-4947-aeb7-6cd10c030fe9"
+                    },
+                    {
+                      "key": "ar_zip_code",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "4c2fc9cf-fca4-4815-8093-688ba6da309d"
+                    },
+                    {
+                      "key": "ar_address",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "321e363c-8a80-4e48-a9d9-db0fe47879eb"
+                    },
+                    {
+                      "key": "ar_details",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "e786436d-fe01-4bee-b8c9-25bb98a513e8"
+                    },
+                    {
+                      "key": "photo",
+                      "type": "file",
+                      "uuid": "11cbb752-1c63-4a2f-897a-e1c3d0e4a067",
+                      "src": "/C:/Users/USER/Downloads/cat-18.png"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/updated-profile",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "updated-profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Organizer Updated Password",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "current_password",
+                      "value": "123456",
+                      "type": "text"
+                    },
+                    {
+                      "key": "new_password",
+                      "value": "12345678",
+                      "type": "text"
+                    },
+                    {
+                      "key": "new_password_confirmation",
+                      "value": "12345678",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/updated-password",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "updated-password"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Organizer  Transaction",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/transcation?transcation_id=123445",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "transcation"
+                  ],
+                  "query": [
+                    {
+                      "key": "transcation_id",
+                      "value": "123445",
+                      "type": "text"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Organizer Logout",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/organizer/logout",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "logout"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  ""
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Events Management Api",
+          "item": [
+            {
+              "name": "All Events",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/events?title=&event_type",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "events"
+                  ],
+                  "query": [
+                    {
+                      "key": "title",
+                      "value": ""
+                    },
+                    {
+                      "key": "event_type",
+                      "value": null
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Add Event",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/add-event",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "add-event"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "All Categories {language_id}",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/all-categories/8",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "all-categories",
+                    "8"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "All Countries {language_id}",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/all-countries/8",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "all-countries",
+                    "8"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "All States  {language_id}",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/all-states/8",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "all-states",
+                    "8"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "All Cities {language_id}",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/all-cities/8",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "all-cities",
+                    "8"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Country Wise State City {country_id}",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/country-wise-state-city/8",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "country-wise-state-city",
+                    "8"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "State  Wise City {state_id}",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/state-wise-city/8",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "state-wise-city",
+                    "8"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Event Store",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "event_type",
+                      "value": "venue",
+                      "description": "value : onine , venue",
+                      "type": "text",
+                      "uuid": "6f4fa262-3761-4874-bc0d-2cd01f75e182"
+                    },
+                    {
+                      "key": "date_type",
+                      "value": "multiple",
+                      "description": "value : single , multiple",
+                      "type": "text",
+                      "uuid": "31a6e52e-8d5d-47b7-a99d-36feb1a5a97b"
+                    },
+                    {
+                      "key": "countdown_status",
+                      "value": "2",
+                      "type": "text",
+                      "uuid": "132cc266-0e07-4798-b8df-09c3c3ffece1"
+                    },
+                    {
+                      "key": "slider_images[]",
+                      "type": "file",
+                      "uuid": "76f099e9-fa36-427b-83ab-7ccdea6ca227",
+                      "src": [
+                        "/C:/Users/USER/Downloads/1.png",
+                        "/C:/Users/USER/Downloads/2.png",
+                        "/C:/Users/USER/Downloads/3.png"
+                      ]
+                    },
+                    {
+                      "key": "thumbnail",
+                      "type": "file",
+                      "uuid": "c5565378-5963-4be6-968f-4abb9c0cdf97",
+                      "src": "/C:/Users/USER/Downloads/1.png"
+                    },
+                    {
+                      "key": "status",
+                      "value": "1",
+                      "description": "value : 1 , 0",
+                      "type": "text",
+                      "uuid": "fa070bc3-e76d-45d3-87f7-0f0b519fa5d8"
+                    },
+                    {
+                      "key": "is_featured",
+                      "value": "yes",
+                      "description": "value: yes ,no",
+                      "type": "text",
+                      "uuid": "803215ad-009e-471e-9220-99dc94738e20"
+                    },
+                    {
+                      "key": "early_bird_discount_type",
+                      "value": "enable",
+                      "description": "value :  enable , disable",
+                      "type": "text",
+                      "uuid": "07a2c8ea-8e73-422e-97a2-910d3a81608a"
+                    },
+                    {
+                      "key": "meeting_url",
+                      "value": "https://www.facebook.com/",
+                      "type": "text",
+                      "uuid": "390b9e13-78a9-4e81-a881-a22b6114568c"
+                    },
+                    {
+                      "key": "discount_type",
+                      "value": "fixed",
+                      "type": "text",
+                      "uuid": "42b6348d-4b51-4f9e-9180-dd86b99ba58b"
+                    },
+                    {
+                      "key": "early_bird_discount_amount",
+                      "value": "40",
+                      "type": "text",
+                      "uuid": "8c218f9d-3442-4426-8c34-8c4cf4f2be95"
+                    },
+                    {
+                      "key": "early_bird_discount_date",
+                      "value": "2025-12-28",
+                      "type": "text",
+                      "uuid": "dc307583-169a-4b6c-9d27-cc4a89f9aa72"
+                    },
+                    {
+                      "key": "early_bird_discount_time",
+                      "value": "17:26",
+                      "type": "text",
+                      "uuid": "88e9c8b7-afd5-4e1d-8ef4-1e21d7fef7de"
+                    },
+                    {
+                      "key": "ticket_available_type",
+                      "value": "limited",
+                      "description": "value : limited , unlimited",
+                      "type": "text",
+                      "uuid": "6f1e4a83-10a9-4fba-a435-8d98239348c8"
+                    },
+                    {
+                      "key": "max_ticket_buy_type",
+                      "value": "limited",
+                      "description": "value : limited , unlimited",
+                      "type": "text",
+                      "uuid": "97c8b12f-da5e-4431-9b77-75db655ed4e9"
+                    },
+                    {
+                      "key": "max_buy_ticket",
+                      "value": "5",
+                      "type": "text",
+                      "uuid": "223ef7df-469d-44a3-81cd-5e0e97edb096"
+                    },
+                    {
+                      "key": "ticket_available",
+                      "value": "400",
+                      "type": "text",
+                      "uuid": "3621aaf2-3e8d-4479-badf-a6b9f084fd6f"
+                    },
+                    {
+                      "key": "price",
+                      "value": "800",
+                      "type": "text",
+                      "uuid": "3be38b6f-5d3a-41b2-bb82-8e52b2bdf275"
+                    },
+                    {
+                      "key": "start_date",
+                      "value": "2025-12-28",
+                      "type": "text",
+                      "uuid": "695a1873-99a6-4b7c-8ece-4cf247f3cfb1"
+                    },
+                    {
+                      "key": "start_time",
+                      "value": "15:27",
+                      "type": "text",
+                      "uuid": "29c6bf55-1a32-474f-8f73-061af5322875"
+                    },
+                    {
+                      "key": "end_date",
+                      "value": "2026-01-03",
+                      "type": "text",
+                      "uuid": "9d395384-2b71-4a90-bb68-2da038e82b3a"
+                    },
+                    {
+                      "key": "end_time",
+                      "value": "15:29",
+                      "type": "text",
+                      "uuid": "0a363b13-f243-440c-924b-36b1e1a2c38b"
+                    },
+                    {
+                      "key": "en_title",
+                      "value": "8433",
+                      "type": "text",
+                      "uuid": "8d77d9ac-811d-4a61-9404-1b893a7c2b99"
+                    },
+                    {
+                      "key": "ar_title",
+                      "value": "8433",
+                      "type": "text",
+                      "uuid": "61233575-4e9e-475c-9ea4-9f93a6d1cc2f"
+                    },
+                    {
+                      "key": "en_category_id",
+                      "value": "22",
+                      "type": "text",
+                      "uuid": "e2643747-7b15-4859-9735-1c43b53fc123"
+                    },
+                    {
+                      "key": "ar_category_id",
+                      "value": "23",
+                      "type": "text",
+                      "uuid": "4b4c2d31-dd0c-4177-b002-7befb3438fdf"
+                    },
+                    {
+                      "key": "m_start_date[0]",
+                      "value": " 2025-01-10",
+                      "type": "text",
+                      "uuid": "e8955653-85bf-4355-bc89-7b16dc943079"
+                    },
+                    {
+                      "key": "m_start_date[1]",
+                      "value": " 2025-01-11",
+                      "type": "text",
+                      "uuid": "710eb637-da6a-487c-a5e0-81de55728bda"
+                    },
+                    {
+                      "key": "m_start_time[0]",
+                      "value": "10:00",
+                      "type": "text",
+                      "uuid": "2fa644b1-388f-49ec-a2eb-cc11761c16b4"
+                    },
+                    {
+                      "key": "m_start_time[1]",
+                      "value": "12:00",
+                      "type": "text",
+                      "uuid": "d0e98acf-78d2-488c-97d2-5aff6c590968"
+                    },
+                    {
+                      "key": "m_end_date[0]",
+                      "value": " 2025-01-10",
+                      "type": "text",
+                      "uuid": "442698cd-c014-4008-9293-c7c6ac967704"
+                    },
+                    {
+                      "key": "m_end_date[1]",
+                      "value": " 2025-01-11",
+                      "type": "text",
+                      "uuid": "dc4053dd-0c83-41e8-8d2c-73d7d8757b30"
+                    },
+                    {
+                      "key": "m_end_time[0]",
+                      "value": "11:00",
+                      "type": "text",
+                      "uuid": "a9338705-2cfd-4b71-b637-7ec465f95c76"
+                    },
+                    {
+                      "key": "m_end_time[1]",
+                      "value": " 13:00",
+                      "type": "text",
+                      "uuid": "984ad188-461c-4e7f-b86a-129d97cdfccf"
+                    },
+                    {
+                      "key": "latitude",
+                      "value": "11",
+                      "type": "text",
+                      "uuid": "7a256a5c-31ba-4da6-b31f-9b55217cbd47"
+                    },
+                    {
+                      "key": "longitude",
+                      "value": "11",
+                      "type": "text",
+                      "uuid": "29b9804d-d990-428d-bd01-8270b3b08e89"
+                    },
+                    {
+                      "key": "en_country",
+                      "value": "1",
+                      "type": "text",
+                      "uuid": "185c8f6a-763b-4f5f-8d88-250bf9317815"
+                    },
+                    {
+                      "key": "ar_country",
+                      "value": "10",
+                      "type": "text",
+                      "uuid": "0ca321fa-107e-4479-94a8-9b8f0ff9da70"
+                    },
+                    {
+                      "key": "en_state",
+                      "value": "1",
+                      "type": "text",
+                      "uuid": "a8dd0034-b9c2-42ff-b625-6c3cfa032f6f"
+                    },
+                    {
+                      "key": "ar_state",
+                      "value": "16",
+                      "type": "text",
+                      "uuid": "99e19df5-e638-45ac-95a2-e6808f14a9cd"
+                    },
+                    {
+                      "key": "en_city",
+                      "value": "14",
+                      "type": "text",
+                      "uuid": "d348ec54-94e7-457a-bbf9-531bb152a3b0"
+                    },
+                    {
+                      "key": "ar_city",
+                      "value": "19",
+                      "type": "text",
+                      "uuid": "b273a2ff-04c5-40c5-ac42-470ecc30947c"
+                    },
+                    {
+                      "key": "en_address",
+                      "value": "dhaka bangladesh ",
+                      "type": "text",
+                      "uuid": "7eaf4db3-fabd-45ae-b0e8-5f5c777115be"
+                    },
+                    {
+                      "key": "ar_address",
+                      "value": "نيويورك",
+                      "type": "text",
+                      "uuid": "20567be5-0b61-4a73-9c8e-13b74da50183"
+                    },
+                    {
+                      "key": "en_refund_policy",
+                      "value": "Lorem ipsum is a pseudo-Latin text used in web design, typography, layout, and printing in place of English to emphasise design elements over content. It's also called placeholder (or filler) text. It's a convenient tool for mock-ups. It helps to outline the visual elements of a document or presentation, eg typography, font, or layout.\n\n Lorem ipsum is mostly a part of a Latin text by the classical author and philosopher Cicero. Its words and letters have been changed by addition or removal, \n\n\n\nso to deliberately render its content nonsensical; it's not genuine, correct, or comprehensible Latin anymore.\n\n\n\n While lorem ipsum's still resembles classical Latin, it actually has no meaning whatsoever. As Cicero's text doesn't contain the letters K, W, or Z, alien to latin, these, and others are often inserted randomly to mimic the typographic appearence of European languages, as are digraphs not to be found in the original.",
+                      "type": "text",
+                      "uuid": "09851ee5-275e-4a09-922e-8eaaa3115810"
+                    },
+                    {
+                      "key": "ar_refund_policy",
+                      "value": "Lorem ipsum is a pseudo-Latin text used in web design, typography, layout, and printing in place of English to emphasise design elements over content. It's also called placeholder (or filler) text. It's a convenient tool for mock-ups. It helps to outline the visual elements of a document or presentation, eg typography, font, or layout.\n\n Lorem ipsum is mostly a part of a Latin text by the classical author and philosopher Cicero. Its words and letters have been changed by addition or removal, \n\n\n\nso to deliberately render its content nonsensical; it's not genuine, correct, or comprehensible Latin anymore.\n\n\n\n While lorem ipsum's still resembles classical Latin, it actually has no meaning whatsoever. As Cicero's text doesn't contain the letters K, W, or Z, alien to latin, these, and others are often inserted randomly to mimic the typographic appearence of European languages, as are digraphs not to be found in the original.",
+                      "type": "text",
+                      "uuid": "49556fab-88b5-445b-af2e-4fb09df8f350"
+                    },
+                    {
+                      "key": "en_meta_keywords",
+                      "value": "wewerw",
+                      "type": "text",
+                      "uuid": "e93d2690-c54c-4299-94e4-fa34650a868b"
+                    },
+                    {
+                      "key": "ar_meta_keywords",
+                      "value": "ewrwerw",
+                      "type": "text",
+                      "uuid": "23b43fc5-9ecc-4408-972f-39a5136bbb15"
+                    },
+                    {
+                      "key": "en_meta_description",
+                      "value": "erwerwr",
+                      "type": "text",
+                      "uuid": "3c658084-80ee-43be-b3b5-ade8780b29f6"
+                    },
+                    {
+                      "key": "ar_meta_description",
+                      "value": "ererwe",
+                      "type": "text",
+                      "uuid": "7e12d35b-f6ec-4757-87d8-6d0ebef375cd"
+                    },
+                    {
+                      "key": "en_description",
+                      "value": "Lorem ipsum is a pseudo-Latin text used in web design, typography, layout, and printing in place of English to emphasise design elements over content. It's also called placeholder (or filler) text. It's a convenient tool for mock-ups. It helps to outline the visual elements of a document or presentation, eg typography, font, or layout.\n Lorem ipsum is mostly a part of a Latin text by the classical author and philosopher Cicero. Its words and letters have been changed by addition or removal, \nso to deliberately render its content nonsensical; it's not genuine, correct, or comprehensible Latin anymore.\n While lorem ipsum's still resembles classical Latin, it actually has no meaning whatsoever. As Cicero's text doesn't contain the letters K, W, or Z, alien to latin, these, and others are often inserted randomly to mimic the typographic appearence of European languages, as are digraphs not to be found in the original.",
+                      "type": "text",
+                      "uuid": "fe1db8b5-5ef4-42af-ae83-a8171bb826ff"
+                    },
+                    {
+                      "key": "ar_description",
+                      "value": "Lorem ipsum is a pseudo-Latin text used in web design, typography, layout, and printing in place of English to emphasise design elements over content. It's also called placeholder (or filler) text. It's a convenient tool for mock-ups. It helps to outline the visual elements of a document or presentation, eg typography, font, or layout.\n Lorem ipsum is mostly a part of a Latin text by the classical author and philosopher Cicero. Its words and letters have been changed by addition or removal, \nso to deliberately render its content nonsensical; it's not genuine, correct, or comprehensible Latin anymore.\n While lorem ipsum's still resembles classical Latin, it actually has no meaning whatsoever. As Cicero's text doesn't contain the letters K, W, or Z, alien to latin, these, and others are often inserted randomly to mimic the typographic appearence of European languages, as are digraphs not to be found in the original.",
+                      "type": "text",
+                      "uuid": "42076325-9f46-4c4e-b349-d2d922cd2452"
+                    },
+                    {
+                      "key": "en_zip_code",
+                      "value": "234523443",
+                      "type": "text",
+                      "uuid": "500835f6-690a-459b-bd08-28633571191e"
+                    },
+                    {
+                      "key": "ar_zip_code",
+                      "value": "45345345",
+                      "type": "text",
+                      "uuid": "57231ded-0bfa-4bde-925b-5c3d08c780c2"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/event-store",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "event-store"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Event Edit",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true,
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/event-edit/128",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "event-edit",
+                    "128"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Event Update",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "event_type",
+                      "value": "venue",
+                      "description": "value : onine , venue",
+                      "type": "text",
+                      "uuid": "6f4fa262-3761-4874-bc0d-2cd01f75e182"
+                    },
+                    {
+                      "key": "event_id",
+                      "value": "142",
+                      "type": "text",
+                      "uuid": "c1413667-1032-41e7-b03c-acda8684d4d5"
+                    },
+                    {
+                      "key": "date_type",
+                      "value": "multiple",
+                      "description": "value : single , multiple",
+                      "type": "text",
+                      "uuid": "31a6e52e-8d5d-47b7-a99d-36feb1a5a97b"
+                    },
+                    {
+                      "key": "countdown_status",
+                      "value": "2",
+                      "type": "text",
+                      "uuid": "132cc266-0e07-4798-b8df-09c3c3ffece1"
+                    },
+                    {
+                      "key": "slider_images[]",
+                      "type": "file",
+                      "uuid": "76f099e9-fa36-427b-83ab-7ccdea6ca227",
+                      "src": [
+                        "/C:/Users/USER/Downloads/690f2a8023598.jpg",
+                        "/C:/Users/USER/Downloads/690f2a8293d85.jpg"
+                      ]
+                    },
+                    {
+                      "key": "thumbnail",
+                      "type": "file",
+                      "uuid": "c5565378-5963-4be6-968f-4abb9c0cdf97",
+                      "src": "/C:/Users/USER/Downloads/th.png"
+                    },
+                    {
+                      "key": "status",
+                      "value": "1",
+                      "description": "value : 1 , 0",
+                      "type": "text",
+                      "uuid": "fa070bc3-e76d-45d3-87f7-0f0b519fa5d8"
+                    },
+                    {
+                      "key": "is_featured",
+                      "value": "yes",
+                      "description": "value: yes ,no",
+                      "type": "text",
+                      "uuid": "803215ad-009e-471e-9220-99dc94738e20"
+                    },
+                    {
+                      "key": "early_bird_discount_type",
+                      "value": "enable",
+                      "description": "value :  enable , disable",
+                      "type": "text",
+                      "uuid": "07a2c8ea-8e73-422e-97a2-910d3a81608a"
+                    },
+                    {
+                      "key": "meeting_url",
+                      "value": "https://www.facebook.com/",
+                      "type": "text",
+                      "uuid": "390b9e13-78a9-4e81-a881-a22b6114568c"
+                    },
+                    {
+                      "key": "discount_type",
+                      "value": "fixed",
+                      "type": "text",
+                      "uuid": "42b6348d-4b51-4f9e-9180-dd86b99ba58b"
+                    },
+                    {
+                      "key": "early_bird_discount_amount",
+                      "value": "40",
+                      "type": "text",
+                      "uuid": "8c218f9d-3442-4426-8c34-8c4cf4f2be95"
+                    },
+                    {
+                      "key": "early_bird_discount_date",
+                      "value": "2025-12-28",
+                      "type": "text",
+                      "uuid": "dc307583-169a-4b6c-9d27-cc4a89f9aa72"
+                    },
+                    {
+                      "key": "early_bird_discount_time",
+                      "value": "17:26",
+                      "type": "text",
+                      "uuid": "88e9c8b7-afd5-4e1d-8ef4-1e21d7fef7de"
+                    },
+                    {
+                      "key": "ticket_available_type",
+                      "value": "limited",
+                      "description": "value : limited , unlimited",
+                      "type": "text",
+                      "uuid": "6f1e4a83-10a9-4fba-a435-8d98239348c8"
+                    },
+                    {
+                      "key": "max_ticket_buy_type",
+                      "value": "limited",
+                      "description": "value : limited , unlimited",
+                      "type": "text",
+                      "uuid": "97c8b12f-da5e-4431-9b77-75db655ed4e9"
+                    },
+                    {
+                      "key": "max_buy_ticket",
+                      "value": "5",
+                      "type": "text",
+                      "uuid": "223ef7df-469d-44a3-81cd-5e0e97edb096"
+                    },
+                    {
+                      "key": "ticket_available",
+                      "value": "400",
+                      "type": "text",
+                      "uuid": "3621aaf2-3e8d-4479-badf-a6b9f084fd6f"
+                    },
+                    {
+                      "key": "price",
+                      "value": "800",
+                      "type": "text",
+                      "uuid": "3be38b6f-5d3a-41b2-bb82-8e52b2bdf275"
+                    },
+                    {
+                      "key": "start_date",
+                      "value": "2025-12-28",
+                      "type": "text",
+                      "uuid": "695a1873-99a6-4b7c-8ece-4cf247f3cfb1"
+                    },
+                    {
+                      "key": "start_time",
+                      "value": "15:27",
+                      "type": "text",
+                      "uuid": "29c6bf55-1a32-474f-8f73-061af5322875"
+                    },
+                    {
+                      "key": "end_date",
+                      "value": "2026-01-03",
+                      "type": "text",
+                      "uuid": "9d395384-2b71-4a90-bb68-2da038e82b3a"
+                    },
+                    {
+                      "key": "end_time",
+                      "value": "15:29",
+                      "type": "text",
+                      "uuid": "0a363b13-f243-440c-924b-36b1e1a2c38b"
+                    },
+                    {
+                      "key": "en_title",
+                      "value": "84",
+                      "type": "text",
+                      "uuid": "8d77d9ac-811d-4a61-9404-1b893a7c2b99"
+                    },
+                    {
+                      "key": "ar_title",
+                      "value": "84",
+                      "type": "text",
+                      "uuid": "61233575-4e9e-475c-9ea4-9f93a6d1cc2f"
+                    },
+                    {
+                      "key": "en_category_id",
+                      "value": "22",
+                      "type": "text",
+                      "uuid": "e2643747-7b15-4859-9735-1c43b53fc123"
+                    },
+                    {
+                      "key": "ar_category_id",
+                      "value": "23",
+                      "type": "text",
+                      "uuid": "4b4c2d31-dd0c-4177-b002-7befb3438fdf"
+                    },
+                    {
+                      "key": "date_ids[0]",
+                      "value": "101",
+                      "type": "text",
+                      "uuid": "c3456500-712f-4b14-a9d3-de14e428bc19"
+                    },
+                    {
+                      "key": "date_ids[1]",
+                      "value": "102",
+                      "type": "text",
+                      "uuid": "95dfb3c3-e22a-4c8d-8b50-10fbccb76300"
+                    },
+                    {
+                      "key": "m_start_date[0]",
+                      "value": " 2025-01-10",
+                      "type": "text",
+                      "uuid": "e8955653-85bf-4355-bc89-7b16dc943079"
+                    },
+                    {
+                      "key": "m_start_date[1]",
+                      "value": " 2025-01-11",
+                      "type": "text",
+                      "uuid": "710eb637-da6a-487c-a5e0-81de55728bda"
+                    },
+                    {
+                      "key": "m_start_time[0]",
+                      "value": "10:00",
+                      "type": "text",
+                      "uuid": "2fa644b1-388f-49ec-a2eb-cc11761c16b4"
+                    },
+                    {
+                      "key": "m_start_time[1]",
+                      "value": "12:00",
+                      "type": "text",
+                      "uuid": "d0e98acf-78d2-488c-97d2-5aff6c590968"
+                    },
+                    {
+                      "key": "m_end_date[0]",
+                      "value": " 2025-01-10",
+                      "type": "text",
+                      "uuid": "442698cd-c014-4008-9293-c7c6ac967704"
+                    },
+                    {
+                      "key": "m_end_date[1]",
+                      "value": " 2025-01-11",
+                      "type": "text",
+                      "uuid": "dc4053dd-0c83-41e8-8d2c-73d7d8757b30"
+                    },
+                    {
+                      "key": "m_end_time[0]",
+                      "value": "11:00",
+                      "type": "text",
+                      "uuid": "a9338705-2cfd-4b71-b637-7ec465f95c76"
+                    },
+                    {
+                      "key": "m_end_time[1]",
+                      "value": " 13:00",
+                      "type": "text",
+                      "uuid": "984ad188-461c-4e7f-b86a-129d97cdfccf"
+                    },
+                    {
+                      "key": "latitude",
+                      "value": "11",
+                      "type": "text",
+                      "uuid": "7a256a5c-31ba-4da6-b31f-9b55217cbd47"
+                    },
+                    {
+                      "key": "longitude",
+                      "value": "11",
+                      "type": "text",
+                      "uuid": "29b9804d-d990-428d-bd01-8270b3b08e89"
+                    },
+                    {
+                      "key": "en_country",
+                      "value": "1",
+                      "type": "text",
+                      "uuid": "185c8f6a-763b-4f5f-8d88-250bf9317815"
+                    },
+                    {
+                      "key": "ar_country",
+                      "value": "10",
+                      "type": "text",
+                      "uuid": "0ca321fa-107e-4479-94a8-9b8f0ff9da70"
+                    },
+                    {
+                      "key": "en_state",
+                      "value": "1",
+                      "type": "text",
+                      "uuid": "a8dd0034-b9c2-42ff-b625-6c3cfa032f6f"
+                    },
+                    {
+                      "key": "ar_state",
+                      "value": "16",
+                      "type": "text",
+                      "uuid": "99e19df5-e638-45ac-95a2-e6808f14a9cd"
+                    },
+                    {
+                      "key": "en_city",
+                      "value": "14",
+                      "type": "text",
+                      "uuid": "d348ec54-94e7-457a-bbf9-531bb152a3b0"
+                    },
+                    {
+                      "key": "ar_city",
+                      "value": "19",
+                      "type": "text",
+                      "uuid": "b273a2ff-04c5-40c5-ac42-470ecc30947c"
+                    },
+                    {
+                      "key": "en_address",
+                      "value": "dhaka bangladesh ",
+                      "type": "text",
+                      "uuid": "7eaf4db3-fabd-45ae-b0e8-5f5c777115be"
+                    },
+                    {
+                      "key": "ar_address",
+                      "value": "نيويورك",
+                      "type": "text",
+                      "uuid": "20567be5-0b61-4a73-9c8e-13b74da50183"
+                    },
+                    {
+                      "key": "en_refund_policy",
+                      "value": "Lorem ipsum is a pseudo-Latin text used in web design, typography, layout, and printing in place of English to emphasise design elements over content. It's also called placeholder (or filler) text. It's a convenient tool for mock-ups. It helps to outline the visual elements of a document or presentation, eg typography, font, or layout.\n\n Lorem ipsum is mostly a part of a Latin text by the classical author and philosopher Cicero. Its words and letters have been changed by addition or removal, \n\n\n\nso to deliberately render its content nonsensical; it's not genuine, correct, or comprehensible Latin anymore.\n\n\n\n While lorem ipsum's still resembles classical Latin, it actually has no meaning whatsoever. As Cicero's text doesn't contain the letters K, W, or Z, alien to latin, these, and others are often inserted randomly to mimic the typographic appearence of European languages, as are digraphs not to be found in the original.",
+                      "type": "text",
+                      "uuid": "09851ee5-275e-4a09-922e-8eaaa3115810"
+                    },
+                    {
+                      "key": "ar_refund_policy",
+                      "value": "Lorem ipsum is a pseudo-Latin text used in web design, typography, layout, and printing in place of English to emphasise design elements over content. It's also called placeholder (or filler) text. It's a convenient tool for mock-ups. It helps to outline the visual elements of a document or presentation, eg typography, font, or layout.\n\n Lorem ipsum is mostly a part of a Latin text by the classical author and philosopher Cicero. Its words and letters have been changed by addition or removal, \n\n\n\nso to deliberately render its content nonsensical; it's not genuine, correct, or comprehensible Latin anymore.\n\n\n\n While lorem ipsum's still resembles classical Latin, it actually has no meaning whatsoever. As Cicero's text doesn't contain the letters K, W, or Z, alien to latin, these, and others are often inserted randomly to mimic the typographic appearence of European languages, as are digraphs not to be found in the original.",
+                      "type": "text",
+                      "uuid": "49556fab-88b5-445b-af2e-4fb09df8f350"
+                    },
+                    {
+                      "key": "en_meta_keywords",
+                      "value": "wewerw",
+                      "type": "text",
+                      "uuid": "e93d2690-c54c-4299-94e4-fa34650a868b"
+                    },
+                    {
+                      "key": "ar_meta_keywords",
+                      "value": "ewrwerw",
+                      "type": "text",
+                      "uuid": "23b43fc5-9ecc-4408-972f-39a5136bbb15"
+                    },
+                    {
+                      "key": "en_meta_description",
+                      "value": "erwerwr",
+                      "type": "text",
+                      "uuid": "3c658084-80ee-43be-b3b5-ade8780b29f6"
+                    },
+                    {
+                      "key": "ar_meta_description",
+                      "value": "ererwe",
+                      "type": "text",
+                      "uuid": "7e12d35b-f6ec-4757-87d8-6d0ebef375cd"
+                    },
+                    {
+                      "key": "en_description",
+                      "value": "Lorem ipsum is a pseudo-Latin text used in web design, typography, layout, and printing in place of English to emphasise design elements over content. It's also called placeholder (or filler) text. It's a convenient tool for mock-ups. It helps to outline the visual elements of a document or presentation, eg typography, font, or layout.\n Lorem ipsum is mostly a part of a Latin text by the classical author and philosopher Cicero. Its words and letters have been changed by addition or removal, \nso to deliberately render its content nonsensical; it's not genuine, correct, or comprehensible Latin anymore.\n While lorem ipsum's still resembles classical Latin, it actually has no meaning whatsoever. As Cicero's text doesn't contain the letters K, W, or Z, alien to latin, these, and others are often inserted randomly to mimic the typographic appearence of European languages, as are digraphs not to be found in the original.",
+                      "type": "text",
+                      "uuid": "fe1db8b5-5ef4-42af-ae83-a8171bb826ff"
+                    },
+                    {
+                      "key": "ar_description",
+                      "value": "Lorem ipsum is a pseudo-Latin text used in web design, typography, layout, and printing in place of English to emphasise design elements over content. It's also called placeholder (or filler) text. It's a convenient tool for mock-ups. It helps to outline the visual elements of a document or presentation, eg typography, font, or layout.\n Lorem ipsum is mostly a part of a Latin text by the classical author and philosopher Cicero. Its words and letters have been changed by addition or removal, \nso to deliberately render its content nonsensical; it's not genuine, correct, or comprehensible Latin anymore.\n While lorem ipsum's still resembles classical Latin, it actually has no meaning whatsoever. As Cicero's text doesn't contain the letters K, W, or Z, alien to latin, these, and others are often inserted randomly to mimic the typographic appearence of European languages, as are digraphs not to be found in the original.",
+                      "type": "text",
+                      "uuid": "42076325-9f46-4c4e-b349-d2d922cd2452"
+                    },
+                    {
+                      "key": "en_zip_code",
+                      "value": "234523443",
+                      "type": "text",
+                      "uuid": "500835f6-690a-459b-bd08-28633571191e"
+                    },
+                    {
+                      "key": "ar_zip_code",
+                      "value": "45345345",
+                      "type": "text",
+                      "uuid": "57231ded-0bfa-4bde-925b-5c3d08c780c2"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/event-update",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "event-update"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Event Delete Date",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "date_id",
+                      "value": "107",
+                      "type": "text",
+                      "uuid": "d4cf7b28-7c6e-432a-9ea5-c129d1fa307c"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/event-delete-date",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "event-delete-date"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Event Img Delete",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "id",
+                      "value": "326",
+                      "type": "text",
+                      "uuid": "d4cf7b28-7c6e-432a-9ea5-c129d1fa307c"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/event-img-delete",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "event-img-delete"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Event Update Status",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "event_id",
+                      "value": "128",
+                      "type": "text",
+                      "uuid": "d4cf7b28-7c6e-432a-9ea5-c129d1fa307c"
+                    },
+                    {
+                      "key": "status",
+                      "value": "1",
+                      "type": "text",
+                      "uuid": "ea99b6ee-e183-48ca-bdce-dee38977d86d"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/event-update-status",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "event-update-status"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Event Update Featured",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "event_id",
+                      "value": "128",
+                      "type": "text",
+                      "uuid": "d4cf7b28-7c6e-432a-9ea5-c129d1fa307c"
+                    },
+                    {
+                      "key": "is_featured",
+                      "value": "no",
+                      "type": "text",
+                      "uuid": "ea99b6ee-e183-48ca-bdce-dee38977d86d"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/event-update-featured",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "event-update-featured"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Event Ticket Setting",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true,
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/edit-ticket-setting/144",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "edit-ticket-setting",
+                    "144"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Event Ticket Setting Update",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "event_id",
+                      "value": "144",
+                      "type": "text",
+                      "uuid": "34a1c81b-84eb-493e-a471-db7e96e7b048"
+                    },
+                    {
+                      "key": "ticket_image",
+                      "type": "file",
+                      "uuid": "5fc7473b-0465-4ff4-abe6-8be33fe51ee5",
+                      "src": "/C:/Users/USER/Downloads/1759920703559.png"
+                    },
+                    {
+                      "key": "ticket_logo",
+                      "type": "file",
+                      "uuid": "53f39f47-3d4f-4300-a623-af0fec9a1521",
+                      "src": "/C:/Users/USER/Downloads/1725333987370.png"
+                    },
+                    {
+                      "key": "instructions",
+                      "type": "text",
+                      "uuid": "09bb0cec-0de7-4f96-97b7-3dd826c5ec59",
+                      "value": "Important information\n\n• We are AltokeTicket and we are dedicated to selling tickets for the best events in the country. However, you must remember that we are not the organizers of the event, that is, we are not responsible for the general condition, safety conditions of the establishment or for rescheduling or cancellations that may occur before, during or after the event.\n\n• Therefore, in the event of any eventuality, you will have to contact the company organizing the event. You can obtain information about this through all of our customer service channels.\n\n• If you decide to purchase from unauthorized points of sale, the responsibility will be yours, therefore, if the ticket turns out to be\nfalse or adulterated, the promoter may NOT AUTHORIZE entry to the event.\n\n• Do not disclose or share the ticket with third parties.\n\n• IMPORTANT! When you arrive at the event you must present your ticket (printed or virtual) along with your identification document\n.\n\n• If you purchased insurance, the insurance certificate will be sent by Altoke Ticket to the email address indicated by the ticket. \n\n\n\nFor any questions or queries about the event or this ticket, you can contact us from the\nSupport option on our website https://www.example.com"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/update-ticket-setting",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "update-ticket-setting"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Event Tickets",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true,
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "en",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/event/tickets?event_id=105&event_type=venue",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "event",
+                    "tickets"
+                  ],
+                  "query": [
+                    {
+                      "key": "event_id",
+                      "value": "105"
+                    },
+                    {
+                      "key": "event_type",
+                      "value": "venue"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Add Event Ticket",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true,
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "en",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/event/add-ticket?event_id=105&event_type=venue",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "event",
+                    "add-ticket"
+                  ],
+                  "query": [
+                    {
+                      "key": "event_id",
+                      "value": "105"
+                    },
+                    {
+                      "key": "event_type",
+                      "value": "venue"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Store Event Ticket",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "en",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "// ======================================================\r\n// pricing_type_2 : VARIATION\r\n// ======================================================\r\n\r\n// {\r\n//   \"event_id\": 146,\r\n//   \"pricing_type_2\": \"variation\",\r\n\r\n//   \"ticket_available_type\": \"limited\",\r\n//   \"ticket_available\": 200,\r\n\r\n//   \"max_ticket_buy_type\": \"limited\",\r\n//   \"max_buy_ticket\": 5,\r\n\r\n//   \"early_bird_discount_type\": \"enable\",\r\n//   \"discount_type\": \"percentage\",\r\n//   \"early_bird_discount_amount\": 10,\r\n//   \"early_bird_discount_date\": \"2026-01-15\",\r\n//   \"early_bird_discount_time\": \"23:59\",\r\n\r\n//   \"variation_price\": [800, 1000, 1500, 2000],\r\n\r\n//   \"v_ticket_available_type\": [\r\n//     \"limited\",\r\n//     \"unlimited\",\r\n//     \"limited\",\r\n//     \"unlimited\"\r\n//   ],\r\n//   \"v_ticket_available\": [\r\n//     40,\r\n//     null,\r\n//     60,\r\n//     null\r\n//   ],\r\n\r\n//   \"v_max_ticket_buy_type\": [\r\n//     \"limited\",\r\n//     \"unlimited\",\r\n//     \"limited\",\r\n//     \"limited\"\r\n//   ],\r\n//   \"v_max_ticket_buy\": [\r\n//     1,\r\n//     null,\r\n//     3,\r\n//     2\r\n//   ],\r\n\r\n//   \"en_title\": \"Varriation Ticket\",\r\n//   \"ar_title\": \"تذكرة كبار الشخصيات\",\r\n\r\n//   \"en_description\": \"VIP ticket description\",\r\n//   \"ar_description\": \"وصف تذكرة كبار الشخصيات\",\r\n\r\n//   \"en_variation_name\": [\r\n//     \"Bronze Package\",\r\n//     \"Silver Package\",\r\n//     \"Gold Package\",\r\n//     \"Platinum Package\"\r\n//   ],\r\n//   \"ar_variation_name\": [\r\n//     \"الباقة البرونزية\",\r\n//     \"الباقة الفضية\",\r\n//     \"الباقة الذهبية\",\r\n//     \"الباقة البلاتينية\"\r\n//   ]\r\n// }\r\n\r\n\r\n\r\n// ======================================================\r\n// pricing_type_2 : FREE\r\n// ======================================================\r\n\r\n// {\r\n//   \"event_id\": 146,\r\n//   \"pricing_type_2\": \"free\",\r\n\r\n//   \"ticket_available_type\": \"limited\",\r\n//   \"ticket_available\": 300,\r\n\r\n//   \"max_ticket_buy_type\": \"limited\",\r\n//   \"max_buy_ticket\": 2,\r\n\r\n//   \"early_bird_discount_type\": \"disable\",\r\n\r\n//   \"en_title\": \"Free Entry Ticket\",\r\n//   \"ar_title\": \"تذكرة دخول مجانية\",\r\n\r\n//   \"en_description\": \"This is a free entry ticket for the event\",\r\n//   \"ar_description\": \"هذه تذكرة دخول مجانية للفعالية\"\r\n// }\r\n\r\n\r\n\r\n// ======================================================\r\n// pricing_type_2 : NORMAL\r\n// ======================================================\r\n\r\n{\r\n  \"event_id\": 146,\r\n  \"pricing_type_2\": \"normal\",\r\n\r\n  \"price\": 1200,\r\n\r\n  \"ticket_available_type\": \"limited\",\r\n  \"ticket_available\": 150,\r\n\r\n  \"max_ticket_buy_type\": \"limited\",\r\n  \"max_buy_ticket\": 4,\r\n\r\n  \"early_bird_discount_type\": \"enable\",\r\n  \"discount_type\": \"percentage\",\r\n  \"early_bird_discount_amount\": 15,\r\n  \"early_bird_discount_date\": \"2026-01-10\",\r\n  \"early_bird_discount_time\": \"23:59\",\r\n\r\n  \"en_title\": \"NORMAL Ticket\",\r\n  \"ar_title\": \"تذكرة عادية\",\r\n\r\n  \"en_description\": \"Standard entry ticket for the event\",\r\n  \"ar_description\": \"تذكرة دخول عادية للفعالية\"\r\n}\r\n\r\n"
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/event/store-ticket",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "event",
+                    "store-ticket"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Edit Event Ticket",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true,
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "en",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": ""
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/event/edit-ticket?event_id=146&event_type=venue&id=249",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "event",
+                    "edit-ticket"
+                  ],
+                  "query": [
+                    {
+                      "key": "event_id",
+                      "value": "146"
+                    },
+                    {
+                      "key": "event_type",
+                      "value": "venue"
+                    },
+                    {
+                      "key": "id",
+                      "value": "249"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Event Ticket",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "en",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "// ======================================================\r\n// UPDATE : pricing_type_2 = VARIATION\r\n// ======================================================\r\n{\r\n    \"event_id\": 144,\r\n    \"ticket_id\": 243,\r\n    \"pricing_type_2\": \"variation\",\r\n    \"ticket_available_type\": \"limited\",\r\n    \"ticket_available\": 200,\r\n    \"max_ticket_buy_type\": \"limited\",\r\n    \"max_buy_ticket\": 5,\r\n    \"early_bird_discount_type\": \"enable\",\r\n    \"discount_type\": \"percentage\",\r\n    \"early_bird_discount_amount\": 10,\r\n    \"early_bird_discount_date\": \"2026-01-15\",\r\n    \"early_bird_discount_time\": \"23:59\",\r\n    \"variation_price\": [\r\n        800,\r\n        1000,\r\n        1500,\r\n        2000\r\n    ],\r\n    \"v_ticket_available_type\": [\r\n        \"limited\",\r\n        \"unlimited\",\r\n        \"limited\",\r\n        \"unlimited\"\r\n    ],\r\n    \"v_ticket_available\": [\r\n        40,\r\n        null,\r\n        60,\r\n        null\r\n    ],\r\n    \"v_max_ticket_buy_type\": [\r\n        \"limited\",\r\n        \"unlimited\",\r\n        \"limited\",\r\n        \"limited\"\r\n    ],\r\n    \"v_max_ticket_buy\": [\r\n        1,\r\n        null,\r\n        3,\r\n        2\r\n    ],\r\n    \"slot_enable_input\": [\r\n        0,\r\n        0,\r\n        0,\r\n        0\r\n    ],\r\n    \"slot_unique_id_input\": [\r\n        268005,\r\n        493371,\r\n        116177,\r\n        370581\r\n    ],\r\n    \"slot_seat_min_price\": [\r\n        0,\r\n        0,\r\n        0,\r\n        0\r\n    ],\r\n    \"en_title\": \"VIP Ticket\",\r\n    \"ar_title\": \"تذكرة كبار الشخصيات\",\r\n    \"en_description\": \"VIP ticket description\",\r\n    \"ar_description\": \"وصف تذكرة كبار الشخصيات\",\r\n    \"en_variation_name\": [\r\n        \"Bronze Package\",\r\n        \"Silver Package\",\r\n        \"Gold Package\",\r\n        \"Platinum Package\"\r\n    ],\r\n    \"ar_variation_name\": [\r\n        \"الباقة البرونزية\",\r\n        \"الباقة الفضية\",\r\n        \"الباقة الذهبية\",\r\n        \"الباقة البلاتينية\"\r\n    ]\r\n}\r\n// ======================================================\r\n// UPDATE : pricing_type_2 = FREE\r\n// ======================================================\r\n/*\r\n{\r\n  \"event_id\": 144,\r\n  \"ticket_id\": 25,\r\n\r\n  \"pricing_type_2\": \"free\",\r\n\r\n  \"ticket_available_type\": \"limited\",\r\n  \"ticket_available\": 300,\r\n\r\n  \"max_ticket_buy_type\": \"limited\",\r\n  \"max_buy_ticket\": 2,\r\n\r\n  \"early_bird_discount_type\": \"disable\",\r\n\r\n  \"free_tickete_slot_enable\": 0,\r\n  \"free_tickete_slot_unique_id\": 123456,\r\n\r\n  \"en_title\": \"Free Entry Ticket\",\r\n  \"ar_title\": \"تذكرة دخول مجانية\",\r\n\r\n  \"en_description\": \"This is a free entry ticket for the event\",\r\n  \"ar_description\": \"هذه تذكرة دخول مجانية للفعالية\"\r\n}\r\n*/\r\n// ======================================================\r\n// UPDATE : pricing_type_2 = NORMAL\r\n// ======================================================\r\n/*\r\n{\r\n  \"event_id\": 144,\r\n  \"ticket_id\": 25,\r\n\r\n  \"pricing_type_2\": \"normal\",\r\n\r\n  \"price\": 1200,\r\n\r\n  \"ticket_available_type\": \"limited\",\r\n  \"ticket_available\": 150,\r\n\r\n  \"max_ticket_buy_type\": \"limited\",\r\n  \"max_buy_ticket\": 4,\r\n\r\n  \"early_bird_discount_type\": \"enable\",\r\n  \"discount_type\": \"percentage\",\r\n  \"early_bird_discount_amount\": 15,\r\n  \"early_bird_discount_date\": \"2026-01-10\",\r\n  \"early_bird_discount_time\": \"23:59\",\r\n\r\n  \"slot_enable_no_vaidation\": 0,\r\n  \"slot_unique_id_no_vaidation\": 987654,\r\n\r\n  \"en_title\": \"Regular Ticket\",\r\n  \"ar_title\": \"تذكرة عادية\",\r\n\r\n  \"en_description\": \"Standard entry ticket for the event\",\r\n  \"ar_description\": \"تذكرة دخول عادية للفعالية\"\r\n}\r\n*/"
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/event/update-ticket",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "event",
+                    "update-ticket"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Event Ticket",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "en",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "id",
+                      "value": "244",
+                      "type": "text",
+                      "uuid": "ba2e1909-29a4-49d8-82a5-02e85f1c7d3f"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/event/delete-ticket",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "event",
+                    "delete-ticket"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Bulk Delete Event Ticket",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "en",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"ids\": [\r\n        243,\r\n        245\r\n    ]\r\n}"
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/event/bulk-delete-ticket",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "event",
+                    "bulk-delete-ticket"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Event",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "en",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/event-delete/144",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "event-delete",
+                    "144"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Bulk Delete Event",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {}
+              },
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "en",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"ids\": [\r\n        145\r\n    ]\r\n}"
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-management/event-bulk-delete",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-management",
+                    "event-bulk-delete"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Event Booking Api",
+          "item": [
+            {
+              "name": "Bookings",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-booking?status&event_title&booking_id",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-booking"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": null,
+                      "description": "value: completed,pending,rejected"
+                    },
+                    {
+                      "key": "event_title",
+                      "value": null
+                    },
+                    {
+                      "key": "booking_id",
+                      "value": null
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Booking Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-booking/details/197",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-booking",
+                    "details",
+                    "197"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Booking Delete",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-booking/delete/197",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-booking",
+                    "delete",
+                    "197"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Booking Bulk Delete",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"ids\": [\r\n        \"198\"\r\n    ]\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-booking/bulk-delete",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-booking",
+                    "bulk-delete"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Booking Report",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-booking/report?from_date=2024-12-28&to_date=2027-12-28&payment_method=&payment_status=",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-booking",
+                    "report"
+                  ],
+                  "query": [
+                    {
+                      "key": "from_date",
+                      "value": "2024-12-28"
+                    },
+                    {
+                      "key": "to_date",
+                      "value": "2027-12-28"
+                    },
+                    {
+                      "key": "payment_method",
+                      "value": ""
+                    },
+                    {
+                      "key": "payment_status",
+                      "value": ""
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Booking Report Export",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"bookings\": [\r\n        {\r\n            \"title\": \"Betsson Peruvian Volleyball\",\r\n            \"slug\": \"betsson-peruvian-volleyball\",\r\n            \"id\": 196,\r\n            \"customer_id\": \"23\",\r\n            \"booking_id\": \"691034407db32\",\r\n            \"event_id\": \"126\",\r\n            \"organizer_id\": 23,\r\n            \"fname\": \"Jone\",\r\n            \"lname\": \"Doe\",\r\n            \"email\": \"metewa8928@fintehs.com\",\r\n            \"phone\": \"202-555-0152\",\r\n            \"country\": \"Uniteud States\",\r\n            \"state\": \"North Carolina\",\r\n            \"city\": \"Rockingham\",\r\n            \"zip_code\": \"28339\",\r\n            \"address\": \"33 Robin Covington Road, Rockingham,nc, 28339  United States\",\r\n            \"variation\": \"[{\\\"ticket_id\\\":205,\\\"early_bird_dicount\\\":0,\\\"name\\\":\\\"Economy\\\",\\\"qty\\\":1,\\\"price\\\":20,\\\"scan_status\\\":0,\\\"unique_id\\\":\\\"ONFbggi1G\\\"},{\\\"ticket_id\\\":198,\\\"early_bird_dicount\\\":1,\\\"name\\\":\\\"North Preferred\\\",\\\"qty\\\":1,\\\"price\\\":10,\\\"scan_status\\\":0,\\\"unique_id\\\":\\\"gxlIB74sA\\\",\\\"seat_id\\\":395,\\\"seat_name\\\":\\\"NZ-Second-01\\\",\\\"slot_id\\\":50,\\\"slot_name\\\":1,\\\"slot_unique_id\\\":659237},{\\\"ticket_id\\\":198,\\\"early_bird_dicount\\\":2,\\\"name\\\":\\\"North Preferred\\\",\\\"qty\\\":1,\\\"price\\\":20,\\\"scan_status\\\":0,\\\"unique_id\\\":\\\"EvjjQjANm\\\",\\\"seat_id\\\":396,\\\"seat_name\\\":\\\"NZ-Second-02\\\",\\\"slot_id\\\":50,\\\"slot_name\\\":1,\\\"slot_unique_id\\\":659237},{\\\"ticket_id\\\":198,\\\"early_bird_dicount\\\":3,\\\"name\\\":\\\"North Preferred\\\",\\\"qty\\\":1,\\\"price\\\":30,\\\"scan_status\\\":0,\\\"unique_id\\\":\\\"jizYH03IW\\\",\\\"seat_id\\\":397,\\\"seat_name\\\":\\\"NZ-Second-03\\\",\\\"slot_id\\\":50,\\\"slot_name\\\":1,\\\"slot_unique_id\\\":659237},{\\\"ticket_id\\\":198,\\\"early_bird_dicount\\\":4,\\\"name\\\":\\\"North Preferred\\\",\\\"qty\\\":1,\\\"price\\\":40,\\\"scan_status\\\":0,\\\"unique_id\\\":\\\"vrVBicQ73\\\",\\\"seat_id\\\":398,\\\"seat_name\\\":\\\"NZ-Second-04\\\",\\\"slot_id\\\":50,\\\"slot_name\\\":1,\\\"slot_unique_id\\\":659237}]\",\r\n            \"price\": 110,\r\n            \"quantity\": \"5\",\r\n            \"discount\": 0,\r\n            \"tax\": 11,\r\n            \"commission\": 5.5,\r\n            \"early_bird_discount\": 10,\r\n            \"currencyText\": \"INR\",\r\n            \"currencyTextPosition\": \"right\",\r\n            \"currencySymbol\": \"$\",\r\n            \"currencySymbolPosition\": \"left\",\r\n            \"paymentMethod\": \"PayPal\",\r\n            \"gatewayType\": \"online\",\r\n            \"paymentStatus\": \"completed\",\r\n            \"invoice\": \"691034407db32.pdf\",\r\n            \"attachmentFile\": null,\r\n            \"event_date\": \"Sat, Oct 06, 2029 02:43am\",\r\n            \"created_at\": \"2025-11-09T01:27:12.000000Z\",\r\n            \"updated_at\": \"2025-11-09T01:27:15.000000Z\",\r\n            \"tax_percentage\": 10,\r\n            \"commission_percentage\": 5,\r\n            \"scan_status\": 0,\r\n            \"scanned_tickets\": null,\r\n            \"conversation_id\": null,\r\n            \"fcm_token\": null\r\n        }\r\n    ]\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/event-booking/export",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "event-booking",
+                    "export"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Withdraw Api",
+          "item": [
+            {
+              "name": "Organizer Withdraws",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/withdraw",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "withdraw"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Withdraw Create",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/withdraw/create",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "withdraw",
+                    "create"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Method Input {method_id}",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/withdraw/get-method-input/5",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "withdraw",
+                    "get-method-input",
+                    "5"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Balance Calculation {method_id}/{amount}",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/withdraw/calculation/4/100",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "withdraw",
+                    "calculation",
+                    "4",
+                    "100"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Withdraw Send Request",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "withdraw_method",
+                      "value": "4",
+                      "type": "text"
+                    },
+                    {
+                      "key": "withdraw_amount",
+                      "value": "100",
+                      "type": "text"
+                    },
+                    {
+                      "key": "Contact_Number",
+                      "value": "+234523452345346",
+                      "description": "this input field create by daynamically",
+                      "type": "text",
+                      "uuid": "8133a9b9-dd71-439a-b1cd-4d10eaa00ea7"
+                    },
+                    {
+                      "key": "Address",
+                      "value": "fghdfghfh",
+                      "description": "this input field create by daynamically",
+                      "type": "text",
+                      "uuid": "f1a2ee2a-23bf-4b30-9dd8-895ccdadf1be"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/withdraw/send-request",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "withdraw",
+                    "send-request"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Withdraw Delete",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "id",
+                      "value": "21",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/withdraw/delete",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "withdraw",
+                    "delete"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Withdraw Bulk Delete",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"ids\":[19,20]\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/withdraw/bulk-delete",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "withdraw",
+                    "bulk-delete"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Support Ticket Api",
+          "item": [
+            {
+              "name": "Support Tickets",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/support-ticket",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "support-ticket"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Support Ticket Store",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "email",
+                      "value": "azimahmed11041@gmail.com",
+                      "type": "text"
+                    },
+                    {
+                      "key": "subject",
+                      "value": "Test",
+                      "type": "text"
+                    },
+                    {
+                      "key": "attachment",
+                      "type": "file",
+                      "src": "/C:/Users/USER/Downloads/1683372521.zip"
+                    },
+                    {
+                      "key": "description",
+                      "value": "{\n    \"success\": true,\n    \"message\": \"Support Ticket Created Successfully!\"\n}{\n    \"success\": true,\n    \"message\": \"Support Ticket Created Successfully!\"\n}{\n    \"success\": true,\n    \"message\": \"Support Ticket Created Successfully!\"\n}{\n    \"success\": true,\n    \"message\": \"Support Ticket Created Successfully!\"\n}{\n    \"success\": true,\n    \"message\": \"Support Ticket Created Successfully!\"\n}{\n    \"success\": true,\n    \"message\": \"Support Ticket Created Successfully!\"\n}{\n    \"success\": true,\n    \"message\": \"Support Ticket Created Successfully!\"\n}{\n    \"success\": true,\n    \"message\": \"Support Ticket Created Successfully!\"\n}{\n    \"success\": true,\n    \"message\": \"Support Ticket Created Successfully!\"\n}{\n    \"success\": true,\n    \"message\": \"Support Ticket Created Successfully!\"\n}{\n    \"success\": true,\n    \"message\": \"Support Ticket Created Successfully!\"\n}{\n    \"success\": true,\n    \"message\": \"Support Ticket Created Successfully!\"\n}{\n    \"success\": true,\n    \"message\": \"Support Ticket Created Successfully!\"\n}{\n    \"success\": true,\n    \"message\": \"Support Ticket Created Successfully!\"\n}{\n    \"success\": true,\n    \"message\": \"Support Ticket Created Successfully!\"\n}{\n    \"success\": true,\n    \"message\": \"Support Ticket Created Successfully!\"\n}",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/support-ticket/store",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "support-ticket",
+                    "store"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Support Ticket Message {id}",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/support-ticket/message/16",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "support-ticket",
+                    "message",
+                    "16"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Support Ticket Reply",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": "/C:/Users/USER/Downloads/1683372521.zip"
+                    },
+                    {
+                      "key": "reply",
+                      "value": "yturu",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/support-ticket/reply/28",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "support-ticket",
+                    "reply",
+                    "28"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Support Ticket Delete",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/support-ticket/delete/27",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "support-ticket",
+                    "delete",
+                    "27"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Seat Mapping Slot",
+          "item": [
+            {
+              "name": "All Slots",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/seat-mapping/slot/all?event_id=146&ticket_id=247&slot_unique_id=377701&pricing_type=variation",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "seat-mapping",
+                    "slot",
+                    "all"
+                  ],
+                  "query": [
+                    {
+                      "key": "event_id",
+                      "value": "146"
+                    },
+                    {
+                      "key": "ticket_id",
+                      "value": "247"
+                    },
+                    {
+                      "key": "slot_unique_id",
+                      "value": "377701"
+                    },
+                    {
+                      "key": "pricing_type",
+                      "value": "variation"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Background Image",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "event_id",
+                      "value": "146",
+                      "type": "text",
+                      "uuid": "eb77f524-55ee-4646-b193-b837850c9c7e"
+                    },
+                    {
+                      "key": "ticket_id",
+                      "value": "247",
+                      "type": "text",
+                      "uuid": "938d5631-e801-4101-9d4e-4bf5f9bf47df"
+                    },
+                    {
+                      "key": "slot_unique_id",
+                      "value": "377701",
+                      "type": "text",
+                      "uuid": "0e49851b-0362-45d9-8c05-b31c13d90dfd"
+                    },
+                    {
+                      "key": "map_image",
+                      "type": "file",
+                      "uuid": "25306261-6aba-42d0-b788-8d5b333604fa",
+                      "src": "/C:/Users/USER/Downloads/1759920703559.png"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/seat-mapping/slot/update-background-image",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "seat-mapping",
+                    "slot",
+                    "update-background-image"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Store Or Update Slot",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"pos_x\": \"24\",\r\n  \"pos_y\": \"368.84375\",\r\n  \"rotate\": \"0\",\r\n  \"width\": \"30\",\r\n  \"height\": \"30\",\r\n  \"price\": \"9.00\",\r\n  \"background_color\": \"#00e5b5\",\r\n  \"number_of_seat\": \"2\",\r\n  \"slot_id\": null,  //slot id dile update hobe na dile create hobe\r\n  \"event_id\": \"146\",\r\n  \"ticket_id\": \"247\",\r\n  \"slot_unique_id\": \"377701\",\r\n  \"slot_name\": \"api\",\r\n  \"font_size\": \"14\",\r\n  \"slot_type\": \"1\",\r\n  \"slot_deactive\": \"0\",\r\n  \"round\": \"10\",\r\n  \"pricing_type\": \"variation\"\r\n}\r\n"
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/seat-mapping/slot/update-store",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "seat-mapping",
+                    "slot",
+                    "update-store"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Drag Drop Slot",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "pos_x",
+                      "value": "210",
+                      "type": "text",
+                      "uuid": "04522756-e933-412c-ad5c-160a74da1812"
+                    },
+                    {
+                      "key": "pos_y",
+                      "value": "17.84375",
+                      "type": "text",
+                      "uuid": "790dcf82-5156-4010-9da4-1226d2bbc78b"
+                    },
+                    {
+                      "key": "slot_id",
+                      "value": "114",
+                      "type": "text",
+                      "uuid": "a5467fca-aba9-4bad-81cd-db84df7b78eb"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/seat-mapping/slot/drag-drop",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "seat-mapping",
+                    "slot",
+                    "drag-drop"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Slot Delete",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "slot_id",
+                      "value": "114",
+                      "type": "text",
+                      "uuid": "a5467fca-aba9-4bad-81cd-db84df7b78eb"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/seat-mapping/slot/delete",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "seat-mapping",
+                    "slot",
+                    "delete"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Seats",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseURL}}/organizer/seat-mapping/slot/seats?event_id=146&ticket_id=247&slot_unique_id=377701&slot_id=116",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "seat-mapping",
+                    "slot",
+                    "seats"
+                  ],
+                  "query": [
+                    {
+                      "key": "event_id",
+                      "value": "146"
+                    },
+                    {
+                      "key": "ticket_id",
+                      "value": "247"
+                    },
+                    {
+                      "key": "slot_unique_id",
+                      "value": "377701"
+                    },
+                    {
+                      "key": "slot_id",
+                      "value": "116"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Seats Update",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"ticket_id\": \"247\",\r\n  \"slot_unique_id\": \"377701\",\r\n  \"slot_id\": \"121\",\r\n  \"slot_type\": \"1\",\r\n  \"pricing_type\": \"variation\",\r\n  \"seatKey\": [\r\n    \"1\",\r\n    \"2\",\r\n    \"3\",\r\n    \"4\",\r\n    \"5\"\r\n  ],\r\n  \"keyName\": {\r\n    \"598\": \"33-01\",\r\n    \"599\": \"33-02\",\r\n    \"600\": \"33-03\",\r\n    \"675\": \"33-04\",\r\n    \"676\": \"33-05\"\r\n  },\r\n  \"keyPrice\": {\r\n    \"598\": \"0.00\",\r\n    \"599\": \"0.00\",\r\n    \"600\": \"0.00\",\r\n    \"675\": \"0.00\",\r\n    \"676\": \"0.00\"\r\n  },\r\n  \"slot_deactive_input\": {\r\n    \"598\": \"0\",\r\n    \"599\": \"0\",\r\n    \"600\": \"0\",\r\n    \"675\": \"0\",\r\n    \"676\": \"0\"\r\n  }\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/organizer/seat-mapping/slot/seats/update",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "organizer",
+                    "seat-mapping",
+                    "slot",
+                    "seats",
+                    "update"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Scanner Api",
+      "item": [
+        {
+          "name": "api.organizer.login_submit (Sets auth_token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set(\"auth_token\", jsonData.token);",
+                  "    console.log(\"Organizer Token set: \" + jsonData.token);",
+                  "} else {",
+                  "    console.log(\"Login failed, token not found.\");",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/scanner/organizer/login/submit?username=organizer&password=12345678",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "scanner",
+                "organizer",
+                "login",
+                "submit"
+              ],
+              "query": [
+                {
+                  "key": "username",
+                  "value": "organizer"
+                },
+                {
+                  "key": "password",
+                  "value": "12345678"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "api.get-basic",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/scanner/get-basic",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "scanner",
+                "get-basic"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "api.organizer.check-qr-code",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/scanner/organizer/check-qrcode",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "scanner",
+                "organizer",
+                "check-qrcode"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "api.organizer.logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/scanner/organizer/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "scanner",
+                "organizer",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "api.admin.login_submit (Sets auth_token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set(\"auth_token\", jsonData.token);",
+                  "    console.log(\"Admin Token set: \" + jsonData.token);",
+                  "} else {",
+                  "    console.log(\"Login failed, token not found.\");",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/login/submit?username=admin&password=admin",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "login",
+                "submit"
+              ],
+              "query": [
+                {
+                  "key": "username",
+                  "value": "admin"
+                },
+                {
+                  "key": "password",
+                  "value": "admin"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "api.admin.check-qr-code",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/scanner/admin/check-qrcode",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "scanner",
+                "admin",
+                "check-qrcode"
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": null,
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "api.admin.logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/scanner/admin/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "scanner",
+                "admin",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "api.organizer.events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/scanner/organizer/events",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "scanner",
+                "organizer",
+                "events"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "api.organizer.ticket_scan_change",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/scanner/organizer/ticket/scanned-status-change?booking_id=6919c19b86faa&ticket_id=2&status=scanned",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "scanner",
+                "organizer",
+                "ticket",
+                "scanned-status-change"
+              ],
+              "query": [
+                {
+                  "key": "booking_id",
+                  "value": "6919c19b86faa"
+                },
+                {
+                  "key": "ticket_id",
+                  "value": "2"
+                },
+                {
+                  "key": "status",
+                  "value": "scanned"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "api.admin.events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/scanner/admin/events",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "scanner",
+                "admin",
+                "events"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "api.admin.ticket_scan_change",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/scanner/admin/ticket/scanned-status-change?booking_id=690afabc88aa8&ticket_id=690afabc88940&status=unscanned",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "scanner",
+                "admin",
+                "ticket",
+                "scanned-status-change"
+              ],
+              "query": [
+                {
+                  "key": "booking_id",
+                  "value": "690afabc88aa8"
+                },
+                {
+                  "key": "ticket_id",
+                  "value": "690afabc88940"
+                },
+                {
+                  "key": "status",
+                  "value": "unscanned"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "{{$basurl}}",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "url",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "default"
+    }
+  ]
+}

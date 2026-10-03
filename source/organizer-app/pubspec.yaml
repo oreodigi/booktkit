@@ -1,0 +1,82 @@
+name: booktkit_organizer
+description: "A new Flutter project."
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  flutter_html: ^3.0.0
+  flutter_quill: ^11.5.0
+  flutter_svg: ^2.2.3
+  image_picker: ^1.2.1
+  font_awesome_flutter: ^10.12.0
+  fl_chart: ^1.0.0
+  syncfusion_flutter_charts: ^30.1.42
+  syncfusion_flutter_core: ^30.1.42
+  syncfusion_flutter_sliders: ^30.1.42
+  dotted_border: ^3.1.0
+  intl: ^0.20.2
+  flutter_colorpicker: ^1.1.0
+  flutter_launcher_icons: ^0.14.4
+  provider: ^6.1.2
+  shared_preferences: ^2.3.4
+  logger: ^2.6.2
+  dio: ^5.9.1
+  url_launcher: ^6.3.1
+  file_picker: ^8.1.7
+  share_plus: ^10.1.4
+  path_provider: ^2.1.5
+  flutter_quill_delta_from_html: ^1.5.3
+  cached_network_image: ^3.4.1
+  device_info_plus: ^12.3.0
+  geolocator: ^13.0.4
+  geocoding: ^3.0.0
+  flutter_map: ^8.1.1
+  latlong2: ^0.9.1
+
+
+
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+flutter:
+
+
+  uses-material-design: true
+
+
+  assets:
+    - assets/images/
+
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter/Inter_18pt-Regular.ttf
+        - asset: assets/fonts/Inter/Inter_18pt-Medium.ttf
+        - asset: assets/fonts/Inter/Inter_18pt-SemiBold.ttf
+        - asset: assets/fonts/Inter/Inter_18pt-Bold.ttf
+        - asset: assets/fonts/Inter/Inter_24pt-SemiBold.ttf
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/icon.png"
+  adaptive_icon_foreground: "assets/icons/icon.png"
+  adaptive_icon_background: "assets/icons/bg.png"
+
+

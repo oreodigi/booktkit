@@ -1,0 +1,261 @@
+<?php
+
+namespace App\Http\Controllers\FrontEnd\PaymentGateway;
+
+use App\Models\Earning;
+use Illuminate\Http\Request;
+use App\Jobs\BookingInvoiceJob;
+use Illuminate\Support\Facades\DB;
+use App\Models\BasicSettings\Basic;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Session;
+use App\Models\PaymentGateway\OnlineGateway;
+use App\Http\Controllers\FrontEnd\Event\BookingController;
+
+class FlutterwaveController extends Controller
+{
+  private $public_key, $secret_key;
+
+  public function __construct()
+  {
+    $data = OnlineGateway::whereKeyword('flutterwave')->first();
+    $flutterwaveData = json_decode($data->information, true);
+
+    $this->public_key = $flutterwaveData['public_key'];
+    $this->secret_key = $flutterwaveData['secret_key'];
+  }
+
+  public function bookingProcess(Request $request, $eventId)
+  {
+    $rules = [
+      'fname' => 'required',
+      'lname' => 'required',
+      'email' => 'required',
+      'phone' => 'required',
+      'country' => 'required',
+      'address' => 'required',
+      'gateway' => 'required',
+
+    ];
+
+    $message = [];
+
+    $message['fname.required'] = 'The first name feild is required';
+    $message['lname.required'] = 'The last name feild is required';
+    $message['gateway.required'] = 'The payment gateway feild is required';
+    $request->validate($rules, $message);
+
+    $booking = new BookingController();
+
+    $baseTotal = floatval(Session::get('grand_total'));
+    $baseTaxAmount = floatval(Session::get('tax'));
+    $baseDiscount = floatval(Session::get('discount'));
+    $baseTotalEarlyBirdDiscount = floatval(Session::get('total_early_bird_dicount'));
+    $quantity = Session::get('quantity');
+
+    //tax and commission end
+    $basicSetting = Basic::select('commission')->first();
+    $baseCommissionAmount = ($baseTotal * $basicSetting->commission) / 100;
+
+    // Convert base values to the selected currency
+    $total = price_format($baseTotal);
+    $tax_amount = price_format($baseTaxAmount);
+    $discount = price_format($baseDiscount);
+    $total_early_bird_dicount = price_format($baseTotalEarlyBirdDiscount);
+    $commission_amount = price_format($baseCommissionAmount);
+
+    $allowedCurrencies = array('BIF', 'CAD', 'CDF', 'CVE', 'EUR', 'GBP', 'GHS', 'GMD', 'GNF', 'KES', 'LRD', 'MWK', 'MZN', 'NGN', 'RWF', 'SLL', 'STD', 'TZS', 'UGX', 'USD', 'XAF', 'XOF', 'ZMK', 'ZMW', 'ZWD');
+
+    $currencyInfo = $this->getCurrencyInfo();
+
+    // checking whether the base currency is allowed or not
+    if (!in_array($currencyInfo->text, $allowedCurrencies)) {
+      return redirect()->back()->with('currency_error', 'Invalid currency for flutterwave payment.')->withInput();
+    }
+
+    $arrData = array(
+      'event_id' => $eventId,
+      'price' => $total,
+      'tax' => $tax_amount,
+      'commission' => $commission_amount,
+      'quantity' => $quantity,
+      'discount' => $discount,
+      'total_early_bird_dicount' => $total_early_bird_dicount,
+      'currencyText' => $currencyInfo->text,
+      'currencyTextPosition' => $currencyInfo->text_position,
+      'currencySymbol' => $currencyInfo->symbol,
+      'currencySymbolPosition' => $currencyInfo->symbol_position,
+      'fname' => $request->fname,
+      'lname' => $request->lname,
+      'email' => $request->email,
+      'phone' => $request->phone,
+      'country' => $request->country,
+      'state' => $request->state,
+      'city' => $request->city,
+      'zip_code' => $request->city,
+      'address' => $request->address,
+      'paymentMethod' => 'Flutterwave',
+      'gatewayType' => 'online',
+      'paymentStatus' => 'completed',
+    );
+
+    $notifyURL = route('event_booking.flutterwave.notify');
+
+    // generate a payment reference
+    // send payment to flutterwave for processing
+    $curl = curl_init();
+
+    $payment_plan = ""; // this is only required for recurring payments.
+    $txref = uniqid();
+    Session::put('txref', $txref);
+
+
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => "https://api.ravepay.co/flwv3-pug/getpaidx/api/v2/hosted/pay",
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_CUSTOMREQUEST => "POST",
+      CURLOPT_POSTFIELDS => json_encode([
+        'amount' => $total + $tax_amount,
+        'customer_email' => $request->email,
+        'currency' => $currencyInfo->text,
+        'txref' => $txref,
+        'PBFPubKey' => $this->public_key,
+        'redirect_url' => $notifyURL,
+        'payment_plan' => $payment_plan
+      ]),
+      CURLOPT_HTTPHEADER => [
+        "content-type: application/json",
+        "cache-control: no-cache"
+      ],
+    ));
+
+    $response = curl_exec($curl);
+
+    curl_close($curl);
+
+    $responseData = json_decode($response, true);
+
+    //curl end
+
+    // put some data in session before redirect to flutterwave url
+    $request->session()->put('eventId', $eventId);
+    $request->session()->put('arrData', $arrData);
+
+    if ($responseData['status'] === 'success') {
+      return redirect($responseData['data']['link']);
+    } else {
+      return redirect()->back()->with('error', 'Error: ' . $responseData['message'])->withInput();
+    }
+  }
+
+  public function notify(Request $request)
+  {
+    try {
+      // get the information from session
+      $eventId = $request->session()->get('eventId');
+      $arrData = $request->session()->get('arrData');
+      if (isset($request['txref'])) {
+        $ref = Session::get('txref');
+        $query = array(
+          "SECKEY" => $this->secret_key,
+          "txref" => $ref
+        );
+      }
+      $data_string = json_encode($query);
+
+      $ch = curl_init('https://api.ravepay.co/flwv3-pug/getpaidx/api/v2/verify');
+      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+      curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+      $response = curl_exec($ch);
+      curl_close($ch);
+      $resp = json_decode($response, true);
+      if ($resp['status'] == 'error') {
+        // remove all session data
+        $request->session()->forget('eventId');
+        $request->session()->forget('arrData');
+        $request->session()->forget('discount');
+
+        return redirect()->route('event_booking.cancel', ['id' => $eventId]);
+      }
+
+      if ($resp['status'] = "success") {
+        $enrol = new BookingController();
+
+        $bookingInfo['transcation_type'] = 1;
+
+        // store the course enrolment information in database
+        $bookingInfo = $enrol->storeData($arrData);
+
+
+        $ticket = DB::table('basic_settings')->select('how_ticket_will_be_send')->first();
+
+        if ($ticket->how_ticket_will_be_send == 'instant') {
+          // generate an invoice in pdf format
+          $invoice = $enrol->generateInvoice($bookingInfo, $bookingInfo->event_id);
+
+          //unlink qr code
+          if (
+            $bookingInfo->variation != null
+          ) {
+            //generate qr code for without wise ticket
+            $variations = json_decode($bookingInfo->variation, true);
+            foreach ($variations as $variation) {
+
+              @unlink(public_path('assets/admin/qrcodes/') . $bookingInfo->booking_id . '__' . $variation['unique_id'] . '.svg');
+            }
+          } else {
+            //generate qr code for without wise ticket
+            for ($i = 1; $i <= $bookingInfo->quantity; $i++) {
+              @unlink(public_path('assets/admin/qrcodes/') . $bookingInfo->booking_id . '__' . $i .  '.svg');
+            }
+          }
+
+          // then, update the invoice field info in database
+          $bookingInfo->invoice = $invoice;
+          $bookingInfo->save();
+
+          // send a mail to the customer with the invoice
+          $enrol->sendMail($bookingInfo);
+        } else {
+          BookingInvoiceJob::dispatch($bookingInfo->id)->delay(now()->addSeconds(10));
+        }
+
+        //add blance to admin revinue
+        $earning = Earning::first();
+        $earning->total_revenue = $earning->total_revenue + $arrData['price'] + $bookingInfo->tax;
+        if ($bookingInfo['organizer_id'] != null) {
+          $earning->total_earning = $earning->total_earning + ($bookingInfo->tax + $bookingInfo->commission);
+        } else {
+          $earning->total_earning = $earning->total_earning + $arrData['price'] + $bookingInfo->tax;
+        }
+        $earning->save();
+
+        //storeTransaction
+        $bookingInfo['paymentStatus'] = 1;
+        $bookingInfo['transcation_type'] = 1;
+
+        storeTranscation($bookingInfo);
+
+        //store amount to organizer
+        $organizerData['organizer_id'] = $bookingInfo['organizer_id'];
+        $organizerData['price'] = $arrData['price'];
+        $organizerData['tax'] = $bookingInfo->tax;
+        $organizerData['commission'] = $bookingInfo->commission;
+        storeOrganizer($organizerData);
+
+        // remove all session data
+        $request->session()->forget('event_id');
+        $request->session()->forget('selTickets');
+        $request->session()->forget('arrData');
+        $request->session()->forget('paymentId');
+        $request->session()->forget('discount');
+        return redirect()->route('event_booking.complete', ['id' => $eventId, 'booking_id' => $bookingInfo->id]);
+      }
+    } catch (\Exception $e) {
+      return view('errors.404');
+    }
+  }
+}

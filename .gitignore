@@ -1,0 +1,49 @@
+# Purchased originals and historical inspection copies
+/Source Code/
+/project-review/source/
+/*.zip
+/New Text Document.txt
+# Environment and credentials
+**/.env
+**/.env.*
+!**/.env.example
+**/google-services.json
+**/GoogleService-Info.plist
+**/key.properties
+**/*.jks
+**/*.keystore
+**/*.pem
+**/*.p12
+# Dependencies, build outputs and local editor state
+**/vendor/
+**/node_modules/
+**/.dart_tool/
+**/.gradle/
+**/.kotlin/
+**/Pods/
+**/.symlinks/
+**/ephemeral/
+**/DerivedData/
+**/xcuserdata/
+**/*.log
+**/build/
+**/.idea/
+**/.vscode/
+**/.flutter-plugins*
+**/local.properties
+**/*.iml
+**/__show.ps1
+# Website runtime and uploaded content
+/source/website/storage/**
+!/source/website/storage/**/.gitignore
+/source/website/bootstrap/cache/*.php
+/source/website/public/storage
+/source/website/public/assets/file/**
+/source/website/public/assets/admin/file/**
+/source/website/public/assets/admin/img/**
+/source/website/public/assets/img/**
+!/source/website/public/assets/img/mobile-interface/
+!/source/website/public/assets/img/mobile-interface/booktkit-*.png
+# Local deployment artifacts
+/.sync-private/
+*.bundle

@@ -1,0 +1,128 @@
+<?php
+
+namespace App\Exports;
+
+use App\Models\BasicSettings\Basic;
+use App\Models\Language;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+
+use Maatwebsite\Excel\Concerns\FromCollection;
+
+class BookingExportApp implements FromCollection, WithHeadings, WithMapping
+{
+  public $bookings;
+
+  public function __construct($bookings)
+  {
+    $this->bookings = $bookings;
+  }
+  /**
+   * @return \Illuminate\Support\Collection
+   */
+  public function collection()
+  {
+    return $this->bookings;
+  }
+
+  // public function map($bookings): array
+  // {
+  //   $bs = Basic::firstOrFail();
+  //   $deLang = Language::where('is_default', 1)->first();
+
+  //   $customer = $bookings->customerInfo()->first();
+  //   if ($customer) {
+  //     $customerName = $customer->fname . ' ' . $customer->lname;
+  //   } else {
+  //     $customerName =  "Guest";
+  //   }
+
+  //   return [
+  //     $bookings->booking_id,
+  //     $bookings->title,
+  //     $customerName ?? '',
+  //     ($bs->currencySymbolPosition == 'left' ? $bs->currencySymbol : '') . $bookings->discount . ($bs->currencySymbolPosition == 'right' ? $bs->currencySymbol : ''),
+
+  //     ($bs->currencySymbolPosition == 'left' ? $bs->currencySymbol : '') . (empty($bookings->early_bird_discount) ? 0 : $bookings->early_bird_discount) . ($bs->currencySymbolPosition == 'right' ? $bs->currencySymbol : ''),
+
+  //     $bookings->quantity,
+
+  //     ($bs->currencySymbolPosition == 'left' ? $bs->currencySymbol : '') . (empty($bookings->price) ? 0 : $bookings->price) . ($bs->currencySymbolPosition == 'right' ? $bs->currencySymbol : ''),
+
+  //     $bookings->fname . ' ' . $bookings->lname,
+  //     $bookings->email,
+  //     $bookings->phone,
+  //     $bookings->city,
+  //     $bookings->state,
+  //     $bookings->country,
+  //     $bookings->zip_code,
+  //     $bookings->paymentMethod,
+  //     $bookings->paymentStatus,
+  //     $bookings->created_at
+  //   ];
+  // }
+  public function map($booking): array
+  {
+    $bs = Basic::firstOrFail();
+
+    $customerName = trim(($booking['fname'] ?? '') . ' ' . ($booking['lname'] ?? ''));
+    if ($customerName === '') {
+      $customerName = 'Guest';
+    }
+
+    return [
+      $booking['booking_id'] ?? '',
+      $booking['title'] ?? '',
+      $customerName,
+
+      ($bs->currencySymbolPosition == 'left' ? $bs->currencySymbol : '')
+        . ($booking['discount'] ?? 0)
+        . ($bs->currencySymbolPosition == 'right' ? $bs->currencySymbol : ''),
+
+      ($bs->currencySymbolPosition == 'left' ? $bs->currencySymbol : '')
+        . ($booking['early_bird_discount'] ?? 0)
+        . ($bs->currencySymbolPosition == 'right' ? $bs->currencySymbol : ''),
+
+      $booking['quantity'] ?? 0,
+
+      ($bs->currencySymbolPosition == 'left' ? $bs->currencySymbol : '')
+        . ($booking['price'] ?? 0)
+        . ($bs->currencySymbolPosition == 'right' ? $bs->currencySymbol : ''),
+
+      $customerName,
+      $booking['email'] ?? '',
+      $booking['phone'] ?? '',
+      $booking['city'] ?? '',
+      $booking['state'] ?? '',
+      $booking['country'] ?? '',
+      $booking['zip_code'] ?? '',
+      $booking['paymentMethod'] ?? '',
+      $booking['paymentStatus'] ?? '',
+      $booking['created_at'] ?? '',
+    ];
+  }
+
+
+  public function headings(): array
+  {
+    return [
+      'Booking Id',
+      'Event',
+      'Customer Name',
+      'Discount',
+      'Early Bird Discount',
+      'Quantity',
+      'Total',
+      'Name',
+      'Email',
+      'Phone',
+      'City',
+      'State',
+      'Country',
+      'Zip Code',
+      'Gateway',
+      'Payment Status',
+      'Date'
+    ];
+  }
+}
