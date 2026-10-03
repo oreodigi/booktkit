@@ -142,6 +142,12 @@ def deploy():
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_bytes(bundle.extractfile(member).read())
                 files[name] = digest(target)
+        required = set(PATCHES) | {'artisan', 'public/index.php', 'server.php',
+                                  'composer.lock', 'public/pgw/composer.lock',
+                                  'app/Providers/AppServiceProvider.php'}
+        missing = sorted(required - set(files))
+        if missing:
+            raise RuntimeError('Required deployment files missing: ' + ', '.join(missing))
         for name in ('composer.lock', 'public/pgw/composer.lock'):
             if (stage / name).exists() and digest(stage / name) != digest(LIVE / name):
                 raise RuntimeError('Dependency lock changed; install and validate dependencies before deploying: ' + name)
