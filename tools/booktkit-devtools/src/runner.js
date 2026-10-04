@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 
-const allowedSuites = new Set(['all', 'smoke', 'mobile', 'auth', 'organizer', 'razorpay']);
+const allowedSuites = new Set(['all', 'smoke', 'mobile', 'auth', 'organizer', 'api', 'security', 'razorpay']);
 
 export function runSuite(suite = 'smoke') {
   if (!allowedSuites.has(suite)) throw new Error('Unsupported suite');
@@ -9,6 +9,8 @@ export function runSuite(suite = 'smoke') {
   if (suite === 'mobile') args.push('--project=mobile-chrome');
   if (suite === 'auth') args.push('tests/organizer-auth.spec.js', 'tests/customer-auth.spec.js');
   if (suite === 'organizer') args.push('tests/organizer-capabilities.spec.js', 'tests/staging-event.spec.js');
+  if (suite === 'api') args.push('tests/api-surface.spec.js');
+  if (suite === 'security') args.push('tests/security-boundaries.spec.js', 'tests/mutation-guard.spec.js');
   if (suite === 'razorpay') args.push('tests/razorpay.spec.js');
 
   return new Promise((resolve) => {
