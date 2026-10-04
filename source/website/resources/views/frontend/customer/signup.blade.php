@@ -1,4 +1,5 @@
 @extends('frontend.layout')
+@section('body-class', 'booktkit-auth-body')
 @section('pageHeading')
   @if (!empty($pageHeading))
     {{ $pageHeading->customer_signup_page_title ?? __('Customer Signup') }}
