@@ -831,3 +831,24 @@
     min-height: 46px;
   }
 }
+
+/* Auth reference fidelity + mobile login entry */
+@media only screen and (max-width:767px){
+  .menu-right .auth-menu-entry.mobile-auth-visible{display:block!important;grid-column:1/-1}
+  .menu-right .auth-menu-entry.mobile-auth-visible .menu-btn{display:flex!important;background:var(--primary-color);color:#fff!important;border:0}
+  .menu-right .guest-organizer-entry{display:none!important}
+  body.booktkit-auth-body .main-header .navbar-header{display:flex!important;align-items:center;justify-content:space-between}
+  body.booktkit-auth-body .main-header .navbar-header:after{
+    content:"Sign In";display:flex;align-items:center;justify-content:center;height:42px;padding:0 16px;
+    border:1px solid #d9dde4;border-radius:9px;color:#24272c;font-size:14px;font-weight:700;
+  }
+  body.booktkit-auth-body .login-area .container,body.booktkit-auth-body .signup-area .container{padding-top:18px!important}
+  .booktkit-auth-page.login-form,.signup-area .booktkit-auth-page.login-form{padding:20px 18px 18px!important}
+  .booktkit-auth-page::before{font-size:28px;margin-bottom:17px}
+  .login-area .booktkit-auth-page::before{content:"Sign In"}
+  .signup-area .booktkit-auth-page::before{content:"Register Now"}
+  .booktkit-auth-page .auth-social-label,.booktkit-auth-page .auth-email-label{font-size:14px;color:#292929;font-weight:700}
+  .booktkit-auth-page .bg-google{background:#f3f4f6!important;height:48px;min-height:48px}
+  .booktkit-auth-page .auth-terms{margin-top:18px;font-size:11px;line-height:1.45;color:#747980}
+  .booktkit-auth-page .auth-terms a{color:#555b62;text-decoration:underline;text-underline-offset:2px}
+}
