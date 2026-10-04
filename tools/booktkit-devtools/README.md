@@ -22,7 +22,14 @@ npm run mcp
 Set `BOOKTKIT_BASE_URL` to staging when tests may mutate data. Never commit credentials.
 
 ## MCP client
-Run `npm run mcp` from this directory. The current transport is stdio for local development. A protected HTTPS MCP transport will be added for the ChatGPT Project after the test API and authentication boundary are finalized.
+Run `npm run mcp` for local stdio tools or `npm run mcp:http` for the protected HTTPS control plane. The remote tools dispatch approved GitHub Actions suites on `main` and list their results; see `REMOTE-MCP.md` for secrets and hosting.
+
+## Verification
+CI runs the complete read-only suite across desktop Chromium, mobile Chromium and mobile WebKit. Both browser engines must be installed. Dependencies are pinned by `package-lock.json` and installed with `npm ci`.
+
+API probes request JSON and verify real HTTP rejection statuses rather than accepting redirected login pages. Maps regression coverage forces immediate callback execution to catch loading-order races. Runtime checks wait for page load so deferred errors are observed.
+
+Production runs explicitly skip staging-only event/payment checks and authenticated organizer checks when credentials are absent. The mutation guard itself is still tested. These skips do not verify booking, payment execution, event creation or admission; those require a separate approved staging environment and disposable accounts.
 
 ## Planned suites
 Authentication, Google sign-in, organizer onboarding, current online/venue event creation, customer booking and checkout, Razorpay order/verification/webhooks, admin/RBAC, organizer data isolation, ticket inventory, scanner/QR admission, mobile API compatibility, notifications, mobile navigation, accessibility, console/network diagnostics, and post-deploy regression.

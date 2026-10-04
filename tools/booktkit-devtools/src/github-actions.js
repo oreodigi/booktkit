@@ -34,7 +34,7 @@ export async function dispatchSuite({ suite='smoke', baseUrl='https://www.booktk
   return { ok: true, suite, baseUrl: target, ref };
 }
 
-export async function recentRuns({ branch='feature/booktkit-devtools', limit=10 }={}) {
+export async function recentRuns({ branch='main', limit=10 }={}) {
   const q = new URLSearchParams({ branch, event: 'workflow_dispatch', per_page: String(Math.min(limit, 25)) });
   const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW}/runs?${q}`, { headers: headers() });
   if (!r.ok) throw new Error(`GitHub runs lookup failed: ${r.status} ${await r.text()}`);
