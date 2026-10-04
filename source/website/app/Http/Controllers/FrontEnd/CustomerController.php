@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Rules\MatchEmailRule;
+use App\Services\RecaptchaV3Service;
 use App\Models\BasicSettings\MailTemplate;
 use App\Models\Customer;
 use App\Models\Event\Booking;
@@ -50,6 +51,8 @@ class CustomerController extends Controller
   //create
   public function create(Request $request)
   {
+    app(RecaptchaV3Service::class)->verify($request, 'customer_signup');
+
 
     $rules = [
       'fname' => 'required',
@@ -208,6 +211,8 @@ class CustomerController extends Controller
   //authenticate
   public function authentication(Request $request)
   {
+    app(RecaptchaV3Service::class)->verify($request, 'customer_login');
+
     // at first, get the url from session which will be redirect after login
     if ($request->session()->has('redirectTo')) {
       $redirectURL = $request->session()->get('redirectTo');
@@ -282,6 +287,8 @@ class CustomerController extends Controller
   //forget_mail
   public function forget_mail(Request $request)
   {
+    app(RecaptchaV3Service::class)->verify($request, 'customer_forgot_password');
+
     $rules = [
       'email' => [
         'required',
