@@ -1,6 +1,21 @@
 @extends('frontend.layout')
 @section('pageHeading')
     {{ __('Home') }}
+    <nav class="booktkit-mobile-tabbar" aria-label="Mobile navigation">
+      <a class="active" href="{{ route('index') }}"><i class="fas fa-home"></i><span>{{ __('Home') }}</span></a>
+      <a href="{{ route('events') }}"><i class="far fa-calendar-alt"></i><span>{{ __('Events') }}</span></a>
+      @if (Auth::guard('customer')->check())
+        <a href="{{ route('customer.dashboard') }}"><i class="fas fa-ticket-alt"></i><span>{{ __('My Tickets') }}</span></a>
+      @else
+        <a href="{{ route('customer.login') }}"><i class="fas fa-ticket-alt"></i><span>{{ __('My Tickets') }}</span></a>
+      @endif
+      <a href="{{ route('contact') }}"><i class="far fa-bell"></i><span>{{ __('Support') }}</span></a>
+      @if (Auth::guard('customer')->check())
+        <a href="{{ route('customer.dashboard') }}"><i class="far fa-user"></i><span>{{ __('Account') }}</span></a>
+      @else
+        <a href="{{ route('customer.login') }}"><i class="far fa-user"></i><span>{{ __('Account') }}</span></a>
+      @endif
+    </nav>
 @endsection
 
 @php
@@ -10,6 +25,7 @@
 @section('meta-keywords', "{{ $metaKeywords }}")
 @section('meta-description', "$metaDescription")
 
+@section('body-class', 'booktkit-home-page')
 @section('hero-section')
     <!-- Hero Section Start -->
     @if ($heroSection)
@@ -54,6 +70,13 @@
     <!-- Hero Section End -->
 @endsection
 @section('content')
+    <div class="booktkit-mobile-categories">
+      <a href="{{ route('events') }}"><span><i class="fas fa-calendar-alt"></i></span>{{ __('All Events') }}</a>
+      @foreach ($categories->take(4) as $category)
+        <a href="{{ route('events', ['category' => $category->slug]) }}"><span><i class="fas fa-ticket-alt"></i></span>{{ $category->name }}</a>
+      @endforeach
+    </div>
+
 
     <!-- Events Section Start -->
     @if ($secInfo->featured_section_status == 1)
