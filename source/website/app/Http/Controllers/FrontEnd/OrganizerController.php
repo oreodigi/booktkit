@@ -135,16 +135,9 @@ class OrganizerController extends Controller
       'subject' => 'required',
       'message' => 'required'
     ];
-    if ($info->google_recaptcha_status == 1) {
-      $rules['g-recaptcha-response'] = 'required|captcha';
-    }
 
     $msgs = [];
 
-    if ($info->google_recaptcha_status == 1) {
-      $msgs['g-recaptcha-response.required'] = 'Please verify that you are not a robot.';
-      $msgs['g-recaptcha-response.captcha'] = 'Captcha error! try again later or contact site admin.';
-    }
 
     $validator = Validator::make($request->all(), $rules);
 
