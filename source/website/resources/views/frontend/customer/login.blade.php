@@ -80,7 +80,7 @@
             method="POST">
             @csrf
 
-            <p class="auth-social-label">{{ __('Sign In With Open Account') }}</p>
+            <p class="auth-social-label">{{ __('Sign In With Google Account') }}</p>
             @if ($basicInfo->facebook_login_status == 1 || $basicInfo->google_login_status == 1)
               <div class="form-group overflow-hidden">
                 <div class="row justify-content-between mb-3">
