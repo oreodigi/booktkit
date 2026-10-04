@@ -1,4 +1,5 @@
 @extends('frontend.layout')
+@section('body-class', 'booktkit-events-page')
 @section('pageHeading')
     @if (!empty($pageHeading))
         {{ $pageHeading->event_page_title ?? __('Events') }}
