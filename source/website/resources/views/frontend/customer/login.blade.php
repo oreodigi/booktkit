@@ -75,10 +75,11 @@
           @endif
 
 
-          <form id="login-form" name="login_form" class="login-form" action="{{ route('customer.authentication') }}"
+          <form id="login-form" name="login_form" class="login-form booktkit-auth-page" action="{{ route('customer.authentication') }}"
             method="POST">
             @csrf
 
+            <p class="auth-social-label">{{ __('Sign In With Open Account') }}</p>
             @if ($basicInfo->facebook_login_status == 1 || $basicInfo->google_login_status == 1)
               <div class="form-group overflow-hidden">
                 <div class="row justify-content-between mb-3">
@@ -99,6 +100,7 @@
               </div>
             @endif
 
+            <p class="auth-email-label">{{ __('Or Continue With Email Address') }}</p>
             @if (Session::has('success'))
               <div class="alert alert-success">{{ Session::get('success') }}</div>
             @endif
@@ -108,12 +110,13 @@
 
             <div class="form-group">
               <label for="username">{{ __('Username') . ' *' }} </label>
-              <input type="text" placeholder="{{ __('Enter Your Username') }}" name="username" id="username"
+              <input type="text" placeholder="{{ __('Email Address') }}" name="username" id="username"
                 value="" class="form-control">
               @error('username')
                 <p class="text-danger">{{ $message }}</p>
               @enderror
             </div>
+            <a class="auth-forgot d-md-none" href="{{ route('customer.forget.password') }}">{{ __('Forgot Password ?') }}</a>
             <div class="form-group">
               <label for="password">{{ __('Password') . ' *' }}</label>
               <input type="password" name="password" value="" id="password" class="form-control"
@@ -129,11 +132,12 @@
               <button class="theme-btn br-30" type="submit"
                 data-loading-text="Please wait...">{{ __('Login') }}</button>
             </div>
-            <div class="form-group mt-3 d-flex justify-content-between mb-0">
+            <div class="form-group mt-3 d-flex justify-content-between mb-0 auth-links">
               <p>{{ __('Don`t have an account') . '?' }} <a class="text-info"
                   href="{{ route('customer.signup') }}">{{ __('Signup Now') }}</a></p>
-              <p><a href="{{ route('customer.forget.password') }}">{{ __('Lost your password') . '?' }}</a></p>
+              <p class="d-none d-md-block"><a href="{{ route('customer.forget.password') }}">{{ __('Lost your password') . '?' }}</a></p>
             </div>
+          <p class="auth-terms d-md-none">{{ __('By signing in, you agree to our') }} <a href="/terms-and-conditions">{{ __('Terms & Conditions') }}</a> {{ __('and') }} <a href="/privacy-policy">{{ __('Privacy Policy') }}</a>.</p>
           </form>
         </div>
       </div>
