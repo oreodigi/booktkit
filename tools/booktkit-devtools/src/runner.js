@@ -1,12 +1,13 @@
 import { spawn } from 'node:child_process';
 
-const allowedSuites = new Set(['all', 'smoke', 'mobile']);
+const allowedSuites = new Set(['all', 'smoke', 'mobile', 'auth']);
 
 export function runSuite(suite = 'smoke') {
   if (!allowedSuites.has(suite)) throw new Error('Unsupported suite');
   const args = ['playwright', 'test'];
   if (suite === 'smoke') args.push('--grep', '@smoke');
   if (suite === 'mobile') args.push('--project=mobile-chrome');
+  if (suite === 'auth') args.push('tests/organizer-auth.spec.js', 'tests/customer-auth.spec.js');
 
   return new Promise((resolve) => {
     const child = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', args, {
