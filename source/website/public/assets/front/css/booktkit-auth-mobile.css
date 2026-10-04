@@ -1,0 +1,330 @@
+/* BookTKIT authentication + mobile navigation polish
+   Loaded after the vendor/theme styles so these rules stay isolated and easy to remove. */
+
+.login-area,
+.signup-area {
+  background: #f7f8fc;
+}
+
+.login-area .col-lg-8,
+.signup-area .col-lg-8 {
+  max-width: 760px;
+}
+
+.login-form {
+  background: #fff;
+  border: 1px solid #e8ebf2;
+  border-radius: 20px;
+  padding: 38px 40px;
+  box-shadow: 0 18px 55px rgba(3, 10, 21, .07);
+}
+
+.login-form .form-group {
+  margin-bottom: 22px;
+}
+
+.login-form .form-group label {
+  color: #111827;
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 700;
+  margin-bottom: 9px;
+}
+
+.login-form .form-control {
+  min-height: 54px;
+  border: 1px solid #dfe3ea;
+  border-radius: 10px;
+  padding: 13px 16px;
+  color: #111827;
+  background: #fff;
+  font-size: 15px;
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.login-form .form-control::placeholder {
+  color: #9aa1ad;
+}
+
+.login-form .form-control:focus {
+  background: #fff;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(255, 183, 0, .12);
+}
+
+.login-form .theme-btn {
+  width: 100%;
+  min-height: 52px;
+  border-radius: 10px !important;
+  font-size: 16px;
+}
+
+.login-form .bg-google,
+.login-form .bg-facebook {
+  min-height: 52px;
+  border-radius: 10px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-weight: 600;
+}
+
+.login-form .bg-google {
+  background: #fff !important;
+  color: #202124 !important;
+  border: 1px solid #dadce0;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+
+.login-form .bg-google i {
+  color: #4285f4;
+}
+
+.login-form .text-info {
+  color: var(--primary-color) !important;
+  font-weight: 700;
+}
+
+.login-form .text-danger {
+  font-size: 13px;
+  line-height: 1.45;
+  margin-top: 6px;
+  margin-bottom: 0;
+}
+
+/* Mobile navigation */
+@media only screen and (max-width: 1199px) {
+  .main-header .header-upper {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    background: #fff;
+  }
+
+  .main-menu .navbar-header {
+    min-height: 58px;
+  }
+
+  .main-menu .logo-mobile img {
+    width: auto;
+    max-width: 220px;
+    max-height: 56px;
+  }
+
+  .main-menu .navbar-header .navbar-toggle {
+    width: 46px;
+    height: 46px;
+    padding: 8px;
+    border-radius: 10px;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .main-menu .navbar-header .navbar-toggle .icon-bar {
+    width: 27px;
+    height: 3px;
+    margin: 3px 0;
+    border-radius: 10px;
+  }
+
+  .main-menu .navbar-collapse {
+    left: 0;
+    right: 0;
+    margin-top: 12px;
+    border: 1px solid #edf0f5;
+    border-radius: 0 0 18px 18px;
+    box-shadow: 0 20px 45px rgba(3, 10, 21, .12);
+    overflow: hidden;
+  }
+
+  .main-menu .navigation {
+    max-height: min(52vh, 420px);
+    padding: 8px 20px 4px;
+  }
+
+  .main-menu .navigation li {
+    padding: 0;
+    border-top: 0;
+    border-bottom: 1px solid #edf0f5;
+  }
+
+  .main-menu .navigation > li:last-child {
+    border-bottom: 0;
+  }
+
+  .main-menu .navigation li a {
+    min-height: 52px;
+    padding: 14px 4px;
+    display: flex;
+    align-items: center;
+    color: #0b1b4d;
+    font-family: var(--heading-font);
+    font-size: 15px;
+    font-weight: 650;
+    letter-spacing: 0;
+  }
+
+  .main-menu .navigation li.dropdown .dropdown-btn {
+    top: 7px;
+    right: 0;
+    width: 42px;
+    height: 40px;
+    line-height: 40px;
+    border-left: 0;
+    border-radius: 8px;
+  }
+
+  .main-menu .navigation li ul li {
+    padding: 0 10px;
+  }
+
+  .main-menu .navigation li ul li a {
+    min-height: 44px;
+    padding: 10px 6px;
+    color: #4b5563;
+  }
+
+  .menu-right {
+    margin: 0 !important;
+    padding: 14px 20px 20px;
+    background: #fff;
+    border-top: 1px solid #edf0f5;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .menu-right form {
+    grid-column: 1 / -1;
+    width: 100%;
+    margin: 0 !important;
+  }
+
+  .menu-right .ui-selectmenu-button.ui-button {
+    width: 100% !important;
+    min-height: 46px;
+    margin: 0 !important;
+    padding: 10px 12px;
+    border: 1px solid #e1e5ec;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+  }
+
+  .menu-right .ui-selectmenu-text {
+    width: 100%;
+  }
+
+  .menu-right > .dropdown {
+    width: 100%;
+  }
+
+  .menu-right .menu-btn {
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 12px;
+    border-radius: 9px;
+    justify-content: center;
+    margin: 0 !important;
+    font-weight: 700;
+  }
+
+  .menu-right .dropdown-menu {
+    width: 100%;
+    min-width: 100%;
+    border: 1px solid #e7eaf0;
+    border-radius: 10px;
+    box-shadow: 0 12px 30px rgba(3,10,21,.12);
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .page-banner.pt-120 {
+    padding-top: 58px !important;
+    padding-bottom: 58px !important;
+  }
+
+  .page-banner .page-title {
+    font-size: 30px;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .page-banner .breadcrumb {
+    font-size: 14px;
+  }
+
+  .login-area,
+  .signup-area {
+    padding-top: 28px !important;
+    padding-bottom: 50px !important;
+  }
+
+  .login-area .container,
+  .signup-area .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .login-form {
+    padding: 24px 18px;
+    border-radius: 16px;
+    box-shadow: 0 10px 35px rgba(3, 10, 21, .06);
+  }
+
+  .login-form .row {
+    margin-left: -7px;
+    margin-right: -7px;
+  }
+
+  .login-form .row > [class*="col-"] {
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+
+  .login-form .form-group {
+    margin-bottom: 18px;
+  }
+
+  .login-form .form-control {
+    min-height: 50px;
+    padding: 12px 14px;
+    font-size: 16px; /* prevents iOS form zoom */
+  }
+
+  .login-form .form-group.mt-3.d-flex {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .login-form .form-group.mt-3 p {
+    margin-bottom: 0;
+    line-height: 1.55;
+  }
+
+  .main-menu .logo-mobile img {
+    max-width: 190px;
+    max-height: 52px;
+  }
+}
+
+@media only screen and (max-width: 400px) {
+  .menu-right {
+    grid-template-columns: 1fr;
+  }
+
+  .menu-right form {
+    grid-column: auto;
+  }
+
+  .login-form {
+    padding: 22px 15px;
+  }
+
+  .main-menu .logo-mobile img {
+    max-width: 175px;
+  }
+}
