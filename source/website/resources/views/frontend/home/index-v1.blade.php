@@ -70,12 +70,21 @@
     <!-- Hero Section End -->
 @endsection
 @section('content')
-    <div class="booktkit-mobile-categories">
-      <a href="{{ route('events') }}"><span><i class="fas fa-calendar-alt"></i></span>{{ __('All Events') }}</a>
-      @foreach ($categories->take(4) as $category)
-        <a href="{{ route('events', ['category' => $category->slug]) }}"><span><i class="fas fa-ticket-alt"></i></span>{{ $category->name }}</a>
-      @endforeach
-    </div>
+    <section class="booktkit-mobile-categories-wrap">
+      <div class="booktkit-mobile-section-head">
+        <h2>{{ __('Explore Categories') }}</h2>
+        <a href="{{ route('events') }}">{{ __('View All') }}</a>
+      </div>
+      <div class="booktkit-mobile-categories">
+        @foreach ($categories as $category)
+          <a class="booktkit-mobile-category-card" href="{{ route('events', ['category' => $category->slug]) }}">
+            <img src="{{ asset('assets/admin/img/event-category/' . $category->image) }}" alt="{{ $category->name }}">
+            <span class="booktkit-mobile-category-overlay"></span>
+            <strong>{{ $category->name }}</strong>
+          </a>
+        @endforeach
+      </div>
+    </section>
 
 
     <!-- Events Section Start -->
