@@ -25,7 +25,7 @@
   @yield('custom-style')
 </head>
 
-<body>
+<body class="@yield('body-class')">
   <div class="page-wrapper">
 
     <!-- Preloader -->
