@@ -79,7 +79,7 @@
                   </form>
                 @endif
                 @if (!Auth::guard('customer')->check())
-                  <div class="dropdown auth-menu-entry customer-menu-entry">
+                  <div class="dropdown auth-menu-entry customer-menu-entry mobile-auth-visible">
                     <a class="menu-btn mr-1" href="{{ route('customer.login') }}">{{ __('Customer Login') }}</a>
                   </div>
                 @else
