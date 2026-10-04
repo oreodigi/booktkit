@@ -590,7 +590,7 @@ class CustomerController extends Controller
         ]);
       }
 
-      Auth::guard('customer')->login($customer, true);
+      Auth::guard('customer')->login($customer);
       if ($request) {
         $request->session()->regenerate();
       }
