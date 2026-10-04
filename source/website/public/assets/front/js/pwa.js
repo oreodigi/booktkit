@@ -1,14 +1,14 @@
 initSW();
 
 function initSW() {
-    if (!"serviceWorker" in navigator) {
+    if (!("serviceWorker" in navigator)) {
         //service worker isn't supported
         return;
     }
 
     //don't use it here if you use service worker
     //for other stuff.
-    if (!"PushManager" in window) {
+    if (!("PushManager" in window) || !("Notification" in window)) {
         //push isn't supported
         return;
     }
@@ -30,6 +30,9 @@ function initSW() {
 
 
 function initPush() {
+    if (!("Notification" in window) || !("serviceWorker" in navigator)) {
+        return;
+    }
     if (!navigator.serviceWorker.ready) {
         return;
     }
@@ -49,6 +52,9 @@ function initPush() {
             } else {
                 subscribeUser();
             }
+        })
+        .catch(() => {
+            // Browsers may deny permission requests made without a user gesture.
         });
 }
 
