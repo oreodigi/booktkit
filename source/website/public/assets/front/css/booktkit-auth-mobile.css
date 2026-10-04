@@ -852,3 +852,98 @@
   .booktkit-auth-page .auth-terms{margin-top:18px;font-size:11px;line-height:1.45;color:#747980}
   .booktkit-auth-page .auth-terms a{color:#555b62;text-decoration:underline;text-underline-offset:2px}
 }
+
+
+/* BookTKIT mobile navigation v3 — full-height dark slide panel */
+.mobile-menu-head,.mobile-menu-backdrop{display:none}
+@media only screen and (max-width:1199px){
+  body.mobile-menu-open{overflow:hidden}
+  .main-menu .navbar-collapse{
+    display:block!important;
+    position:fixed!important;
+    top:0!important;right:0!important;bottom:0!important;left:auto!important;
+    width:min(88vw,390px)!important;height:100dvh!important;
+    margin:0!important;padding:0!important;
+    background:#202226!important;
+    border:0!important;border-radius:0!important;
+    box-shadow:-18px 0 55px rgba(0,0,0,.28)!important;
+    overflow-y:auto!important;
+    z-index:10002!important;
+    transform:translateX(105%);
+    visibility:hidden;
+    transition:transform .28s ease,visibility .28s ease!important;
+  }
+  .main-menu .navbar-collapse.show{
+    transform:translateX(0);visibility:visible
+  }
+  .mobile-menu-backdrop{
+    position:fixed;inset:0;background:rgba(8,10,14,.68);
+    backdrop-filter:blur(2px);z-index:10001
+  }
+  body.mobile-menu-open .mobile-menu-backdrop{display:block}
+  .mobile-menu-head{
+    position:sticky;top:0;z-index:5;
+    display:flex!important;align-items:center;justify-content:space-between;
+    min-height:74px;padding:0 22px;
+    background:#202226;border-bottom:1px solid rgba(255,255,255,.09)
+  }
+  .mobile-menu-title{color:#fff;font-size:20px;font-weight:800}
+  .mobile-menu-close{
+    width:42px;height:42px;border:1px solid rgba(255,255,255,.13);
+    border-radius:12px;background:#2b2e33;color:#fff;
+    font-size:29px;line-height:36px;font-weight:300
+  }
+  .main-menu .navigation{
+    max-height:none!important;padding:14px 20px 8px!important;margin:0!important;
+    background:#202226!important
+  }
+  .main-menu .navigation>li{
+    border:0!important;border-bottom:1px solid rgba(255,255,255,.075)!important
+  }
+  .main-menu .navigation li a{
+    min-height:54px!important;padding:15px 4px!important;
+    color:#f3f4f6!important;font-size:16px!important;font-weight:600!important
+  }
+  .main-menu .navigation li a:hover{color:var(--primary-color)!important}
+  .main-menu .navigation li.dropdown .dropdown-btn{
+    top:7px!important;right:0!important;color:#fff!important;background:#2b2e33!important
+  }
+  .main-menu .navigation li ul{
+    background:#292c31!important;border-radius:10px!important;margin:0 0 8px!important
+  }
+  .main-menu .navigation li ul li{border-color:rgba(255,255,255,.06)!important}
+  .main-menu .navigation li ul li a{color:#d5d8de!important;font-size:14px!important}
+  .menu-right{
+    display:block!important;margin:0!important;padding:12px 20px 26px!important;
+    background:#202226!important;border-top:0!important
+  }
+  .menu-right form:not(.language-switcher){display:block!important;width:100%;margin:0 0 12px!important}
+  .menu-right .language-switcher{display:none!important}
+  .menu-right .ui-selectmenu-button.ui-button,.menu-right select.form-control{
+    width:100%!important;min-height:48px!important;margin:0!important;
+    border:1px solid rgba(255,255,255,.13)!important;border-radius:10px!important;
+    background:#292c31!important;color:#f5f5f5!important
+  }
+  .menu-right>.dropdown{width:100%!important;margin:0 0 10px!important}
+  .menu-right .menu-btn{
+    width:100%!important;min-height:49px!important;padding:11px 14px!important;
+    border:1px solid rgba(255,183,0,.6)!important;border-radius:10px!important;
+    background:var(--primary-color)!important;color:#151515!important;
+    justify-content:center!important;font-size:15px!important;font-weight:750!important
+  }
+  .menu-right .dropdown-menu{
+    position:static!important;float:none!important;width:100%!important;
+    margin:7px 0 0!important;padding:5px!important;
+    background:#292c31!important;border:1px solid rgba(255,255,255,.08)!important;
+    box-shadow:none!important
+  }
+  .menu-right .dropdown-item{
+    padding:11px 12px!important;border-radius:7px!important;
+    color:#e6e7e9!important;background:transparent!important
+  }
+  .menu-right .dropdown-item:hover{background:#33363c!important;color:#fff!important}
+}
+@media only screen and (max-width:480px){
+  .main-menu .navbar-collapse{width:100vw!important}
+  .mobile-menu-backdrop{display:none!important}
+}
