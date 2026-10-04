@@ -66,6 +66,7 @@
                 <p class="text-danger">{{ $message }}</p>
               @enderror
             </div>
+            @include('frontend.partials.recaptcha-v3', ['formId' => 'login-form', 'action' => 'organizer_forgot_password'])
             <div class="form-group mb-0">
               <button class="theme-btn br-30" type="submit">{{ __('PROCEED') }}</button>
             </div>
