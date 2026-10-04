@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Rules\MatchEmailRule;
+use App\Services\RecaptchaV3Service;
 use App\Models\BasicSettings\MailTemplate;
 use App\Models\Event;
 use App\Models\Event\Booking;
@@ -170,6 +171,8 @@ class OrganizerController extends Controller
   //create
   public function create(Request $request)
   {
+    app(RecaptchaV3Service::class)->verify($request, 'organizer_signup');
+
     $rules = [
       'name' => 'required',
       'username' => [
@@ -285,6 +288,8 @@ class OrganizerController extends Controller
   //authenticate
   public function authentication(Request $request)
   {
+    app(RecaptchaV3Service::class)->verify($request, 'organizer_login');
+
     $rules = [
       'username' => 'required',
       'password' => 'required'
@@ -345,6 +350,8 @@ class OrganizerController extends Controller
   //forget_mail
   public function forget_mail(Request $request)
   {
+    app(RecaptchaV3Service::class)->verify($request, 'organizer_forgot_password');
+
     $rules = [
       'email' => [
         'required',
