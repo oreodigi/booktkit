@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\FrontEnd;
 
 use App\Http\Controllers\Controller;
+use App\Services\RecaptchaV3Service;
 use App\Models\Admin;
 use App\Models\Event;
 use App\Models\Event\EventCategory;
@@ -121,6 +122,8 @@ class OrganizerController extends Controller
 
   public function sendMail(Request $request)
   {
+    app(RecaptchaV3Service::class)->verify($request, 'organizer_contact');
+
 
     $info = DB::table('basic_settings')
       ->select('google_recaptcha_status', 'website_title', 'smtp_status', 'smtp_host', 'smtp_port', 'encryption', 'smtp_username', 'smtp_password', 'from_mail', 'from_name', 'email_address')
