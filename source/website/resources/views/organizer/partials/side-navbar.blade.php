@@ -236,6 +236,12 @@
             <p>{{ __('Transactions') }}</p>
           </a>
         </li>
+        <li class="nav-item @if (request()->routeIs('organizer.payments.index')) active @endif">
+          <a href="{{ route('organizer.payments.index') }}">
+            <i class="fal fa-wallet"></i>
+            <p>{{ __('Payments & Settlements') }}</p>
+          </a>
+        </li>
         <li class="nav-item">
           <a href="{{ route('organizer.pwa') }}" target="_blank">
             <i class="fas fa-scanner"></i>

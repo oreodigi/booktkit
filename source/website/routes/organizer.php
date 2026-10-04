@@ -183,3 +183,7 @@ Route::prefix('/organizer')->middleware('auth:organizer', 'Deactive:organizer', 
     Route::get('cancel', 'BackEnd\Organizer\AiTokenPurchaseController@cancel')->name('organizer.ai_token_purchase.cancel');
   });
 });
+
+Route::middleware(['auth:organizer'])->group(function () {
+  Route::get('/payments-settlements', 'BackEnd\Organizer\PaymentCenterController@index')->name('organizer.payments.index');
+});
