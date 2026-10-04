@@ -13,26 +13,10 @@ class OnlineGatewayController extends Controller
 {
   public function index()
   {
-    $gatewayInfo['paypal'] = OnlineGateway::where('keyword', 'paypal')->first();
-    $gatewayInfo['instamojo'] = OnlineGateway::where('keyword', 'instamojo')->first();
-    $gatewayInfo['paystack'] = OnlineGateway::where('keyword', 'paystack')->first();
-    $gatewayInfo['flutterwave'] = OnlineGateway::where('keyword', 'flutterwave')->first();
+    // BookTKIT supports only gateways relevant to its India/UK operating model.
     $gatewayInfo['razorpay'] = OnlineGateway::where('keyword', 'razorpay')->first();
-    $gatewayInfo['mercadopago'] = OnlineGateway::where('keyword', 'mercadopago')->first();
-    $gatewayInfo['mollie'] = OnlineGateway::where('keyword', 'mollie')->first();
     $gatewayInfo['stripe'] = OnlineGateway::where('keyword', 'stripe')->first();
-    $gatewayInfo['paytm'] = OnlineGateway::where('keyword', 'paytm')->first();
-    $gatewayInfo['midtrans'] = OnlineGateway::where('keyword', 'midtrans')->first();
-    $gatewayInfo['iyzico'] = OnlineGateway::where('keyword', 'iyzico')->first();
-    $gatewayInfo['paytabs'] = OnlineGateway::where('keyword', 'paytabs')->first();
-    $gatewayInfo['toyyibpay'] = OnlineGateway::where('keyword', 'toyyibpay')->first();
-    $gatewayInfo['phonepe'] = OnlineGateway::where('keyword', 'phonepe')->first();
-    $gatewayInfo['yoco'] = OnlineGateway::where('keyword', 'yoco')->first();
-    $gatewayInfo['xendit'] = OnlineGateway::where('keyword', 'xendit')->first();
-    $gatewayInfo['myfatoorah'] = OnlineGateway::where('keyword', 'myfatoorah')->first();
-    $gatewayInfo['perfect_money'] = OnlineGateway::where('keyword', 'perfect_money')->first();
-
-    return view('backend.payment-gateways.online-gateways', $gatewayInfo);
+    return view('backend.payment-gateways.booktkit-online-gateways', $gatewayInfo);
   }
 
   public function updatePayPalInfo(Request $request)
@@ -219,7 +203,8 @@ class OnlineGatewayController extends Controller
     $rules = [
       'razorpay_status' => 'required',
       'razorpay_key' => 'required',
-      'razorpay_secret' => 'required'
+      'razorpay_secret' => 'required',
+      'razorpay_webhook_secret' => 'nullable|string|min:16'
     ];
 
     $validator = Validator::make($request->all(), $rules);
@@ -230,6 +215,7 @@ class OnlineGatewayController extends Controller
 
     $information['key'] = $request->razorpay_key;
     $information['secret'] = $request->razorpay_secret;
+    if ($request->filled('razorpay_webhook_secret')) $information['webhook_secret'] = $request->razorpay_webhook_secret;
 
     $razorpayInfo = OnlineGateway::where('keyword', 'razorpay')->first();
     if (isset($request->is_mobile) && $request->is_mobile == 1) {
