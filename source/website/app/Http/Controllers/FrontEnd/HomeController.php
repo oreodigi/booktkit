@@ -33,6 +33,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use App\Services\MobileHomeResolver;
 
 class HomeController extends Controller
 {
@@ -99,6 +100,8 @@ class HomeController extends Controller
 
     $queryResult['partnerInfo'] = PartnerSection::where('language_id', $language->id)->first();
     $queryResult['partners'] = Partner::orderBy('serial_number', 'asc')->get();
+    $mobileHomeResolver = app(MobileHomeResolver::class);
+    $queryResult['mobileHomeCampaign'] = $mobileHomeResolver->active() ?: $mobileHomeResolver->fallback();
     $queryResult['footerInfo'] = FooterContent::where('language_id', $language->id)->first();
     $queryResult['quickLinkInfos'] = QuickLink::orderBy('serial_number', 'asc')->get();
 
