@@ -1096,6 +1096,14 @@
                     </li>
                 @endif
 
+                @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Transaction', $rolePermissions)))
+                    <li class="nav-item @if (request()->routeIs('admin.payments.*')) active @endif">
+                        <a href="{{ route('admin.payments.finance') }}">
+                            <i class="fas fa-wallet"></i><p>{{ __('BookTKIT Finance') }}</p>
+                        </a>
+                    </li>
+                @endif
+
                 {{-- payment gateway --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Payment Gateways', $rolePermissions)))
                     <li
