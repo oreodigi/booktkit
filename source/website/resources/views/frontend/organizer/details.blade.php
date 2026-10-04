@@ -1050,14 +1050,7 @@
                                         </div>
                                     </div>
                                     <div class="col-lg-12">
-                                        @if ($basicInfos->google_recaptcha_status == 1)
-                                            <div class="form_group">
-                                                {!! NoCaptcha::renderJs() !!}
-                                                {!! NoCaptcha::display() !!}
-
-                                                <p class="text-danger em" id="Error_g-recaptcha-response"></p>
-                                            </div>
-                                        @endif
+                                        @include('frontend.partials.recaptcha-v3', ['formId' => 'vendorContactForm', 'action' => 'organizer_contact'])
                                     </div>
                                     <div class="col-lg-12 text-center">
                                         <button class="theme-btn" type="submit"
