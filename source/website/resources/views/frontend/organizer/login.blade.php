@@ -74,15 +74,7 @@
                 <p class="text-danger">{{ $message }}</p>
               @enderror
             </div>
-            @if ($basicInfo->google_recaptcha_status == 1)
-              <div class="form-group">
-                {!! NoCaptcha::renderJs() !!}
-                {!! NoCaptcha::display() !!}
-                @error('g-recaptcha-response')
-                  <p class="text-danger">{{ $message }}</p>
-                @enderror
-              </div>
-            @endif
+            @include('frontend.partials.recaptcha-v3', ['formId' => 'login-form', 'action' => 'organizer_login'])
 
             <div class="form-group mb-0">
               <button class="theme-btn br-30" type="submit"
