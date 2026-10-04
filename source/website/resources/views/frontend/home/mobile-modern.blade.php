@@ -1,0 +1,29 @@
+@php
+$mhSections=$mobileHomeCampaign?->sections ?? collect();
+$mhDesign=$mobileHomeCampaign?->template?->design ?? [];
+$mhAccent=$mhDesign['accent'] ?? '#f6b500';
+$mhSurface=$mhDesign['surface'] ?? '#ffffff';
+$mhRadius=$mhDesign['radius'] ?? 16;
+$mhEvents=DB::table('event_contents')->join('events','events.id','=','event_contents.event_id')->where('event_contents.language_id',$currentLanguageInfo->id)->where('events.status',1)->where('events.end_date_time','>=',now())->orderByDesc('events.is_featured')->orderBy('events.start_date')->limit(6)->get();
+@endphp
+<div class="bkm-app" style="--bkm-accent:{{ $mhAccent }};--bkm-surface:{{ $mhSurface }};--bkm-radius:{{ $mhRadius }}px">
+<header class="bkm-header"><a href="{{ route('index') }}" class="bkm-brand">{{ $websiteInfo->website_title }}</a><div class="bkm-actions"><a href="{{ route('contact') }}"><i class="far fa-headset"></i></a><a href="{{ Auth::guard('customer')->check()?route('customer.dashboard'):route('customer.login') }}"><i class="far fa-user"></i></a></div></header>
+@foreach($mhSections as $section)
+@if($section->type==='hero')
+<section class="bkm-hero"><div class="bkm-hero-copy"><span class="bkm-kicker">{{ __('Discover. Book. Enjoy.') }}</span><h1>{{ $section->title ?: __('Find your next experience') }}</h1><p>{{ __('Concerts, festivals, sports and experiences — all in one place.') }}</p></div><form class="bkm-search" action="{{ route('events') }}"><i class="far fa-search"></i><input name="search-input" placeholder="{{ __('Search events, artists or venues') }}"><button>{{ __('Search') }}</button></form></section>
+@elseif($section->type==='quick_categories')
+<section class="bkm-section"><div class="bkm-title"><h2>{{ $section->title }}</h2><a href="{{ route('events') }}">{{ __('See all') }}</a></div><div class="bkm-category-row">@foreach($categories->take(8) as $category)<a href="{{ route('events',['category'=>$category->slug]) }}"><span><img src="{{ asset('assets/admin/img/event-category/'.$category->image) }}" alt="{{ $category->name }}"></span><strong>{{ $category->name }}</strong></a>@endforeach</div></section>
+@elseif($section->type==='featured_events')
+<section class="bkm-section"><div class="bkm-title"><h2>{{ $section->title }}</h2><a href="{{ route('events') }}">{{ __('See all') }}</a></div><div class="bkm-event-list">@forelse($mhEvents->take(4) as $event)@php $ticket=App\Models\Event\Ticket::where('event_id',$event->id)->whereNotNull('price')->orderBy('price')->first(); @endphp<a class="bkm-event" href="{{ route('event.details',[$event->slug,$event->id]) }}"><img src="{{ asset('assets/admin/img/event/thumbnail/'.$event->thumbnail) }}" alt="{{ $event->title }}"><div class="bkm-event-info"><small>{{ \Carbon\Carbon::parse($event->start_date)->format('D, d M') }} · {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }}</small><h3>{{ $event->title }}</h3><p>{{ $event->event_type==='online'?__('Online Event'):($event->city ?? __('Venue Event')) }}</p><strong>{{ $ticket ? __('From').' '.$currencyInfo->base_currency_symbol.number_format($ticket->price,0) : __('View tickets') }}</strong></div></a>@empty<p class="bkm-empty">{{ __('New events are coming soon.') }}</p>@endforelse</div></section>
+@elseif($section->type==='explore_categories')
+<section class="bkm-section"><div class="bkm-title"><h2>{{ $section->title }}</h2></div><div class="bkm-explore">@foreach($categories as $category)<a href="{{ route('events',['category'=>$category->slug]) }}"><img src="{{ asset('assets/admin/img/event-category/'.$category->image) }}" alt="{{ $category->name }}"><span></span><strong>{{ $category->name }}</strong></a>@endforeach</div></section>
+@elseif($section->type==='organizer_cta')
+<section class="bkm-section"><div class="bkm-cta"><div><small>{{ __('FOR ORGANIZERS') }}</small><h2>{{ __('Hosting an event?') }}</h2><p>{{ __('Create your event and start selling tickets with BookTKIT.') }}</p></div><a href="{{ route('organizer.signup') }}">{{ __('Start selling') }}</a></div></section>
+@elseif($section->type==='how_it_works')
+<section class="bkm-section"><div class="bkm-title"><h2>{{ $section->title }}</h2></div><div class="bkm-steps"><div><i class="far fa-search"></i><b>{{ __('Discover') }}</b><small>{{ __('Find an event') }}</small></div><div><i class="fas fa-ticket-alt"></i><b>{{ __('Book') }}</b><small>{{ __('Choose tickets') }}</small></div><div><i class="fas fa-qrcode"></i><b>{{ __('Enter') }}</b><small>{{ __('Show your QR') }}</small></div></div></section>
+@elseif($section->type==='partners' && isset($partners) && $partners->count())
+<section class="bkm-section bkm-last"><div class="bkm-title"><h2>{{ $section->title }}</h2></div><div class="bkm-partners">@foreach($partners as $partner)<span><img src="{{ asset('assets/admin/img/partner/'.$partner->image) }}" alt="{{ $partner->name ?? __('Partner') }}"></span>@endforeach</div></section>
+@endif
+@endforeach
+<nav class="bkm-nav"><a class="active" href="{{ route('index') }}"><i class="fas fa-home"></i><span>{{ __('Home') }}</span></a><a href="{{ route('events') }}"><i class="far fa-compass"></i><span>{{ __('Explore') }}</span></a><a href="{{ Auth::guard('customer')->check()?route('customer.booking.my_booking'):route('customer.login') }}"><i class="fas fa-ticket-alt"></i><span>{{ __('Tickets') }}</span></a><a href="{{ Auth::guard('customer')->check()?route('customer.dashboard'):route('customer.login') }}"><i class="far fa-user"></i><span>{{ __('Account') }}</span></a></nav>
+</div>
