@@ -16,13 +16,20 @@
             <div class="navbar-header">
               <div class="logo-mobile"><a href="{{ route('index') }}"><img
                     src="{{ asset('assets/admin/img/' . $websiteInfo->logo) }}" alt="Logo"></a></div>
-              <!-- Toggle Button -->
-              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"
-                aria-controls="main-menu">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-              </button>
+              <div class="mobile-header-actions d-xl-none">
+                <a class="mobile-header-icon" href="{{ route('contact') }}" aria-label="Support"><i class="fa fa-headphones"></i></a>
+                @if (Auth::guard('customer')->check())
+                  <a class="mobile-header-icon" href="{{ route('customer.dashboard') }}" aria-label="Account"><i class="fa fa-user-circle"></i></a>
+                @elseif (Auth::guard('organizer')->check())
+                  <a class="mobile-header-icon" href="{{ route('organizer.dashboard') }}" aria-label="Account"><i class="fa fa-user-circle"></i></a>
+                @else
+                  <a class="mobile-header-icon" href="{{ route('customer.login') }}" aria-label="Sign in"><i class="fa fa-user-circle"></i></a>
+                @endif
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"
+                  aria-controls="main-menu" aria-label="Open menu">
+                  <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+                </button>
+              </div>
             </div>
 
             <div class="navbar-collapse collapse clearfix" id="main-menu">
@@ -68,7 +75,7 @@
                   </select>
                 </form>
                 @if (isset($allCurrencyInfos) && $allCurrencyInfos->count() > 0)
-                  <form action="{{ route('change_currency') }}" method="get" class="ml-2 mr-1">
+                  <form action="{{ route('change_currency') }}" method="get" class="ml-2 mr-1 desktop-currency-selector">
                     <select name="currency_id" class="form-control" onchange="this.form.submit()">
                       @foreach ($allCurrencyInfos as $currency)
                         <option value="{{ $currency->id }}"
