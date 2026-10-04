@@ -1,15 +1,18 @@
 @php
-  $recaptchaSettings = isset($basicInfo)
-    ? $basicInfo
-    : \App\Models\BasicSettings\Basic::query()
-        ->select('google_recaptcha_status', 'google_recaptcha_site_key')
-        ->first();
-  $recaptchaV3SiteKey = $recaptchaSettings->google_recaptcha_site_key ?? '';
+  // Always read the canonical reCAPTCHA settings row. Frontend $basicInfo
+  // is intentionally not used because many page controllers select only a
+  // subset of basic_settings columns and may omit the v3 site key.
+  $recaptchaSettings = \App\Models\BasicSettings\Basic::query()
+      ->where('uniqid', 12345)
+      ->select('google_recaptcha_status', 'google_recaptcha_site_key')
+      ->first();
+
+  $recaptchaV3SiteKey = trim((string) ($recaptchaSettings->google_recaptcha_site_key ?? ''));
 @endphp
 
-@if (($recaptchaSettings->google_recaptcha_status ?? 0) == 1 && !empty($recaptchaV3SiteKey))
+@if ((int) ($recaptchaSettings->google_recaptcha_status ?? 0) === 1 && $recaptchaV3SiteKey !== '')
   <input type="hidden" name="g-recaptcha-response" value="">
-  <script src="https://www.google.com/recaptcha/api.js?render={{ $recaptchaV3SiteKey }}"></script>
+  <script src="https://www.google.com/recaptcha/api.js?render={{ urlencode($recaptchaV3SiteKey) }}"></script>
   <script>
     (function () {
       const form = document.getElementById(@json($formId));
