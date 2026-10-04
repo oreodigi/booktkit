@@ -88,12 +88,22 @@ class CustomerController extends Controller
 
     $in['verification_token'] = $token;
 
-    // send a mail to user for verify his/her email address
+    // Persist the account before attempting external SMTP delivery. A temporary
+    // mail outage must never discard an otherwise valid registration.
+    $customer = Customer::create($in);
+
     $mail_status = $this->sendVerificationMail($request, $token);
-    if($mail_status == false){
-      return redirect()->back()->with(['alert-type' => 'warning', 'message' => 'Mail could not be sent !']);;
+    if ($mail_status === false) {
+      Log::warning('Customer registered but verification email could not be sent', [
+        'customer_id' => $customer->id,
+        'email' => $customer->email,
+      ]);
+
+      return redirect()->route('customer.login')->with([
+        'alert-type' => 'warning',
+        'message' => 'Your account was created, but the verification email could not be sent. Please contact support or try again later.',
+      ]);
     }
-    Customer::create($in);
 
     return redirect()->route('customer.login');
   }
@@ -149,6 +159,10 @@ class CustomerController extends Controller
       $mail_status = true;
       Session::flash('success', 'A verification mail has been sent to your email address.');
     } catch (Exception $e) {
+      Log::error('Customer verification email failed', [
+        'email' => $request->email,
+        'message' => $e->getMessage(),
+      ]);
       $mail_status = false;
     }
     return $mail_status;
