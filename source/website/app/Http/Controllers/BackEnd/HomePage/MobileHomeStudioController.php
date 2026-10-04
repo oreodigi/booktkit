@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Event\EventCategory;
 use App\Models\Event\EventContent;
+use Illuminate\Support\Str;
 
 class MobileHomeStudioController extends Controller {
  public function index(){
@@ -20,13 +21,13 @@ class MobileHomeStudioController extends Controller {
  }
  public function storeTemplate(Request $r){
    $data=$r->validate(['name'=>'required|max:100','template_key'=>'required|in:modern,festival,nightlife,sports,minimal']);
-   $data['slug']=\Str::slug($data['name']).'-'.substr(uniqid(),-5);
+   $data['slug']=Str::slug($data['name']).'-'.substr(uniqid(),-5);
    MobileHomeTemplate::create($data); return back()->with('success','Mobile homepage template created.');
  }
  public function storeCampaign(Request $r){
    $data=$r->validate(['name'=>'required|max:120','template_id'=>'required|exists:mobile_home_templates,id','priority'=>'nullable|integer','starts_at'=>'nullable|date','ends_at'=>'nullable|date|after_or_equal:starts_at']);
    $data['status']='draft'; $campaign=MobileHomeCampaign::create($data);
-   $defaults=[['hero','Discover Events',1],['quick_categories','Event Categories',2],['featured_events','Featured Events',3],['explore_categories','Explore Categories',4],['how_it_works','How It Works',5],['partners','Partners',6]];
+   $defaults=[['hero','Discover Events',1],['quick_categories','Event Categories',2],['featured_events','Featured Events',3],['explore_categories','Explore Categories',4],['organizer_cta','Host an Event',5],['how_it_works','How It Works',6],['partners','Partners',7]];
    foreach($defaults as $d) MobileHomeSection::create(['campaign_id'=>$campaign->id,'type'=>$d[0],'title'=>$d[1],'position'=>$d[2],'enabled'=>true]);
    return redirect()->route('admin.mobile_home.edit',$campaign)->with('success','Campaign created as draft.');
  }
@@ -34,7 +35,8 @@ class MobileHomeStudioController extends Controller {
    $campaign->load(['template','sections']);
    $categories=EventCategory::where('status',1)->orderBy('serial_number')->get();
    $events=EventContent::join('events','events.id','=','event_contents.event_id')->where('events.status',1)->where('events.end_date_time','>=',now())->select('event_contents.*','events.thumbnail','events.start_date')->orderBy('events.start_date')->limit(100)->get();
-   return view('backend.home-page.mobile-home.edit',compact('campaign','categories','events'));
+   $versions=$campaign->versions()->orderByDesc('version')->limit(20)->get();
+   return view('backend.home-page.mobile-home.edit',compact('campaign','categories','events','versions'));
  }
  public function preview(MobileHomeCampaign $campaign){
    session(['mobile_home_preview_campaign'=>$campaign->id]);
@@ -50,11 +52,35 @@ class MobileHomeStudioController extends Controller {
    $design=array_merge($design,$r->input('design',[]));
    $campaign->template->update(['design'=>$design]);
    foreach($r->input('sections',[]) as $id=>$row){$s=$campaign->sections()->findOrFail($id);$s->update(['title'=>$row['title']??$s->title,'enabled'=>isset($row['enabled']),'position'=>(int)($row['position']??$s->position),'settings'=>array_filter($row['settings']??($s->settings?:[]),fn($v)=>$v!==null&&$v!=='')]);}
+   cache()->forget('mobile_home_active_campaign');
    return back()->with('success','Draft saved.');
  }
  public function publish(MobileHomeCampaign $campaign){
    DB::transaction(function()use($campaign){$campaign->load(['template','sections']);$v=(int)$campaign->versions()->max('version')+1;$snapshot=$campaign->toArray();MobileHomeVersion::create(['campaign_id'=>$campaign->id,'version'=>$v,'snapshot'=>$snapshot,'published_by'=>Auth::guard('admin')->id(),'published_at'=>now()]);$campaign->update(['status'=>'published']);});
    cache()->forget('mobile_home_active_campaign'); return back()->with('success','Mobile homepage published.');
  }
+ public function addSection(Request $r,MobileHomeCampaign $campaign){
+   $data=$r->validate(['type'=>'required|in:hero,quick_categories,featured_events,explore_categories,organizer_cta,how_it_works,partners']);
+   $position=(int)$campaign->sections()->max('position')+1;
+   MobileHomeSection::create(['campaign_id'=>$campaign->id,'type'=>$data['type'],'title'=>Str::headline($data['type']),'position'=>$position,'enabled'=>true]);
+   return back()->with('success','Section added.');
+ }
+ public function duplicateSection(MobileHomeCampaign $campaign,MobileHomeSection $section){
+   abort_unless($section->campaign_id===$campaign->id,404);
+   $copy=$section->replicate(); $copy->title=$section->title.' Copy'; $copy->position=(int)$campaign->sections()->max('position')+1; $copy->save();
+   return back()->with('success','Section duplicated.');
+ }
+ public function deleteSection(MobileHomeCampaign $campaign,MobileHomeSection $section){
+   abort_unless($section->campaign_id===$campaign->id,404); $section->delete(); return back()->with('success','Section removed.');
+ }
+ public function restoreVersion(MobileHomeCampaign $campaign,MobileHomeVersion $version){
+   abort_unless($version->campaign_id===$campaign->id,404); $snapshot=$version->snapshot;
+   DB::transaction(function()use($campaign,$snapshot){
+    foreach(['name','priority','starts_at','ends_at','targeting','is_default'] as $key) if(array_key_exists($key,$snapshot)) $campaign->{$key}=$snapshot[$key];
+    $campaign->status='draft'; $campaign->save(); $campaign->sections()->delete();
+    foreach(($snapshot['sections']??[]) as $s) MobileHomeSection::create(['campaign_id'=>$campaign->id,'type'=>$s['type'],'title'=>$s['title'],'enabled'=>$s['enabled'],'position'=>$s['position'],'settings'=>$s['settings']??null]);
+   }); cache()->forget('mobile_home_active_campaign'); return back()->with('success','Version restored as draft. Review and publish when ready.');
+ }
+ public function makeDefault(MobileHomeCampaign $campaign){DB::transaction(function()use($campaign){MobileHomeCampaign::where('id','!=',$campaign->id)->update(['is_default'=>false]);$campaign->update(['is_default'=>true]);});cache()->forget('mobile_home_active_campaign');return back()->with('success','Default campaign updated.');}
  public function toggle(MobileHomeCampaign $campaign){$campaign->update(['status'=>$campaign->status==='disabled'?'draft':'disabled']);cache()->forget('mobile_home_active_campaign');return back()->with('success','Campaign status updated.');}
 }
