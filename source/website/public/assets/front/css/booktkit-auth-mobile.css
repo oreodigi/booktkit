@@ -1119,3 +1119,64 @@
  .booktkit-mobile-tabbar a.active{color:var(--primary-color)!important}
  body.booktkit-home-page .footer-section{display:none!important}
 }
+
+
+/* BookTKIT mobile app journey: discovery, details and tickets */
+@media only screen and (max-width:767px){
+ body.booktkit-events-page,body.booktkit-event-details-page,body.booktkit-tickets-page,body.booktkit-ticket-details-page{background:#f7f8fa}
+ body.booktkit-events-page .page-banner,body.booktkit-event-details-page .page-banner,body.booktkit-tickets-page .page-banner,body.booktkit-ticket-details-page .page-banner{display:none!important}
+ body.booktkit-events-page .event-page-section{padding:16px 12px 84px!important}
+ body.booktkit-events-page .event-page-section>.container{padding:0!important}
+ body.booktkit-events-page .event-page-section .col-lg-3{margin-bottom:12px}
+ body.booktkit-events-page .event-sidebar{border:0!important;border-radius:16px!important;background:#fff!important;box-shadow:0 4px 18px rgba(20,24,32,.05)}
+ body.booktkit-events-page .event-page-content>.row{margin:0 -5px!important}
+ body.booktkit-events-page .event-page-content .col-sm-6{padding:0 5px!important}
+ body.booktkit-events-page .event-item{margin-bottom:12px!important;border:1px solid #e9ebef!important;border-radius:16px!important;background:#fff!important;overflow:hidden;box-shadow:0 4px 16px rgba(20,24,32,.05)}
+ body.booktkit-events-page .event-image{height:180px!important}
+ body.booktkit-events-page .event-image img{width:100%;height:100%;object-fit:cover}
+ body.booktkit-events-page .event-content{padding:13px!important}
+ body.booktkit-events-page .event-content h5{font-size:17px!important;line-height:1.25!important;margin:6px 0!important}
+ body.booktkit-events-page .event-description{display:none!important}
+ body.booktkit-events-page .time-info{display:flex!important;gap:9px!important}
+ body.booktkit-events-page .time-info li{font-size:11px!important}
+ body.booktkit-events-page .price-remain{margin-top:10px!important;padding-top:9px!important;border-top:1px solid #eef0f3}
+
+ body.booktkit-event-details-page .event-details-section{padding:12px 12px 88px!important}
+ body.booktkit-event-details-page .event-details-section>.container{padding:0!important}
+ body.booktkit-event-details-page .event-top{padding:14px 5px 10px!important;gap:10px!important}
+ body.booktkit-event-details-page .event-top-date{min-width:58px!important;border-radius:13px!important;overflow:hidden}
+ body.booktkit-event-details-page .event-details-top .title{font-size:23px!important;line-height:1.18!important;letter-spacing:-.4px}
+ body.booktkit-event-details-page .event-details-header{margin:9px 0 0!important}
+ body.booktkit-event-details-page .event-details-header ul{display:flex!important;flex-direction:column!important;gap:5px!important}
+ body.booktkit-event-details-page .event-details-header li{font-size:12px!important}
+ body.booktkit-event-details-page .event-details-image{margin:0 0 14px!important;border-radius:18px!important;overflow:hidden;background:#fff}
+ body.booktkit-event-details-page .event-details-images img{width:100%!important;max-height:350px!important;object-fit:cover!important}
+ body.booktkit-event-details-page .event-details-image .buttons{top:12px!important;right:12px!important}
+ body.booktkit-event-details-page .event-details-content-inner,
+ body.booktkit-event-details-page .event-sidebar{padding:17px!important;border:1px solid #e9ebef!important;border-radius:17px!important;background:#fff!important;box-shadow:0 4px 16px rgba(20,24,32,.04)}
+ body.booktkit-event-details-page .event-details-content-inner{margin-bottom:12px!important}
+ body.booktkit-event-details-page .event-info{margin-bottom:10px!important}
+ body.booktkit-event-details-page .event-details-content h3,body.booktkit-event-details-page .event-details-content h4{font-size:19px!important}
+ body.booktkit-event-details-page .theme-btn{border-radius:12px!important;min-height:48px!important}
+
+ body.booktkit-tickets-page .user-dashbord,body.booktkit-ticket-details-page .user-dashbord{padding:14px 10px 84px!important}
+ body.booktkit-tickets-page .user-dashbord>.container,body.booktkit-ticket-details-page .user-dashbord>.container{padding:0!important}
+ body.booktkit-tickets-page .user-dashbord .col-lg-3,body.booktkit-ticket-details-page .user-dashbord .col-lg-3{display:none!important}
+ body.booktkit-tickets-page .user-dashbord .col-lg-9,body.booktkit-ticket-details-page .user-dashbord .col-lg-9{padding:0 5px!important}
+ body.booktkit-tickets-page .user-profile-details,body.booktkit-ticket-details-page .user-profile-details{padding:0!important}
+ body.booktkit-tickets-page .account-info,body.booktkit-ticket-details-page .account-info{border:1px solid #e8eaee!important;border-radius:18px!important;background:#fff!important;overflow:hidden;box-shadow:0 4px 18px rgba(20,24,32,.05)}
+ body.booktkit-tickets-page .account-info .title,body.booktkit-ticket-details-page .account-info .title{padding:17px 17px 10px!important;border:0!important}
+ body.booktkit-tickets-page .account-info .title h4,body.booktkit-ticket-details-page .account-info .title h4{font-size:22px!important;margin:0!important}
+ body.booktkit-tickets-page .main-info,body.booktkit-ticket-details-page .main-info{padding:8px 14px 16px!important}
+ body.booktkit-tickets-page .main-table .table{overflow:visible!important}
+ body.booktkit-tickets-page table,body.booktkit-tickets-page tbody,body.booktkit-tickets-page tr,body.booktkit-tickets-page td{display:block!important;width:100%!important}
+ body.booktkit-tickets-page thead{display:none!important}
+ body.booktkit-tickets-page tbody tr{position:relative;margin:0 0 11px!important;padding:14px!important;border:1px solid #eceef1!important;border-radius:14px!important;background:#fff!important}
+ body.booktkit-tickets-page tbody td{padding:3px 0!important;border:0!important;font-size:12px!important;color:#69717d!important}
+ body.booktkit-tickets-page tbody td:first-child{padding-right:70px!important;font-size:16px!important;font-weight:700!important;color:#20242b!important}
+ body.booktkit-tickets-page tbody td:last-child{position:absolute;right:12px;top:12px;width:auto!important}
+ body.booktkit-tickets-page tbody td .btn{padding:6px 10px!important;border-radius:9px!important;font-size:11px!important}
+ body.booktkit-tickets-page .dataTables_length,body.booktkit-tickets-page .dataTables_filter{display:none!important}
+
+ body.booktkit-events-page .footer-section,body.booktkit-event-details-page .footer-section,body.booktkit-tickets-page .footer-section,body.booktkit-ticket-details-page .footer-section{display:none!important}
+}
