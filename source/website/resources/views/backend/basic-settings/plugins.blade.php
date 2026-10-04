@@ -187,7 +187,7 @@
                     <div class="card-header">
                         <div class="row">
                             <div class="col-lg-12">
-                                <div class="card-title">{{ __('Google Recaptcha') }}</div>
+                                <div class="card-title">{{ __('Google reCAPTCHA v3') }}</div>
                             </div>
                         </div>
                     </div>
@@ -196,7 +196,7 @@
                         <div class="row">
                             <div class="col-lg-12">
                                 <div class="form-group">
-                                    <label>{{ __('Recaptcha Status') . '*' }}</label>
+                                    <label>{{ __('reCAPTCHA v3 Status') . '*' }}</label>
                                     <div class="selectgroup w-100">
                                         <label class="selectgroup-item">
                                             <input type="radio" name="google_recaptcha_status" value="1"
@@ -220,7 +220,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label>{{ __('Site Key') . '*' }}</label>
+                                    <label>{{ __('v3 Site Key') . '*' }}</label>
                                     <input type="text" class="form-control" name="google_recaptcha_site_key"
                                         value="{{ $data->google_recaptcha_site_key }}">
 
@@ -231,7 +231,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label>{{ __('Secret Key') . '*' }}</label>
+                                    <label>{{ __('v3 Secret Key') . '*' }}</label>
                                     <input type="text" class="form-control" name="google_recaptcha_secret_key"
                                         value="{{ $data->google_recaptcha_secret_key }}">
 
