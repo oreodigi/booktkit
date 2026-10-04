@@ -14,6 +14,13 @@ use Illuminate\Support\Facades\Session;
 use App\Models\PaymentGateway\OnlineGateway;
 use Razorpay\Api\Errors\SignatureVerificationError;
 use App\Http\Controllers\FrontEnd\Event\BookingController;
+use App\Services\Payments\AuthoritativeTicketPricingService;
+use App\Services\Payments\PaymentOrderService;
+use App\Services\Payments\RazorpayRouteService;
+use App\Services\Payments\PaymentLedgerService;
+use App\Services\Payments\BookingFinalizationService;
+use App\Models\Payments\PaymentOrder;
+use App\Models\Payments\OrganizerPaymentProfile;
 
 
 class RazorpayController extends Controller
@@ -33,221 +40,51 @@ class RazorpayController extends Controller
 
   public function bookingProcess(Request $request, $event_id)
   {
-    $rules = [
-      'fname' => 'required',
-      'lname' => 'required',
-      'email' => 'required',
-      'phone' => 'required',
-      'country' => 'required',
-      'address' => 'required',
-      'gateway' => 'required',
-    ];
-
-    $message = [];
-
-    $message['fname.required'] = 'The first name feild is required';
-    $message['lname.required'] = 'The last name feild is required';
-    $message['gateway.required'] = 'The payment gateway feild is required';
-    $request->validate($rules, $message);
-
-    new BookingController();
-
-
-    $currencyInfo = $this->getCurrencyInfo();
-    $total = Session::get('grand_total');
-    $quantity = Session::get('quantity');
-    $discount = Session::get('discount');
-    //tax and commission end
-    $basicSetting = Basic::select('commission')->first();
-
-    $tax_amount = Session::get('tax');
-    $commission_amount = ($total * $basicSetting->commission) / 100;
-
-    $total_early_bird_dicount = Session::get('total_early_bird_dicount');
-    // checking whether the currency is set to 'INR' or not
-    if ($currencyInfo->text !== 'INR') {
-      return redirect()->back()->with('currency_error', 'Invalid currency for razorpay payment.')->withInput();
-    }
-
-    $arrData = array(
-      'event_id' => $event_id,
-      'price' => $total,
-      'tax' => $tax_amount,
-      'commission' => $commission_amount,
-      'quantity' => $quantity,
-      'discount' => $discount,
-      'total_early_bird_dicount' => $total_early_bird_dicount,
-      'currencyText' => $currencyInfo->text,
-      'currencyTextPosition' => $currencyInfo->text_position,
-      'currencySymbol' => $currencyInfo->symbol,
-      'currencySymbolPosition' => $currencyInfo->symbol_position,
-      'fname' => $request->fname,
-      'lname' => $request->lname,
-      'email' => $request->email,
-      'phone' => $request->phone,
-      'country' => $request->country,
-      'state' => $request->state,
-      'city' => $request->city,
-      'zip_code' => $request->city,
-      'address' => $request->address,
-      'paymentMethod' => 'Razorpay',
-      'gatewayType' => 'online',
-      'paymentStatus' => 'completed',
-    );
-
-    $notifyURL = route('event_booking.razorpay.notify');
-
-    // create order data
-    $orderData = [
-      'receipt'         => 'Course Enrolment',
-      'amount'          => (($total + $tax_amount) * 100),
-      'currency'        => 'INR',
-      'payment_capture' => 1 // auto capture
-    ];
-
-    try {
-      $razorpayOrder = $this->api->order->create($orderData);
-    } catch (Exception $e) {
-      return redirect()->back()->with('error', 'Something went wrong or invalid api key.!')->withInput();
-    }
-
-    $webInfo = DB::table('basic_settings')->select('website_title')->first();
-    $buyerName = $request->fname . ' ' . $request->lname;
-    $buyerEmail = $request->email;
-    $buyerContact = $request->phone;
-
-    // create checkout data
-    $checkoutData = [
-      'key'               => $this->key,
-      'amount'            => $orderData['amount'],
-      'name'              => $webInfo->website_title,
-      'description'       => 'Event Booking Via Razorpay',
-      'prefill'           => [
-        'name'              => $buyerName,
-        'email'             => $buyerEmail,
-        'contact'           => $buyerContact
-      ],
-      'order_id'          => $razorpayOrder->id
-    ];
-
-    $jsonData = json_encode($checkoutData);
-
-    // put some data in session before redirect to razorpay url
-    $request->session()->put('event_id', $event_id);
-    $request->session()->put('arrData', $arrData);
-    $request->session()->put('razorpayOrderId', $razorpayOrder->id);
-
-    return view('frontend.payment.razorpay', compact('jsonData', 'notifyURL'));
+    $request->validate(['fname'=>'required','lname'=>'required','email'=>'required|email','phone'=>'required','country'=>'required','address'=>'required','gateway'=>'required']);
+    $sel=collect(Session::get('selTickets',[]))->map(function($x){
+      return ['ticket_id'=>(int)$x['ticket_id'],'quantity'=>(int)$x['qty'],'variation'=>($x['name']??null)];
+    })->values()->all();
+    if(empty($sel)) return back()->with('error','Please select at least one ticket.')->withInput();
+    $pricing=app(AuthoritativeTicketPricingService::class)->quote((int)$event_id,$sel);
+    $event=$pricing['event']; $basic=Basic::first(); $taxRate=(float)($basic->tax??0); $tax=(int)round($pricing['ticket_amount']*$taxRate/100);
+    $snapshot=['items'=>$pricing['items'],'quantity'=>$pricing['quantity'],'subtotal'=>$pricing['subtotal'],'discount'=>$pricing['discount'],'tax_rate'=>$taxRate];
+    $idem='web-'.hash('sha256',session()->getId().'|'.$event_id.'|'.microtime(true));
+    $order=app(PaymentOrderService::class)->createFromPricing($event->id,$event->organizer_id,$pricing['ticket_amount'],$tax,$idem,$snapshot);
+    $order->customer_snapshot=['customer_id'=>auth()->id()?:'guest','fname'=>$request->fname,'lname'=>$request->lname,'email'=>$request->email,'phone'=>$request->phone,
+      'country'=>$request->country,'state'=>$request->state,'city'=>$request->city,'zip_code'=>$request->zip_code,'address'=>$request->address,'event_date'=>$request->event_date];
+    $order->save(); $gateway=app(RazorpayRouteService::class)->createOrder($order);
+    $notifyURL=route('event_booking.razorpay.notify');
+    $webInfo=DB::table('basic_settings')->select('website_title')->first();
+    $checkoutData=['key'=>$this->key,'amount'=>$order->customer_total,'currency'=>$order->currency,'name'=>$webInfo->website_title,
+      'description'=>'Event Booking Via Razorpay','prefill'=>['name'=>$request->fname.' '.$request->lname,'email'=>$request->email,'contact'=>$request->phone],'order_id'=>$gateway['id']];
+    $jsonData=json_encode($checkoutData); session(['event_id'=>$event_id,'booktkitPaymentOrder'=>$order->uuid]);
+    return view('frontend.payment.razorpay',compact('jsonData','notifyURL'));
   }
 
   public function notify(Request $request)
   {
-    // get the information from session
-    $eventId = $request->session()->get('event_id');
-    $arrData = $request->session()->get('arrData');
-    $razorpayOrderId = $request->session()->get('razorpayOrderId');
-
-    $urlInfo = $request->all();
-
-    // assume that the transaction was successful
-    $success = true;
-
-    /**
-     * either razorpay_order_id or razorpay_subscription_id must be present.
-     * the keys of $attributes array must be follow razorpay convention.
-     */
+    $eventId=session('event_id'); $uuid=session('booktkitPaymentOrder');
+    $order=PaymentOrder::where('uuid',$uuid)->firstOrFail();
     try {
-      $attributes = [
-        'razorpay_order_id' => $razorpayOrderId,
-        'razorpay_payment_id' => $urlInfo['razorpayPaymentId'],
-        'razorpay_signature' => $urlInfo['razorpaySignature']
-      ];
-
-      $this->api->utility->verifyPaymentSignature($attributes);
-    } catch (SignatureVerificationError $e) {
-      $success = false;
-    }
-
-    if ($success === true) {
-      $enrol = new BookingController();
-
-      $bookingInfo['transcation_type'] = 1;
-
-      // store the course enrolment information in database
-      $bookingInfo = $enrol->storeData($arrData);
-
-      $ticket = DB::table('basic_settings')->select('how_ticket_will_be_send')->first();
-
-      if ($ticket->how_ticket_will_be_send == 'instant') {
-        // generate an invoice in pdf format
-        $invoice = $enrol->generateInvoice($bookingInfo, $bookingInfo->event_id);
-
-        //unlink qr code
-        if (
-          $bookingInfo->variation != null
-        ) {
-          //generate qr code for without wise ticket
-          $variations = json_decode($bookingInfo->variation, true);
-          foreach ($variations as $variation) {
-
-            @unlink(public_path('assets/admin/qrcodes/') . $bookingInfo->booking_id . '__' . $variation['unique_id'] . '.svg');
-          }
-        } else {
-          //generate qr code for without wise ticket
-          for ($i = 1; $i <= $bookingInfo->quantity; $i++) {
-            @unlink(public_path('assets/admin/qrcodes/') . $bookingInfo->booking_id . '__' . $i .  '.svg');
-          }
-        }
-
-        // then, update the invoice field info in database
-        $bookingInfo->invoice = $invoice;
-        $bookingInfo->save();
-
-        // send a mail to the customer with the invoice
-        $enrol->sendMail($bookingInfo);
-      } else {
-        BookingInvoiceJob::dispatch($bookingInfo->id)->delay(now()->addSeconds(10));
+      app(RazorpayRouteService::class)->verifyCheckout($order,$request->razorpayPaymentId,$request->razorpaySignature);
+      $booking=DB::transaction(function() use($order,$request){
+        $locked=PaymentOrder::whereKey($order->id)->lockForUpdate()->first();
+        if($locked->status==='paid' && $locked->booking_id) return AppModelsEventBooking::findOrFail($locked->booking_id);
+        $locked->update(['gateway_payment_id'=>$request->razorpayPaymentId,'status'=>'paid','paid_at'=>now()]);
+        $booking=app(BookingFinalizationService::class)->finalize($locked);
+        app(PaymentLedgerService::class)->recordPaid($locked);
+        return $booking;
+      });
+      $profile=OrganizerPaymentProfile::where('organizer_id',$order->organizer_id)->first();
+      if($order->settlement_mode==='razorpay_split' && $profile && $profile->canSplit()){
+        try { app(RazorpayRouteService::class)->transferToOrganizer($order->fresh(),$profile->razorpay_account_id); } catch(Throwable $e) { report($e); }
       }
-
-      //add blance to admin revinue
-      $earning = Earning::first();
-      $earning->total_revenue = $earning->total_revenue + $arrData['price'] + $bookingInfo->tax;
-      if ($bookingInfo['organizer_id'] != null) {
-        $earning->total_earning = $earning->total_earning + ($bookingInfo->tax + $bookingInfo->commission);
-      } else {
-        $earning->total_earning = $earning->total_earning + $arrData['price'] + $bookingInfo->tax;
-      }
-      $earning->save();
-
-      //storeTransaction
-      $bookingInfo['paymentStatus'] = 1;
-      $bookingInfo['transcation_type'] = 1;
-
-      storeTranscation($bookingInfo);
-
-      //store amount to organizer
-      $organizerData['organizer_id'] = $bookingInfo['organizer_id'];
-      $organizerData['price'] = $arrData['price'];
-      $organizerData['tax'] = $bookingInfo->tax;
-      $organizerData['commission'] = $bookingInfo->commission;
-      storeOrganizer($organizerData);
-
-      // remove all session data
-      $request->session()->forget('event_id');
-      $request->session()->forget('selTickets');
-      $request->session()->forget('arrData');
-      $request->session()->forget('paymentId');
-      $request->session()->forget('discount');
-      $request->session()->forget('razorpayOrderId');
-      return redirect()->route('event_booking.complete', ['id' => $eventId, 'booking_id' => $bookingInfo->id]);
-    } else {
-      // remove all session data
-      $request->session()->forget('event_id');
-      $request->session()->forget('arrData');
-      $request->session()->forget('razorpayOrderId');
-      $request->session()->forget('discount');
-
-      return redirect()->route('event_booking.cancel', ['id' => $eventId]);
+      session()->forget(['event_id','selTickets','arrData','paymentId','discount','razorpayOrderId','booktkitPaymentOrder']);
+      return redirect()->route('event_booking.complete',['id'=>$eventId,'booking_id'=>$booking->id]);
+    } catch(Throwable $e) {
+      report($e); session()->forget(['booktkitPaymentOrder']);
+      return redirect()->route('event_booking.cancel',['id'=>$eventId])->with('error','Payment verification failed.');
     }
   }
+
 }
