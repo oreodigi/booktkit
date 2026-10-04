@@ -43,8 +43,7 @@ class EventsScreen extends StatelessWidget {
         catSlug = args['categorySlug'] as String;
       }
 
-      final wantFilter =
-          (catName != null && catName.trim().isNotEmpty) || catId != null;
+      final wantFilter = (catName?.trim().isNotEmpty ?? false) || catId != null;
       if (wantFilter) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           eventsProvider.setCategoryFilter(
@@ -192,8 +191,7 @@ class EventsScreen extends StatelessWidget {
                             Center(
                               child: Text(
                                 'No Events Found'.tr,
-                                style:
-                                    TextStyle(color: Colors.grey.shade500),
+                                style: TextStyle(color: Colors.grey.shade500),
                               ),
                             ),
                             const SizedBox(height: 120),

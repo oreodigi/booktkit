@@ -1,4 +1,3 @@
-
 import 'package:booktkit_customer/app/app_text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -6,7 +5,7 @@ import 'package:get/get.dart';
 
 class AccountItemWidget extends StatelessWidget {
   final String title;
-  final IconData svgIcon;
+  final FaIconData svgIcon;
   final VoidCallback onTap;
 
   const AccountItemWidget({

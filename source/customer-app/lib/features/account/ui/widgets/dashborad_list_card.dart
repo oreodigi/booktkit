@@ -1,6 +1,6 @@
-
 import 'package:booktkit_customer/features/account/ui/widgets/account_item_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class DashboardListCard extends StatelessWidget {
   final List<Map<String, dynamic>> items;
@@ -32,7 +32,7 @@ class DashboardListCard extends StatelessWidget {
           final item = items[index];
           return AccountItemWidget(
             title: item['title'] as String,
-            svgIcon: item['icon'] as IconData,
+            svgIcon: item['icon'] as FaIconData,
             onTap: () => onItemTap(context, item['title'] as String),
           );
         },
