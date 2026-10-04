@@ -1236,3 +1236,50 @@
  .booktkit-mobile-tabbar a{font-size:9px!important}
  .booktkit-mobile-tabbar i{font-size:17px!important}
 }
+
+/* Approved BookTKIT mobile homepage composition */
+.booktkit-mobile-category-circles,.booktkit-mobile-explore,.booktkit-mobile-how,.booktkit-mobile-partners{display:none}
+@media(max-width:767px){
+ body.booktkit-home-page{padding-bottom:72px!important}
+ body.booktkit-home-page .hero-section{margin:10px 12px 0!important;min-height:300px!important;border-radius:18px!important}
+ body.booktkit-home-page .hero-content h1{font-size:28px!important}
+ body.booktkit-home-page .event-search{left:14px!important;right:14px!important;bottom:14px!important;height:50px!important}
+ .booktkit-mobile-category-circles{display:flex;gap:13px;overflow-x:auto;padding:15px 12px 12px;background:#fff;scrollbar-width:none}
+ .booktkit-mobile-category-circles::-webkit-scrollbar{display:none}
+ .booktkit-mobile-category-circles a{flex:0 0 60px;text-align:center;color:#20242b!important}
+ .booktkit-mobile-category-circles span{display:block;width:54px;height:54px;margin:auto;border-radius:50%;overflow:hidden;border:2px solid #fff;box-shadow:0 2px 9px rgba(0,0,0,.12)}
+ .booktkit-mobile-category-circles img{width:100%;height:100%;object-fit:cover}
+ .booktkit-mobile-category-circles strong{display:block;margin-top:6px;font-size:10px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ body.booktkit-home-page .events-section{padding:15px 12px 18px!important;background:#fff!important}
+ body.booktkit-home-page .events-section>.container{padding:0!important}
+ body.booktkit-home-page .events-section .section-title{margin:0 0 11px!important}
+ body.booktkit-home-page .events-section .section-title h2{font-size:18px!important}
+ body.booktkit-home-page .events-section nav{display:none!important}
+ body.booktkit-home-page .events-section .tab-pane>.row{display:block!important;overflow:visible!important;padding:0!important;margin:0!important}
+ body.booktkit-home-page .events-section .tab-pane>.row>.item{width:100%!important;max-width:100%!important;padding:0!important;margin:0 0 11px!important}
+ body.booktkit-home-page .events-section .tab-pane>.row>.item:nth-child(n+5){display:none!important}
+ body.booktkit-home-page .event-item{display:grid!important;grid-template-columns:116px minmax(0,1fr);min-height:116px!important;border-radius:15px!important}
+ body.booktkit-home-page .event-image{height:100%!important;min-height:116px!important}
+ body.booktkit-home-page .event-content{padding:10px!important}
+ body.booktkit-home-page .event-content h5{font-size:13px!important;min-height:auto!important;margin:4px 0!important}
+ body.booktkit-home-page .event-content .time-info li{font-size:9px!important}
+ .booktkit-mobile-explore,.booktkit-mobile-how,.booktkit-mobile-partners{display:block;padding:17px 12px;background:#fff}
+ .booktkit-mobile-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+ .booktkit-mobile-section-head h2{margin:0;font-size:18px;font-weight:800;color:#181c24}
+ .booktkit-mobile-section-head a{font-size:11px;font-weight:700;color:#f5ad00}
+ .booktkit-mobile-explore-track{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+ .booktkit-mobile-explore-track::-webkit-scrollbar{display:none}
+ .booktkit-mobile-explore-card{position:relative;flex:0 0 calc((100vw - 34px)/2);height:142px;border-radius:17px;overflow:hidden;scroll-snap-align:start;background:#222}
+ .booktkit-mobile-explore-card img{width:100%;height:100%;object-fit:cover}
+ .booktkit-mobile-explore-card span{position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,rgba(0,0,0,.75))}
+ .booktkit-mobile-explore-card strong{position:absolute;left:11px;right:8px;bottom:10px;color:#fff;font-size:13px;font-weight:800}
+ .booktkit-mobile-how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+ .booktkit-mobile-how-grid div{padding:12px 5px 10px;text-align:center;border:1px solid #eef0f3;border-radius:14px;background:#fafbfc}
+ .booktkit-mobile-how-grid i{display:flex;width:38px;height:38px;margin:0 auto 7px;align-items:center;justify-content:center;border-radius:50%;background:#fff4d4;color:#f5ad00;font-size:16px}
+ .booktkit-mobile-how-grid strong,.booktkit-mobile-how-grid small{display:block}
+ .booktkit-mobile-how-grid strong{font-size:11px;color:#1c2027}
+ .booktkit-mobile-how-grid small{margin-top:2px;font-size:9px;color:#7a818b}
+ .booktkit-mobile-partner-track{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+ .booktkit-mobile-partner-track span{display:flex;flex:0 0 105px;height:52px;align-items:center;justify-content:center;border:1px solid #eceef1;border-radius:12px;background:#fff;font-size:12px;font-weight:700;color:#454b55}
+ .booktkit-mobile-tabbar{display:flex!important}
+}
