@@ -947,3 +947,62 @@
   .main-menu .navbar-collapse{width:100vw!important}
   .mobile-menu-backdrop{display:none!important}
 }
+
+
+/* Mobile navigation v4 — true full-screen overlay */
+@media only screen and (max-width:1199px){
+  .main-menu .navbar-collapse{
+    top:0!important;left:0!important;right:0!important;bottom:0!important;
+    width:100vw!important;max-width:none!important;height:100dvh!important;
+    background:#202226!important;
+    transform:translateY(-18px) scale(.985)!important;
+    opacity:0!important;visibility:hidden!important;
+    transition:opacity .22s ease,transform .25s ease,visibility .25s ease!important;
+  }
+  .main-menu .navbar-collapse.show{
+    transform:translateY(0) scale(1)!important;
+    opacity:1!important;visibility:visible!important
+  }
+  .mobile-menu-backdrop{display:none!important}
+  .mobile-menu-head{
+    min-height:82px!important;padding:0 26px!important;
+    background:#202226!important
+  }
+  .mobile-menu-title{font-size:18px!important;letter-spacing:.04em;text-transform:uppercase}
+  .mobile-menu-close{width:46px!important;height:46px!important;border-radius:50%!important}
+  .main-menu .navigation{
+    width:min(100%,560px)!important;margin:18px auto 0!important;
+    padding:10px 30px!important;text-align:center!important
+  }
+  .main-menu .navigation>li{border-bottom:0!important}
+  .main-menu .navigation li a{
+    justify-content:center!important;min-height:62px!important;
+    padding:15px 8px!important;color:#fff!important;
+    font-size:25px!important;line-height:1.2!important;font-weight:700!important;
+    letter-spacing:-.3px!important
+  }
+  .main-menu .navigation li.dropdown .dropdown-btn{
+    top:11px!important;right:calc(50% - 95px)!important;
+    background:transparent!important;border:0!important
+  }
+  .main-menu .navigation li ul{
+    max-width:360px!important;margin:0 auto 8px!important;
+    background:#292c31!important;text-align:center!important
+  }
+  .main-menu .navigation li ul li a{
+    min-height:46px!important;font-size:15px!important;font-weight:550!important
+  }
+  .menu-right{
+    width:min(100%,500px)!important;margin:10px auto 0!important;
+    padding:12px 30px 34px!important;text-align:center!important
+  }
+  .menu-right form:not(.language-switcher){max-width:340px;margin:0 auto 12px!important}
+  .menu-right>.dropdown{max-width:340px;margin:0 auto 10px!important}
+  .menu-right .menu-btn{min-height:48px!important}
+}
+@media only screen and (max-width:480px){
+  .main-menu .navigation{margin-top:8px!important;padding:8px 22px!important}
+  .main-menu .navigation li a{min-height:56px!important;font-size:22px!important}
+  .mobile-menu-head{min-height:72px!important;padding:0 20px!important}
+  .menu-right{padding:8px 22px 24px!important}
+}
