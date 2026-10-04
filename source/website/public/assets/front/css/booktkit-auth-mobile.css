@@ -328,3 +328,208 @@
     max-width: 175px;
   }
 }
+
+
+/* Reference-style authentication layout (phone only) */
+@media only screen and (max-width: 767px) {
+  body:has(.booktkit-auth-page) .page-banner,
+  body:has(.booktkit-auth-page) .footer-section {
+    display: none !important;
+  }
+
+  body:has(.booktkit-auth-page) .main-header {
+    background: #fff;
+    box-shadow: 0 4px 16px rgba(0,0,0,.12);
+  }
+
+  body:has(.booktkit-auth-page) .main-header .header-upper {
+    padding: 12px 18px !important;
+  }
+
+  body:has(.booktkit-auth-page) .main-menu .navbar-header {
+    min-height: 82px;
+  }
+
+  body:has(.booktkit-auth-page) .main-menu .logo-mobile img {
+    max-width: 205px;
+    max-height: 58px;
+  }
+
+  body:has(.booktkit-auth-page) .navbar-toggle {
+    display: none !important;
+  }
+
+  body:has(.booktkit-auth-page) .login-area,
+  body:has(.booktkit-auth-page) .signup-area {
+    background: #fff;
+    padding: 0 !important;
+    min-height: calc(100vh - 106px);
+  }
+
+  body:has(.booktkit-auth-page) .login-area .container,
+  body:has(.booktkit-auth-page) .signup-area .container {
+    padding: 0 34px;
+  }
+
+  body:has(.booktkit-auth-page) .login-area .row,
+  body:has(.booktkit-auth-page) .signup-area .row {
+    margin: 0;
+  }
+
+  body:has(.booktkit-auth-page) .login-area .col-lg-8,
+  body:has(.booktkit-auth-page) .signup-area .col-lg-8 {
+    padding: 0;
+    max-width: none;
+  }
+
+  .booktkit-auth-page.login-form {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 168px 0 90px;
+    background: transparent;
+  }
+
+  .signup-area .booktkit-auth-page.login-form {
+    padding-top: 160px;
+  }
+
+  .booktkit-auth-page::before {
+    display: block;
+    color: #292929;
+    font-family: var(--heading-font);
+    font-size: 43px;
+    line-height: 1.15;
+    font-weight: 800;
+    margin-bottom: 38px;
+  }
+
+  .login-area .booktkit-auth-page::before {
+    content: "Sign In";
+  }
+
+  .signup-area .booktkit-auth-page::before {
+    content: "Register Now";
+  }
+
+  .booktkit-auth-page .auth-social-label,
+  .booktkit-auth-page .auth-email-label {
+    color: #292929;
+    font-size: 18px;
+    line-height: 1.35;
+    font-weight: 700;
+    margin: 0 0 16px;
+  }
+
+  .booktkit-auth-page .auth-email-label {
+    margin-top: 36px;
+  }
+
+  .booktkit-auth-page .bg-google {
+    height: 67px;
+    min-height: 67px;
+    border: 0;
+    border-radius: 10px;
+    background: #e7e7e7 !important;
+    color: #292929 !important;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .booktkit-auth-page .form-group {
+    margin-bottom: 20px;
+  }
+
+  .booktkit-auth-page .form-group label:not(.auth-social-label):not(.auth-email-label) {
+    display: none;
+  }
+
+  .booktkit-auth-page .form-control {
+    height: 74px;
+    min-height: 74px;
+    padding: 16px 20px;
+    border: 1px solid #d8d8d8;
+    border-radius: 10px;
+    font-size: 17px;
+    background: #fff;
+  }
+
+  .booktkit-auth-page .theme-btn {
+    min-height: 72px;
+    margin-top: 2px;
+    border-radius: 9px !important;
+    font-size: 18px;
+  }
+
+  .booktkit-auth-page .auth-links {
+    justify-content: center !important;
+    text-align: center;
+    margin-top: 28px !important;
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .booktkit-auth-page .auth-links a {
+    color: #292929;
+    text-decoration: underline;
+    font-weight: 800;
+  }
+
+  .booktkit-auth-page .auth-forgot {
+    display: block;
+    text-align: right;
+    margin: -8px 0 10px;
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: underline;
+  }
+
+  .booktkit-auth-page .auth-terms {
+    margin: 82px auto 0;
+    max-width: 590px;
+    color: #737373;
+    text-align: center;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .booktkit-auth-page .auth-terms a {
+    color: #606060;
+    text-decoration: underline;
+  }
+
+  .booktkit-auth-page .row.auth-name-row {
+    display: flex;
+    flex-wrap: nowrap;
+    margin-left: -5px !important;
+    margin-right: -5px !important;
+  }
+
+  .booktkit-auth-page .row.auth-name-row > div {
+    width: 50%;
+    flex: 0 0 50%;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+
+  .booktkit-auth-page .auth-hide-mobile {
+    display: none !important;
+  }
+}
+
+@media only screen and (max-width: 400px) {
+  body:has(.booktkit-auth-page) .login-area .container,
+  body:has(.booktkit-auth-page) .signup-area .container {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .booktkit-auth-page.login-form,
+  .signup-area .booktkit-auth-page.login-form {
+    padding-top: 120px;
+  }
+
+  .booktkit-auth-page::before {
+    font-size: 37px;
+  }
+}
