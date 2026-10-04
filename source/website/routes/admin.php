@@ -903,3 +903,16 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
   // currency route end
 
 });
+
+// BookTKIT payment operations
+Route::prefix('/admin')->middleware(['auth:admin', 'adminLang', 'permission:Transaction'])->group(function () {
+  Route::post('/payments/{uuid}/refund', 'Api\PaymentOperationsController@refund')->name('admin.payments.refund');
+  Route::post('/payments/{uuid}/retry-transfer', 'Api\PaymentOperationsController@retryTransfer')->name('admin.payments.retry_transfer');
+  Route::get('/payments/{uuid}/reconcile', 'Api\PaymentOperationsController@reconcile')->name('admin.payments.reconcile');
+});
+
+Route::prefix('/admin/payments')->middleware(['auth:admin','adminLang','permission:Transaction'])->group(function () {
+  Route::get('/', 'BackEnd\PaymentFinanceController@index')->name('admin.payments.finance');
+  Route::get('/organizers', 'BackEnd\PaymentFinanceController@organizers')->name('admin.payments.organizers');
+  Route::post('/organizers/{id}', 'BackEnd\PaymentFinanceController@updateOrganizer')->name('admin.payments.organizers.update');
+});
