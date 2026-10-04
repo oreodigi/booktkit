@@ -18,10 +18,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install --package-lock-only
-      - run: npm ci
+      - run: npm install
       - run: npx playwright install --with-deps chromium
       - run: npm run test:smoke
+      - run: npm run test:contracts
         env:
           BOOKTKIT_BASE_URL: https://www.booktkit.com
       - uses: actions/upload-artifact@v4
