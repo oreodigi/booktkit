@@ -10,7 +10,10 @@
 @section('meta-keywords', "{{ $metaKeywords }}")
 @section('meta-description', "$metaDescription")
 
-@section('body-class', 'booktkit-home-page')
+@section('body-class', 'booktkit-home-page booktkit-mobile-v2')
+@section('custom-style')
+<link rel="stylesheet" href="{{ asset('assets/front/css/booktkit-mobile-home-v2.css') }}">
+@endsection
 @section('hero-section')
     <!-- Hero Section Start -->
     @if ($heroSection)
@@ -55,6 +58,10 @@
     <!-- Hero Section End -->
 @endsection
 @section('content')
+    <div class="booktkit-mobile-v2-renderer">
+      @include('frontend.home.mobile-modern')
+    </div>
+    <div class="booktkit-desktop-home">
     <section class="booktkit-mobile-category-circles" aria-label="{{ __('Event Categories') }}">
       @foreach ($categories->take(6) as $category)
         <a href="{{ route('events', ['category' => $category->slug]) }}">
@@ -1145,6 +1152,7 @@
         </section>
     @endif
     <!-- Client Logo End -->
+    </div>
     <section class="booktkit-mobile-explore">
       <div class="booktkit-mobile-section-head"><h2>{{ __('Explore Categories') }}</h2><a href="{{ route('events') }}">{{ __('See All') }}</a></div>
       <div class="booktkit-mobile-explore-track">
