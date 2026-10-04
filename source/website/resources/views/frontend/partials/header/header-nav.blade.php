@@ -58,7 +58,7 @@
               </ul>
 
               <div class="menu-right">
-                <form action="{{ route('change_language') }}" method="get">
+                <form class="language-switcher" action="{{ route('change_language') }}" method="get">
                   <select name="lang_code" id="language" class="form-control" onchange="this.form.submit()">
                     @foreach ($allLanguageInfos as $item)
                       <option value="{{ $item->code }}"
@@ -79,13 +79,8 @@
                   </form>
                 @endif
                 @if (!Auth::guard('customer')->check())
-                  <div class="dropdown">
-                    <button type="button" class="menu-btn dropdown-toggle mr-1"
-                      data-toggle="dropdown">{{ __('Customer') }}</button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                      <a class="dropdown-item" href="{{ route('customer.login') }}">{{ __('Login') }}</a>
-                      <a class="dropdown-item" href="{{ route('customer.signup') }}">{{ __('Signup') }}</a>
-                    </div>
+                  <div class="dropdown auth-menu-entry customer-menu-entry">
+                    <a class="menu-btn mr-1" href="{{ route('customer.login') }}">{{ __('Customer Login') }}</a>
                   </div>
                 @else
                   <div class="dropdown">
@@ -98,13 +93,8 @@
                   </div>
                 @endif
                 @if (!Auth::guard('organizer')->check())
-                  <div class="dropdown">
-                    <button type="button" class="menu-btn dropdown-toggle"
-                      data-toggle="dropdown">{{ __('Organizer') }}</button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
-                      <a class="dropdown-item" href="{{ route('organizer.login') }}">{{ __('Login') }}</a>
-                      <a class="dropdown-item" href="{{ route('organizer.signup') }}">{{ __('Signup') }}</a>
-                    </div>
+                  <div class="dropdown auth-menu-entry organizer-menu-entry">
+                    <a class="menu-btn" href="{{ route('organizer.login') }}">{{ __('Organizer Login') }}</a>
                   </div>
                 @else
                   <div class="dropdown">
