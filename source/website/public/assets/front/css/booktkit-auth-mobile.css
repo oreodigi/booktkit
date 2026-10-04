@@ -547,3 +547,16 @@
     display: none !important;
   }
 }
+
+
+/* Logged-in customer mobile header: keep account control only. */
+@media only screen and (max-width: 767px) {
+  .menu-right .guest-organizer-entry {
+    display: none !important;
+  }
+  .menu-right > .dropdown:not(.auth-menu-entry) .menu-btn {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
