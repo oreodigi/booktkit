@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 
-const allowedSuites = new Set(['all', 'smoke', 'mobile', 'auth', 'organizer', 'api', 'security', 'razorpay']);
+const allowedSuites = new Set(['all', 'smoke', 'mobile', 'auth', 'organizer', 'api', 'security', 'razorpay', 'scanner', 'contracts']);
 
 export function runSuite(suite = 'smoke') {
   if (!allowedSuites.has(suite)) throw new Error('Unsupported suite');
@@ -11,7 +11,9 @@ export function runSuite(suite = 'smoke') {
   if (suite === 'organizer') args.push('tests/organizer-capabilities.spec.js', 'tests/staging-event.spec.js');
   if (suite === 'api') args.push('tests/api-surface.spec.js');
   if (suite === 'security') args.push('tests/security-boundaries.spec.js', 'tests/mutation-guard.spec.js');
-  if (suite === 'razorpay') args.push('tests/razorpay.spec.js');
+  if (suite === 'razorpay') args.push('tests/razorpay.spec.js', 'tests/razorpay-contract.spec.js');
+  if (suite === 'scanner') args.push('tests/scanner-contract.spec.js');
+  if (suite === 'contracts') args.push('tests/mobile-api-contract.spec.js', 'tests/razorpay-contract.spec.js', 'tests/scanner-contract.spec.js');
 
   return new Promise((resolve) => {
     const child = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', args, {
