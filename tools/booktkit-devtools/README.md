@@ -47,3 +47,6 @@ DevTools tests must be derived from the current `oreodigi/booktkit` repository a
 - notification authentication
 - password-reset expiry and rate limiting
 - mobile API endpoint compatibility across all three apps
+
+## Hosting note
+BookTKIT production is cPanel-hosted. DevTools does not assume or require Vercel. The remote MCP is a separate QA control plane and can be hosted on any suitable HTTPS Node runtime; see `REMOTE-MCP.md`.
