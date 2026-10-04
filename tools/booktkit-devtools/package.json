@@ -1,0 +1,33 @@
+{
+  "name": "@booktkit/devtools",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:mobile": "playwright test --project=mobile-chrome",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report",
+    "mcp": "node src/mcp-server.js",
+    "test:auth": "playwright test tests/organizer-auth.spec.js tests/customer-auth.spec.js",
+    "test:organizer": "playwright test tests/organizer-capabilities.spec.js tests/staging-event.spec.js",
+    "test:razorpay": "playwright test tests/razorpay.spec.js",
+    "test:api": "playwright test tests/api-surface.spec.js",
+    "test:security": "playwright test tests/security-boundaries.spec.js tests/mutation-guard.spec.js",
+    "test:scanner": "playwright test tests/scanner-contract.spec.js",
+    "test:contracts": "playwright test tests/mobile-api-contract.spec.js tests/razorpay-contract.spec.js tests/scanner-contract.spec.js",
+    "test:run": "node src/cli.js",
+    "mcp:http": "node src/http-server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.2",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0"
+  }
+}

@@ -323,5 +323,8 @@ Route::get('/{slug}', 'FrontEnd\PageController@page')->name('dynamic_page')->mid
 
 // fallback route
 Route::fallback(function () {
-  return view('errors.404');
+  if (request()->is('api/*') || request()->expectsJson()) {
+    return response()->json(['message' => 'Not Found.'], 404);
+  }
+  return response()->view('errors.404', [], 404);
 })->middleware('change.lang');

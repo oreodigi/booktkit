@@ -36,11 +36,6 @@
     {{-- lodesh --}}
     <script src="{{ asset('assets/front/js/lodash.min.js') }}"></script>
 
-    @if ($basicInfo->google_map_status == 1)
-      <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key={{ $basicInfo->google_map_api_key }}&libraries=places&callback=initMap">
-      </script>
-    @endif
 
 
     <script>

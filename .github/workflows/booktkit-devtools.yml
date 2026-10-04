@@ -1,0 +1,44 @@
+name: BookTKIT DevTools
+
+on:
+  pull_request:
+    paths:
+      - 'tools/booktkit-devtools/**'
+      - '.github/workflows/booktkit-devtools.yml'
+      - '.github/workflows/booktkit-e2e.yml'
+      - 'source/website/**'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/booktkit-devtools/**'
+      - '.github/workflows/booktkit-*.yml'
+      - 'source/website/**'
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: tools/booktkit-devtools
+    env:
+      BOOKTKIT_BASE_URL: https://www.booktkit.com
+      BOOKTKIT_ALLOW_MUTATIONS: "false"
+      BOOKTKIT_RAZORPAY_TEST_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: node src/cli.js all
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: booktkit-playwright-report
+          path: |
+            tools/booktkit-devtools/artifacts/
+            tools/booktkit-devtools/test-summary.json
+          if-no-files-found: ignore
