@@ -20,8 +20,10 @@ export default defineConfig({
     ignoreHTTPSErrors: false
   },
   projects: [
-    { name: 'desktop-chrome', use: { ...devices['Desktop Chrome'] } },
-    { name: 'mobile-chrome', use: { ...devices['Pixel 7'] } },
-    { name: 'mobile-safari', use: { ...devices['iPhone 14'] } }
+    { name: 'desktop-chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'desktop-firefox', use: { ...devices['Desktop Firefox'] } },
+    { name: 'desktop-webkit', use: { ...devices['Desktop Safari'] } },
+    { name: 'mobile-chromium', use: { ...devices['Pixel 7'] } },
+    { name: 'mobile-webkit', use: { ...devices['iPhone 14'] } }
   ]
 });
