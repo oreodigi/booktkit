@@ -1180,3 +1180,15 @@
 
  body.booktkit-events-page .footer-section,body.booktkit-event-details-page .footer-section,body.booktkit-tickets-page .footer-section,body.booktkit-ticket-details-page .footer-section{display:none!important}
 }
+
+@media only screen and (max-width:767px){
+ body.booktkit-home-page .booktkit-mobile-categories-wrap{display:block;padding:18px 14px 8px;background:#f7f8fa}
+ body.booktkit-home-page .booktkit-mobile-section-head{display:flex;align-items:center;justify-content:space-between;margin:0 1px 12px}
+ body.booktkit-home-page .booktkit-mobile-section-head h2{margin:0;font-size:20px;line-height:1.2;font-weight:800;color:#151922;letter-spacing:-.35px}
+ body.booktkit-home-page .booktkit-mobile-section-head a{font-size:12px;font-weight:700;color:#f6ae00}
+ body.booktkit-home-page .booktkit-mobile-categories{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;overflow:visible!important;padding:0!important;margin:0!important}
+ body.booktkit-home-page .booktkit-mobile-category-card{position:relative!important;display:block!important;width:100%!important;height:116px!important;min-width:0!important;padding:0!important;border:0!important;border-radius:15px!important;overflow:hidden!important;background:#222!important;box-shadow:0 4px 14px rgba(20,24,32,.10)!important}
+ body.booktkit-home-page .booktkit-mobile-category-card img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important}
+ body.booktkit-home-page .booktkit-mobile-category-overlay{position:absolute!important;inset:0!important;background:linear-gradient(180deg,rgba(0,0,0,.04) 28%,rgba(0,0,0,.72) 100%)!important}
+ body.booktkit-home-page .booktkit-mobile-category-card strong{position:absolute!important;left:12px!important;right:10px!important;bottom:10px!important;z-index:2!important;color:#fff!important;font-size:14px!important;font-weight:800!important;line-height:1.15!important;text-shadow:0 1px 3px rgba(0,0,0,.25)!important}
+}
