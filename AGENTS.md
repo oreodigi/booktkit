@@ -5,3 +5,6 @@ Before working on this repository, read `project instructions.md` in the workspa
 Use `source/website`, `source/customer-app`, `source/organizer-app`, and `source/scanner-app` as the complete extracted working sources. Preserve purchased archives under `Source Code`. `project-review/source` is a partial review snapshot.
 
 The live website is deployed separately in cPanel; local edits do not constitute deployment. Do not claim live or cloud changes without verification.
+
+## Mobile app development
+Before changing or building any Flutter app, read `docs/mobile/CODEX-MOBILE-DEVELOPMENT.md` and `docs/mobile/MOBILE-API-CONTRACT.md`, then the app's scoped `AGENTS.md`. Reconcile the latest shared backend contracts and deployed version; do not assume purchased mobile sources reflect current web development.
