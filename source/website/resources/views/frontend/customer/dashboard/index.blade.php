@@ -51,14 +51,12 @@
                                         <h4>{{ __('Account Information') }}</h4>
                                     </div>
                                     <div class="main-info">
-                                        <h5>{{ __('User') }}</h5>
+                                        <h5>{{ trim((Auth::guard('customer')->user()->fname ?? '') . ' ' . (Auth::guard('customer')->user()->lname ?? '')) ?: __('User') }}</h5>
                                         <ul class="list">
                                             @if (Auth::guard('customer')->user()->email != null)
                                                 <li><b>{{ __('Email') . ' : ' }}</b></li>
                                             @endif
-                                            @if (Auth::guard('customer')->user()->username != null)
-                                                <li><b>{{ __('Username') . ' : ' }}</b></li>
-                                            @endif
+                                            
                                             @if (Auth::guard('customer')->user()->phone != null)
                                                 <li><b>{{ __('Phone') . ' : ' }}</b></li>
                                             @endif
@@ -80,7 +78,7 @@
                                         </ul>
                                         <ul class="list w-60p">
                                             <li>{{ Auth::guard('customer')->user()->email }}</li>
-                                            <li>{{ Auth::guard('customer')->user()->username }}</li>
+                                            
                                             <li>{{ Auth::guard('customer')->user()->phone }}</li>
                                             <li>{{ Auth::guard('customer')->user()->address }}</li>
                                             <li>{{ Auth::guard('customer')->user()->country }}</li>
