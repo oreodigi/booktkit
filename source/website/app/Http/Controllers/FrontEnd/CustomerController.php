@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Models\Organizer;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Rules\MatchEmailRule;
 use App\Services\RecaptchaV3Service;
@@ -499,51 +500,104 @@ class CustomerController extends Controller
     return $this->authenticationViaProvider('facebook');
   }
 
-  public function googleRedirect()
+  public function googleRedirect(Request $request)
   {
+    if ($request->filled('redirectPath')) {
+      $request->session()->put('socialRedirectPath', $request->input('redirectPath'));
+    }
+
     return Socialite::driver('google')->redirect();
   }
 
-  public function handleGoogleCallback()
+  public function handleGoogleCallback(Request $request)
   {
-    return $this->authenticationViaProvider('google');
+    return $this->authenticationViaProvider('google', $request);
   }
 
-  public function authenticationViaProvider($driver)
+  public function authenticationViaProvider($driver, Request $request = null)
   {
     try {
+      $socialUser = Socialite::driver($driver)->user();
 
-      $user = Socialite::driver($driver)->user();
-      $isUser = Customer::where('provider_id', $user->id)->first();
-
-      if ($isUser) {
-        Auth::guard('customer')->login($isUser);
-        return redirect()->route('customer.dashboard');
-      } else {
-        //get and insert image
-        $avatar = $user->getAvatar();
-        $fileContents = file_get_contents($avatar);
-
-        $avatarName = $user->getId() . '.jpg';
-        $path = public_path('assets/admin/img/customer-profile/');
-
-        file_put_contents($path . $avatarName, $fileContents);
-
-        $createUser = Customer::create([
-          'photo' => $avatarName,
-          'fname' => $user->name,
-          'email' => $user->email,
-          'username' => $user->id,
-          'provider' => $driver,
-          'provider_id' => $user->id,
-          'password' => encrypt('123456'),
-          'email_verified_at' => now()
-        ]);
-
-        Auth::guard('customer')->login($createUser);
-        return redirect()->route('customer.dashboard');
+      if (empty($socialUser->getId()) || empty($socialUser->getEmail())) {
+        throw new Exception('Social provider did not return a usable id/email.');
       }
+
+      // Prefer the provider identity, but safely link an existing BookTKIT
+      // account with the same verified email instead of creating a duplicate.
+      $customer = Customer::where('provider', $driver)
+        ->where('provider_id', $socialUser->getId())
+        ->first();
+
+      if (!$customer) {
+        $customer = Customer::where('email', $socialUser->getEmail())->first();
+      }
+
+      if ($customer) {
+        if ((int) $customer->status === 0) {
+          return redirect()->route('customer.login')
+            ->with('alert', 'Sorry, your account has been deactivated.');
+        }
+
+        $updates = [];
+        if (empty($customer->provider_id)) {
+          $updates['provider'] = $driver;
+          $updates['provider_id'] = $socialUser->getId();
+        }
+        if (empty($customer->email_verified_at)) {
+          $updates['email_verified_at'] = now();
+          $updates['verification_token'] = null;
+        }
+        if (!empty($updates)) {
+          $customer->update($updates);
+        }
+      } else {
+        $name = trim((string) $socialUser->getName());
+        $parts = preg_split('/\\s+/', $name, 2);
+        $baseUsername = 'google_' . preg_replace('/[^A-Za-z0-9_-]/', '', (string) $socialUser->getId());
+        $username = $baseUsername;
+        $suffix = 1;
+        while (Customer::where('username', $username)->exists()) {
+          $username = $baseUsername . '_' . $suffix++;
+        }
+
+        $customer = Customer::create([
+          'fname' => $parts[0] ?: 'Customer',
+          'lname' => $parts[1] ?? '',
+          'email' => $socialUser->getEmail(),
+          'username' => $username,
+          'provider' => $driver,
+          'provider_id' => $socialUser->getId(),
+          // Social accounts do not use this password; keep a valid, unknown hash.
+          'password' => Hash::make(Str::random(64)),
+          'email_verified_at' => now(),
+          'verification_token' => null,
+          'status' => 1,
+        ]);
+      }
+
+      Auth::guard('customer')->login($customer, true);
+      if ($request) {
+        $request->session()->regenerate();
+      }
+
+      $redirectPath = $request ? $request->session()->pull('socialRedirectPath') : null;
+      if ($redirectPath === 'event_checkout') {
+        return redirect()->route('check-out');
+      }
+      if ($redirectPath === 'checkout') {
+        return redirect()->route('shop.checkout');
+      }
+
+      return redirect()->route('customer.dashboard');
     } catch (Exception $e) {
+      Log::error('Customer social login failed', [
+        'provider' => $driver,
+        'message' => $e->getMessage(),
+      ]);
+
+      return redirect()->route('customer.login')
+        ->with('alert', 'Google login could not be completed. Please try again.');
     }
   }
 }
