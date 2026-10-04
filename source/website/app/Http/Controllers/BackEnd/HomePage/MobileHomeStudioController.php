@@ -9,6 +9,8 @@ use App\Models\MobileHomeVersion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Event\EventCategory;
+use App\Models\Event\EventContent;
 
 class MobileHomeStudioController extends Controller {
  public function index(){
@@ -28,10 +30,26 @@ class MobileHomeStudioController extends Controller {
    foreach($defaults as $d) MobileHomeSection::create(['campaign_id'=>$campaign->id,'type'=>$d[0],'title'=>$d[1],'position'=>$d[2],'enabled'=>true]);
    return redirect()->route('admin.mobile_home.edit',$campaign)->with('success','Campaign created as draft.');
  }
- public function edit(MobileHomeCampaign $campaign){$campaign->load(['template','sections']);return view('backend.home-page.mobile-home.edit',compact('campaign'));}
+ public function edit(MobileHomeCampaign $campaign){
+   $campaign->load(['template','sections']);
+   $categories=EventCategory::where('status',1)->orderBy('serial_number')->get();
+   $events=EventContent::join('events','events.id','=','event_contents.event_id')->where('events.status',1)->where('events.end_date_time','>=',now())->select('event_contents.*','events.thumbnail','events.start_date')->orderBy('events.start_date')->limit(100)->get();
+   return view('backend.home-page.mobile-home.edit',compact('campaign','categories','events'));
+ }
+ public function preview(MobileHomeCampaign $campaign){
+   session(['mobile_home_preview_campaign'=>$campaign->id]);
+   return redirect()->route('index')->with('mobile_home_preview',true);
+ }
+ public function clearPreview(){
+   session()->forget('mobile_home_preview_campaign');
+   return redirect()->route('index');
+ }
  public function update(Request $r,MobileHomeCampaign $campaign){
    $campaign->update($r->validate(['name'=>'required|max:120','priority'=>'required|integer','starts_at'=>'nullable|date','ends_at'=>'nullable|date|after_or_equal:starts_at']));
-   foreach($r->input('sections',[]) as $id=>$row){$s=$campaign->sections()->findOrFail($id);$s->update(['title'=>$row['title']??$s->title,'enabled'=>isset($row['enabled']),'position'=>(int)($row['position']??$s->position),'settings'=>$row['settings']??$s->settings]);}
+   $design=$campaign->template->design ?: [];
+   $design=array_merge($design,$r->input('design',[]));
+   $campaign->template->update(['design'=>$design]);
+   foreach($r->input('sections',[]) as $id=>$row){$s=$campaign->sections()->findOrFail($id);$s->update(['title'=>$row['title']??$s->title,'enabled'=>isset($row['enabled']),'position'=>(int)($row['position']??$s->position),'settings'=>array_filter($row['settings']??($s->settings?:[]),fn($v)=>$v!==null&&$v!=='')]);}
    return back()->with('success','Draft saved.');
  }
  public function publish(MobileHomeCampaign $campaign){
