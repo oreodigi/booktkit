@@ -1,4 +1,5 @@
 @extends('frontend.layout')
+@section('body-class', 'booktkit-tickets-page')
 @section('pageHeading')
   @if (!empty($pageHeading))
     {{ $pageHeading->customer_booking_page_title ?? __('Event Bookings') }}
