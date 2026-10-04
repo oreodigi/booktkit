@@ -1,17 +1,18 @@
-var CACHE_STATIC_NAME = 'static-v26';
+var CACHE_STATIC_NAME = 'static-v27';
 
 self.addEventListener('install', function(event) {
     event.waitUntil(
       caches.open(CACHE_STATIC_NAME)
         .then(function(cache) {
           console.log('[Service Worker] Precaching App Shell');
-          cache.addAll([
+          return cache.addAll([
             './offline',
             './assets/front/images/offline.png',
             './assets/front/img/static/offline-breadcrumb.jpeg'
           ]);
         })
-    )
+    );
+    self.skipWaiting();
 });
 
 self.addEventListener('activate', function(event) {
@@ -21,7 +22,6 @@ self.addEventListener('activate', function(event) {
         .then(function(keyList) {
           return Promise.all(keyList.map(function(key) {
             if (key !== CACHE_STATIC_NAME) {
-              console.log('[Service Worker] Removing old cache.', key);
               return caches.delete(key);
             }
           }));
@@ -31,36 +31,42 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
+    // Never turn failed form/API mutations into an HTML "offline" response.
+    // Let the browser/application receive the real network error instead.
+    if (event.request.method !== 'GET') {
+        return;
+    }
+
     event.respondWith(
       caches.match(event.request)
         .then(function(response) {
           if (response) {
             return response;
-          } else {
-            return fetch(event.request)
-              .catch(function(err) {
-                return caches.open(CACHE_STATIC_NAME)
-                  .then(function(cache) {
-                    return cache.match('./offline');
-                  });
-              });
           }
+
+          return fetch(event.request).catch(function() {
+            // The offline page is only valid for document navigation.
+            if (event.request.mode !== 'navigate') {
+              throw new Error('Network request failed');
+            }
+
+            return caches.open(CACHE_STATIC_NAME)
+              .then(function(cache) {
+                return cache.match('./offline');
+              });
+          });
         })
     );
 });
 
 self.addEventListener('push', function(e) {
     if (!(self.Notification && self.Notification.permission === 'granted')) {
-        //notifications aren't supported or permission not granted!
         return;
     }
 
     if (e.data) {
         var msg = e.data.json();
-        var options = {
-            body: msg.body,
-            icon: msg.icon
-        };
+        var options = { body: msg.body, icon: msg.icon };
         if (msg.actions && msg.actions.length > 0) {
             options.actions = msg.actions;
         }
