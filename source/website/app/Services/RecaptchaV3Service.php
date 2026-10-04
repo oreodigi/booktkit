@@ -11,29 +11,38 @@ class RecaptchaV3Service
 {
     private const VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify';
     private const DEFAULT_SCORE = 0.5;
+    private const SETTINGS_UNIQID = 12345;
+
+    private function settings()
+    {
+        return Basic::query()
+            ->where('uniqid', self::SETTINGS_UNIQID)
+            ->select('google_recaptcha_status', 'google_recaptcha_site_key', 'google_recaptcha_secret_key')
+            ->first();
+    }
 
     public function enabled(): bool
     {
-        return (int) (Basic::query()->value('google_recaptcha_status') ?? 0) === 1;
+        return (int) ($this->settings()->google_recaptcha_status ?? 0) === 1;
     }
 
     public function siteKey(): string
     {
-        return (string) (Basic::query()->value('google_recaptcha_site_key') ?? '');
+        return trim((string) ($this->settings()->google_recaptcha_site_key ?? ''));
     }
 
     public function verify(Request $request, string $expectedAction, ?float $minimumScore = null): void
     {
-        if (!$this->enabled()) {
+        $settings = $this->settings();
+
+        if ((int) ($settings->google_recaptcha_status ?? 0) !== 1) {
             return;
         }
 
-        $settings = Basic::query()
-            ->select('google_recaptcha_secret_key')
-            ->first();
-
+        $secretKey = trim((string) ($settings->google_recaptcha_secret_key ?? ''));
         $token = (string) $request->input('g-recaptcha-response', '');
-        if ($token === '') {
+
+        if ($secretKey === '' || $token === '') {
             $this->fail();
         }
 
@@ -41,7 +50,7 @@ class RecaptchaV3Service
             $response = Http::asForm()
                 ->timeout(5)
                 ->post(self::VERIFY_URL, [
-                    'secret' => (string) ($settings->google_recaptcha_secret_key ?? ''),
+                    'secret' => $secretKey,
                     'response' => $token,
                     'remoteip' => $request->ip(),
                 ]);
@@ -58,8 +67,8 @@ class RecaptchaV3Service
 
         $score = (float) ($result['score'] ?? 0);
         $action = (string) ($result['action'] ?? '');
-        $hostname = strtolower((string) ($result['hostname'] ?? ''));
-        $expectedHost = strtolower((string) $request->getHost());
+        $hostname = $this->normalizeHostname((string) ($result['hostname'] ?? ''));
+        $expectedHost = $this->normalizeHostname((string) $request->getHost());
         $threshold = $minimumScore ?? (float) env('RECAPTCHA_V3_MIN_SCORE', self::DEFAULT_SCORE);
 
         $hostnameMatches = $hostname !== '' && (
@@ -75,6 +84,13 @@ class RecaptchaV3Service
         ) {
             $this->fail();
         }
+    }
+
+    private function normalizeHostname(string $hostname): string
+    {
+        $hostname = strtolower(trim($hostname));
+
+        return str_starts_with($hostname, 'www.') ? substr($hostname, 4) : $hostname;
     }
 
     private function fail(): void
