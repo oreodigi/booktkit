@@ -186,16 +186,9 @@ class OrganizerController extends Controller
     ];
 
     $info = Basic::select('google_recaptcha_status')->first();
-    if ($info->google_recaptcha_status == 1) {
-      $rules['g-recaptcha-response'] = 'required|captcha';
-    }
 
     $messages = [];
 
-    if ($info->google_recaptcha_status == 1) {
-      $messages['g-recaptcha-response.required'] = 'Please verify that you are not a robot.';
-      $messages['g-recaptcha-response.captcha'] = 'Captcha error! try again later or contact site admin.';
-    }
 
     $validator = Validator::make($request->all(), $rules, $messages);
     if ($validator->fails()) {
@@ -296,16 +289,9 @@ class OrganizerController extends Controller
     ];
 
     $info = Basic::select('google_recaptcha_status')->first();
-    if ($info->google_recaptcha_status == 1) {
-      $rules['g-recaptcha-response'] = 'required|captcha';
-    }
 
     $messages = [];
 
-    if ($info->google_recaptcha_status == 1) {
-      $messages['g-recaptcha-response.required'] = 'Please verify that you are not a robot.';
-      $messages['g-recaptcha-response.captcha'] = 'Captcha error! try again later or contact site admin.';
-    }
 
     $validator = Validator::make($request->all(), $rules, $messages);
 
