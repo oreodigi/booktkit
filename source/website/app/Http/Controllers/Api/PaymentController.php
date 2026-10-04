@@ -39,7 +39,7 @@ class PaymentController extends Controller {
  }
  public function verifyRazorpay(Request $r,RazorpayRouteService $razorpay,PaymentLedgerService $ledger,BookingFinalizationService $bookings){
   $data=$r->validate(['payment_order'=>'required|uuid','razorpay_payment_id'=>'required|string','razorpay_signature'=>'required|string']);
-  return DB::transaction(function() use($data,$razorpay,$ledger,$bookings){
+  try { return DB::transaction(function() use($data,$razorpay,$ledger,$bookings){
    $order=PaymentOrder::where('uuid',$data['payment_order'])->lockForUpdate()->firstOrFail();
    if($order->status==='paid') return response()->json(['success'=>true,'status'=>'paid','idempotent'=>true]);
    $razorpay->verifyCheckout($order,$data['razorpay_payment_id'],$data['razorpay_signature']);
@@ -49,6 +49,10 @@ class PaymentController extends Controller {
    $profile=$order->organizer_id ? OrganizerPaymentProfile::where('organizer_id',$order->organizer_id)->first() : null;
    if($order->settlement_mode==='razorpay_split' && $profile && $profile->canSplit()) $razorpay->transferToOrganizer($order,$profile->razorpay_account_id);
    return response()->json(['success'=>true,'status'=>'paid','booking_id'=>$booking->booking_id]);
-  });
+  }); } catch(\Razorpay\Api\Errors\SignatureVerificationError $e) {
+   return response()->json(['success'=>false,'message'=>'Invalid payment signature.'],422);
+  } catch(\Throwable $e) {
+   report($e); return response()->json(['success'=>false,'message'=>'Payment verification failed.'],422);
+  }
  }
 }
