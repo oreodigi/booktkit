@@ -38,6 +38,8 @@
 <link rel="stylesheet" href="{{ asset('assets/front/css/daterangepicker.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/front/css/toastr.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/front/css/organizer.css') }}">
+<!-- BookTKIT auth + mobile navigation overrides -->
+<link rel="stylesheet" href="{{ asset('assets/front/css/booktkit-auth-mobile.css') }}">
 @if ($currentLanguageInfo->direction == 1)
   {{-- right-to-left css --}}
   <link rel="stylesheet" href="{{ asset('assets/front/css/rtl-style.css') }}">
