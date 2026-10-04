@@ -262,3 +262,16 @@ Route::prefix('/organizer')->middleware('auth:organizer_sanctum')->group(functio
     });
   });
 });
+
+// BookTKIT payment orchestration v1
+Route::prefix('v1/payments')->group(function () {
+  Route::post('razorpay/order', 'Api\PaymentController@createRazorpayOrder');
+  Route::post('razorpay/verify', 'Api\PaymentController@verifyRazorpay');
+});
+
+Route::prefix('v1/organizer/payments')->middleware('auth:organizer_sanctum')->group(function () {
+  Route::get('settings', 'Api\OrganizerPaymentSettingsController@show');
+  Route::put('settings', 'Api\OrganizerPaymentSettingsController@update');
+});
+
+Route::post('v1/webhooks/razorpay', 'Api\RazorpayWebhookController@handle');
