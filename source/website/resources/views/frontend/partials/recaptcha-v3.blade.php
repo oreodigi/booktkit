@@ -1,8 +1,13 @@
 @php
-  $recaptchaV3SiteKey = $basicInfo->google_recaptcha_site_key ?? \App\Models\BasicSettings\Basic::query()->value('google_recaptcha_site_key');
+  $recaptchaSettings = isset($basicInfo)
+    ? $basicInfo
+    : \App\Models\BasicSettings\Basic::query()
+        ->select('google_recaptcha_status', 'google_recaptcha_site_key')
+        ->first();
+  $recaptchaV3SiteKey = $recaptchaSettings->google_recaptcha_site_key ?? '';
 @endphp
 
-@if (($basicInfo->google_recaptcha_status ?? 0) == 1 && !empty($recaptchaV3SiteKey))
+@if (($recaptchaSettings->google_recaptcha_status ?? 0) == 1 && !empty($recaptchaV3SiteKey))
   <input type="hidden" name="g-recaptcha-response" value="">
   <script src="https://www.google.com/recaptcha/api.js?render={{ $recaptchaV3SiteKey }}"></script>
   <script>
