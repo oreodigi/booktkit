@@ -49,11 +49,18 @@
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-lg-8">
-          <form id="login-form" name="login_form" class="login-form" action="{{ route('customer.create') }}"
+          <form id="login-form" name="login_form" class="login-form booktkit-auth-page" action="{{ route('customer.create') }}"
             method="POST">
             @csrf
 
-            <div class="row">
+            @if ($basicInfo->google_login_status == 1)
+              <p class="auth-social-label">{{ __('Sign In With Google Account') }}</p>
+              <div class="form-group">
+                <a class="text-center bg-google w-100" href="{{ route('auth.google') }}"><i class="fab fa-google"></i> {{ __('Google') }}</a>
+              </div>
+            @endif
+            <p class="auth-email-label">{{ __('Or Continue With') }}</p>
+            <div class="row auth-name-row">
               <div class="col-sm-6">
                 <div class="form-group">
                   <label for="fname"> {{ __('First Name') }} *</label>
@@ -74,7 +81,10 @@
                   @enderror
                 </div>
               </div>
-              <div class="col-sm-6">
+            </div>
+            <p class="auth-email-label">{{ __('Email Address & Password') }}</p>
+            <div class="row">
+              <div class="col-sm-6 auth-hide-mobile">
                 <div class="form-group">
                   <label for="username">{{ __('Username') }} *</label>
                   <input type="text" name="username" value="{{ old('username') }}" id="username" class="form-control"
@@ -118,10 +128,11 @@
             <div class="form-group mb-0">
               <button class="theme-btn br-30 showLoader" type="submit">{{ __('Signup') }}</button>
             </div>
-            <div class="form-group mt-3 mb-0">
+            <div class="form-group mt-3 mb-0 auth-links">
               <p>{{ __('Already have an account') }} ?<a class="text-info"
                   href="{{ route('customer.login') }}">{{ __('Login Now') }}</a></p>
             </div>
+          <p class="auth-terms d-md-none">{{ __('By creating an account, you agree to our') }} <a href="/terms-and-conditions">{{ __('Terms & Conditions') }}</a> {{ __('and') }} <a href="/privacy-policy">{{ __('Privacy Policy') }}</a>.</p>
           </form>
         </div>
       </div>
