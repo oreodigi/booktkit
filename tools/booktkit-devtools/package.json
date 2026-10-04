@@ -17,7 +17,9 @@
     "test:organizer": "playwright test tests/organizer-capabilities.spec.js tests/staging-event.spec.js",
     "test:razorpay": "playwright test tests/razorpay.spec.js",
     "test:api": "playwright test tests/api-surface.spec.js",
-    "test:security": "playwright test tests/security-boundaries.spec.js tests/mutation-guard.spec.js"
+    "test:security": "playwright test tests/security-boundaries.spec.js tests/mutation-guard.spec.js",
+    "test:scanner": "playwright test tests/scanner-contract.spec.js",
+    "test:contracts": "playwright test tests/mobile-api-contract.spec.js tests/razorpay-contract.spec.js tests/scanner-contract.spec.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.2",
