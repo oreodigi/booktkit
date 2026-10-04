@@ -30,3 +30,7 @@ Composer dependency/lock/autoload metadata is preserved to keep the bundled depe
 Static validation passed for local Dart package imports, Android XML manifests, web manifests and Postman collection JSON. No PHP/Flutter build or end-to-end test ran because those runtimes were not found on this machine's command path. App signing still needs production configuration. The backend issues in `../project-review/PROJECT-ANALYSIS.md` remain a separate priority.
 
 The live cPanel application/database and cloud project were not modified.
+# Repository branding assets
+
+The owner requested that logo files be excluded from the GitHub upload. Logos, launch icons and branding images remain on the local PC and live server. Supply those files separately before building or deploying a fresh copy that references them.
+

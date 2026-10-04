@@ -1,4 +1,18 @@
 # Purchased originals and historical inspection copies
+/Book tkit logos/
+**/*[Ll][Oo][Gg][Oo]*.png
+**/*[Ll][Oo][Gg][Oo]*.jpg
+**/*[Ll][Oo][Gg][Oo]*.jpeg
+**/*[Ll][Oo][Gg][Oo]*.gif
+**/*[Ll][Oo][Gg][Oo]*.webp
+**/*[Ll][Oo][Gg][Oo]*.svg
+**/*[Ll][Oo][Gg][Oo]*.ico
+**/logos/
+**/AppIcon.appiconset/
+**/LaunchImage.imageset/
+**/web/icons/
+**/mipmap*/ic_launcher*
+**/booktkit-icon.png
 /Source Code/
 /project-review/source/
 /*.zip
