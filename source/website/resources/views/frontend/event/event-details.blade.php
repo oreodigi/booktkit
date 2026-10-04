@@ -1,4 +1,5 @@
 @extends('frontend.layout')
+@section('body-class', 'booktkit-event-details-page')
 @section('pageHeading')
     {{ $content->title }}
 @endsection

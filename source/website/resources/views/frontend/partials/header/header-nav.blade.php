@@ -16,16 +16,24 @@
             <div class="navbar-header">
               <div class="logo-mobile"><a href="{{ route('index') }}"><img
                     src="{{ asset('assets/admin/img/' . $websiteInfo->logo) }}" alt="Logo"></a></div>
-              <!-- Toggle Button -->
-              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"
-                aria-controls="main-menu">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-              </button>
+              <div class="mobile-header-actions d-xl-none">
+                <a class="mobile-header-icon" href="{{ route('contact') }}" aria-label="Support"><i class="fa fa-headphones"></i></a>
+                @if (Auth::guard('customer')->check())
+                  <a class="mobile-header-icon" href="{{ route('customer.dashboard') }}" aria-label="Account"><i class="fa fa-user-circle"></i></a>
+                @elseif (Auth::guard('organizer')->check())
+                  <a class="mobile-header-icon" href="{{ route('organizer.dashboard') }}" aria-label="Account"><i class="fa fa-user-circle"></i></a>
+                @else
+                  <a class="mobile-header-icon" href="{{ route('customer.login') }}" aria-label="Sign in"><i class="fa fa-user-circle"></i></a>
+                @endif
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"
+                  aria-controls="main-menu" aria-label="Open menu">
+                  <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+                </button>
+              </div>
             </div>
 
             <div class="navbar-collapse collapse clearfix" id="main-menu">
+              <div class="mobile-menu-head d-xl-none"><span class="mobile-menu-title">{{ __('Menu') }}</span><button type="button" class="mobile-menu-close" aria-label="Close menu">&times;</button></div>
               @php
                 $links = json_decode($menuInfos, true);
               @endphp
@@ -67,7 +75,7 @@
                   </select>
                 </form>
                 @if (isset($allCurrencyInfos) && $allCurrencyInfos->count() > 0)
-                  <form action="{{ route('change_currency') }}" method="get" class="ml-2 mr-1">
+                  <form action="{{ route('change_currency') }}" method="get" class="ml-2 mr-1 desktop-currency-selector">
                     <select name="currency_id" class="form-control" onchange="this.form.submit()">
                       @foreach ($allCurrencyInfos as $currency)
                         <option value="{{ $currency->id }}"
@@ -79,7 +87,7 @@
                   </form>
                 @endif
                 @if (!Auth::guard('customer')->check())
-                  <div class="dropdown auth-menu-entry customer-menu-entry">
+                  <div class="dropdown auth-menu-entry customer-menu-entry mobile-auth-visible">
                     <a class="menu-btn mr-1" href="{{ route('customer.login') }}">{{ __('Customer Login') }}</a>
                   </div>
                 @else
@@ -116,3 +124,7 @@
   </div>
   <!--End Header Upper-->
 </header>
+<div class="mobile-menu-backdrop"></div>
+<script>
+document.addEventListener("DOMContentLoaded",function(){var t=document.querySelector(".navbar-toggle"),c=document.querySelector(".mobile-menu-close"),b=document.querySelector(".mobile-menu-backdrop"),m=document.getElementById("main-menu");function closeMenu(){if(m){m.classList.remove("show");document.body.classList.remove("mobile-menu-open")}}function openMenu(){document.body.classList.add("mobile-menu-open")}if(t)t.addEventListener("click",function(){setTimeout(function(){m&&m.classList.contains("show")?openMenu():closeMenu()},10)});if(c)c.addEventListener("click",closeMenu);if(b)b.addEventListener("click",closeMenu);document.querySelectorAll("#main-menu a").forEach(function(a){a.addEventListener("click",function(){if(!a.closest("li.dropdown")||a.closest(".dropdown-menu"))closeMenu()})})});
+</script>

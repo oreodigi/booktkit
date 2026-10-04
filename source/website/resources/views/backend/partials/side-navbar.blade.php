@@ -90,6 +90,16 @@
                         </a>
                     </li>
                 @endif
+                {{-- mobile homepage studio --}}
+                @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Home Page', $rolePermissions)))
+                    <li class="nav-item {{ request()->routeIs('admin.mobile_home.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.mobile_home.index') }}">
+                            <i class="fal fa-mobile-alt"></i>
+                            <p>{{ __('Mobile Homepage') }}</p>
+                        </a>
+                    </li>
+                @endif
+
                 {{-- event --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Event Management', $rolePermissions)))
                     @php

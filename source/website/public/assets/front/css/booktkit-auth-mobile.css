@@ -560,3 +560,726 @@
     white-space: nowrap;
   }
 }
+
+
+/* Compact auth v2 — phone layout */
+@media only screen and (max-width: 767px) {
+  body.booktkit-auth-body {
+    background: #f8f9fb;
+  }
+
+  body.booktkit-auth-body .page-banner,
+  body.booktkit-auth-body .footer-section {
+    display: none !important;
+  }
+
+  body.booktkit-auth-body .main-header {
+    background: #fff;
+    box-shadow: 0 1px 0 #eceef2;
+  }
+
+  body.booktkit-auth-body .main-header .header-upper {
+    padding: 7px 18px !important;
+  }
+
+  body.booktkit-auth-body .main-menu .navbar-header {
+    min-height: 60px;
+  }
+
+  body.booktkit-auth-body .main-menu .logo-mobile img {
+    max-width: 175px;
+    max-height: 48px;
+  }
+
+  body.booktkit-auth-body .navbar-toggle {
+    display: none !important;
+  }
+
+  body.booktkit-auth-body .login-area,
+  body.booktkit-auth-body .signup-area {
+    min-height: calc(100svh - 74px);
+    padding: 0 !important;
+    background: #f8f9fb;
+  }
+
+  body.booktkit-auth-body .login-area .container,
+  body.booktkit-auth-body .signup-area .container {
+    padding: 22px 18px 30px !important;
+  }
+
+  body.booktkit-auth-body .login-area .row,
+  body.booktkit-auth-body .signup-area .row {
+    margin: 0;
+  }
+
+  body.booktkit-auth-body .login-area .col-lg-8,
+  body.booktkit-auth-body .signup-area .col-lg-8 {
+    width: 100%;
+    max-width: 500px;
+    padding: 0;
+    margin: 0 auto;
+  }
+
+  .booktkit-auth-page.login-form,
+  .signup-area .booktkit-auth-page.login-form {
+    padding: 22px 20px 20px !important;
+    border: 1px solid #eceef2;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(16,24,40,.06);
+  }
+
+  .booktkit-auth-page::before {
+    display: block;
+    margin: 0 0 18px;
+    color: #17191d;
+    font-family: var(--heading-font);
+    font-size: 29px;
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -.5px;
+  }
+
+  .login-area .booktkit-auth-page::before { content: "Welcome back"; }
+  .signup-area .booktkit-auth-page::before { content: "Create account"; }
+
+  .booktkit-auth-page .auth-social-label,
+  .booktkit-auth-page .auth-email-label {
+    margin: 0 0 9px;
+    color: #555b65;
+    font-size: 13px;
+    line-height: 1.35;
+    font-weight: 600;
+  }
+
+  .booktkit-auth-page .auth-email-label {
+    margin-top: 17px;
+  }
+
+  .booktkit-auth-page .form-group {
+    margin-bottom: 11px;
+  }
+
+  .booktkit-auth-page .form-group.overflow-hidden {
+    margin-bottom: 0;
+  }
+
+  .booktkit-auth-page .form-group.overflow-hidden .row {
+    margin-bottom: 0 !important;
+  }
+
+  .booktkit-auth-page .bg-google,
+  .booktkit-auth-page .bg-facebook {
+    height: 48px;
+    min-height: 48px;
+    border: 1px solid #e0e3e8;
+    border-radius: 10px;
+    background: #fff !important;
+    color: #24272c !important;
+    font-size: 15px;
+    font-weight: 650;
+    box-shadow: none;
+  }
+
+  .booktkit-auth-page .form-group label:not(.auth-social-label):not(.auth-email-label) {
+    display: none;
+  }
+
+  .booktkit-auth-page .form-control {
+    height: 50px;
+    min-height: 50px;
+    padding: 11px 14px;
+    border: 1px solid #dfe2e7;
+    border-radius: 10px;
+    background: #fff;
+    color: #1f2329;
+    font-size: 16px;
+    box-shadow: none;
+  }
+
+  .booktkit-auth-page .form-control::placeholder {
+    color: #a0a5ad;
+  }
+
+  .booktkit-auth-page .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(255,183,0,.10);
+  }
+
+  .booktkit-auth-page .auth-forgot {
+    display: block;
+    margin: -1px 1px 7px;
+    color: #555b65;
+    text-align: right;
+    font-size: 13px;
+    line-height: 1.3;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .booktkit-auth-page .theme-btn {
+    min-height: 50px;
+    height: 50px;
+    margin-top: 2px;
+    padding: 10px 16px;
+    border-radius: 10px !important;
+    font-size: 15px;
+    font-weight: 750;
+  }
+
+  .booktkit-auth-page .auth-links,
+  .booktkit-auth-page .form-group.mt-3.auth-links {
+    margin: 13px 0 0 !important;
+    justify-content: center !important;
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+
+  .booktkit-auth-page .auth-links p {
+    margin: 0;
+  }
+
+  .booktkit-auth-page .auth-links a {
+    color: #20242a !important;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .booktkit-auth-page .auth-terms {
+    margin: 19px auto 0;
+    max-width: 390px;
+    color: #8a9099;
+    text-align: center;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .booktkit-auth-page .auth-terms a {
+    color: #686e76;
+    text-decoration: underline;
+  }
+
+  .booktkit-auth-page .row.auth-name-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin: 0 !important;
+  }
+
+  .booktkit-auth-page .row.auth-name-row > div {
+    width: calc(50% - 4px);
+    flex: 0 0 calc(50% - 4px);
+    padding: 0;
+  }
+
+  .booktkit-auth-page > .row:not(.auth-name-row) {
+    margin: 0 !important;
+  }
+
+  .booktkit-auth-page > .row:not(.auth-name-row) > [class*="col-"] {
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 100%;
+    padding: 0;
+  }
+
+  .booktkit-auth-page .auth-hide-mobile {
+    display: none !important;
+  }
+
+  .booktkit-auth-page .text-danger {
+    margin: 4px 0 0;
+    font-size: 11px;
+  }
+
+  .signup-area .booktkit-auth-page .auth-email-label {
+    margin-top: 12px;
+  }
+
+  .signup-area .booktkit-auth-page .form-group {
+    margin-bottom: 9px;
+  }
+
+  .signup-area .booktkit-auth-page .auth-terms {
+    margin-top: 15px;
+  }
+}
+
+@media only screen and (max-width: 380px) {
+  body.booktkit-auth-body .login-area .container,
+  body.booktkit-auth-body .signup-area .container {
+    padding: 14px 12px 22px !important;
+  }
+
+  .booktkit-auth-page.login-form,
+  .signup-area .booktkit-auth-page.login-form {
+    padding: 18px 15px 16px !important;
+  }
+
+  .booktkit-auth-page::before {
+    font-size: 26px;
+    margin-bottom: 14px;
+  }
+
+  .booktkit-auth-page .form-control,
+  .booktkit-auth-page .bg-google,
+  .booktkit-auth-page .theme-btn {
+    height: 46px;
+    min-height: 46px;
+  }
+}
+
+/* Auth reference fidelity + mobile login entry */
+@media only screen and (max-width:767px){
+  .menu-right .auth-menu-entry.mobile-auth-visible{display:block!important;grid-column:1/-1}
+  .menu-right .auth-menu-entry.mobile-auth-visible .menu-btn{display:flex!important;background:var(--primary-color);color:#fff!important;border:0}
+  .menu-right .guest-organizer-entry{display:none!important}
+  body.booktkit-auth-body .main-header .navbar-header{display:flex!important;align-items:center;justify-content:space-between}
+  body.booktkit-auth-body .main-header .navbar-header:after{
+    content:"Sign In";display:flex;align-items:center;justify-content:center;height:42px;padding:0 16px;
+    border:1px solid #d9dde4;border-radius:9px;color:#24272c;font-size:14px;font-weight:700;
+  }
+  body.booktkit-auth-body .login-area .container,body.booktkit-auth-body .signup-area .container{padding-top:18px!important}
+  .booktkit-auth-page.login-form,.signup-area .booktkit-auth-page.login-form{padding:20px 18px 18px!important}
+  .booktkit-auth-page::before{font-size:28px;margin-bottom:17px}
+  .login-area .booktkit-auth-page::before{content:"Sign In"}
+  .signup-area .booktkit-auth-page::before{content:"Register Now"}
+  .booktkit-auth-page .auth-social-label,.booktkit-auth-page .auth-email-label{font-size:14px;color:#292929;font-weight:700}
+  .booktkit-auth-page .bg-google{background:#f3f4f6!important;height:48px;min-height:48px}
+  .booktkit-auth-page .auth-terms{margin-top:18px;font-size:11px;line-height:1.45;color:#747980}
+  .booktkit-auth-page .auth-terms a{color:#555b62;text-decoration:underline;text-underline-offset:2px}
+}
+
+
+/* BookTKIT mobile navigation v3 — full-height dark slide panel */
+.mobile-menu-head,.mobile-menu-backdrop{display:none}
+@media only screen and (max-width:1199px){
+  body.mobile-menu-open{overflow:hidden}
+  .main-menu .navbar-collapse{
+    display:block!important;
+    position:fixed!important;
+    top:0!important;right:0!important;bottom:0!important;left:auto!important;
+    width:min(88vw,390px)!important;height:100dvh!important;
+    margin:0!important;padding:0!important;
+    background:#202226!important;
+    border:0!important;border-radius:0!important;
+    box-shadow:-18px 0 55px rgba(0,0,0,.28)!important;
+    overflow-y:auto!important;
+    z-index:10002!important;
+    transform:translateX(105%);
+    visibility:hidden;
+    transition:transform .28s ease,visibility .28s ease!important;
+  }
+  .main-menu .navbar-collapse.show{
+    transform:translateX(0);visibility:visible
+  }
+  .mobile-menu-backdrop{
+    position:fixed;inset:0;background:rgba(8,10,14,.68);
+    backdrop-filter:blur(2px);z-index:10001
+  }
+  body.mobile-menu-open .mobile-menu-backdrop{display:block}
+  .mobile-menu-head{
+    position:sticky;top:0;z-index:5;
+    display:flex!important;align-items:center;justify-content:space-between;
+    min-height:74px;padding:0 22px;
+    background:#202226;border-bottom:1px solid rgba(255,255,255,.09)
+  }
+  .mobile-menu-title{color:#fff;font-size:20px;font-weight:800}
+  .mobile-menu-close{
+    width:42px;height:42px;border:1px solid rgba(255,255,255,.13);
+    border-radius:12px;background:#2b2e33;color:#fff;
+    font-size:29px;line-height:36px;font-weight:300
+  }
+  .main-menu .navigation{
+    max-height:none!important;padding:14px 20px 8px!important;margin:0!important;
+    background:#202226!important
+  }
+  .main-menu .navigation>li{
+    border:0!important;border-bottom:1px solid rgba(255,255,255,.075)!important
+  }
+  .main-menu .navigation li a{
+    min-height:54px!important;padding:15px 4px!important;
+    color:#f3f4f6!important;font-size:16px!important;font-weight:600!important
+  }
+  .main-menu .navigation li a:hover{color:var(--primary-color)!important}
+  .main-menu .navigation li.dropdown .dropdown-btn{
+    top:7px!important;right:0!important;color:#fff!important;background:#2b2e33!important
+  }
+  .main-menu .navigation li ul{
+    background:#292c31!important;border-radius:10px!important;margin:0 0 8px!important
+  }
+  .main-menu .navigation li ul li{border-color:rgba(255,255,255,.06)!important}
+  .main-menu .navigation li ul li a{color:#d5d8de!important;font-size:14px!important}
+  .menu-right{
+    display:block!important;margin:0!important;padding:12px 20px 26px!important;
+    background:#202226!important;border-top:0!important
+  }
+  .menu-right form:not(.language-switcher){display:block!important;width:100%;margin:0 0 12px!important}
+  .menu-right .language-switcher{display:none!important}
+  .menu-right .ui-selectmenu-button.ui-button,.menu-right select.form-control{
+    width:100%!important;min-height:48px!important;margin:0!important;
+    border:1px solid rgba(255,255,255,.13)!important;border-radius:10px!important;
+    background:#292c31!important;color:#f5f5f5!important
+  }
+  .menu-right>.dropdown{width:100%!important;margin:0 0 10px!important}
+  .menu-right .menu-btn{
+    width:100%!important;min-height:49px!important;padding:11px 14px!important;
+    border:1px solid rgba(255,183,0,.6)!important;border-radius:10px!important;
+    background:var(--primary-color)!important;color:#151515!important;
+    justify-content:center!important;font-size:15px!important;font-weight:750!important
+  }
+  .menu-right .dropdown-menu{
+    position:static!important;float:none!important;width:100%!important;
+    margin:7px 0 0!important;padding:5px!important;
+    background:#292c31!important;border:1px solid rgba(255,255,255,.08)!important;
+    box-shadow:none!important
+  }
+  .menu-right .dropdown-item{
+    padding:11px 12px!important;border-radius:7px!important;
+    color:#e6e7e9!important;background:transparent!important
+  }
+  .menu-right .dropdown-item:hover{background:#33363c!important;color:#fff!important}
+}
+@media only screen and (max-width:480px){
+  .main-menu .navbar-collapse{width:100vw!important}
+  .mobile-menu-backdrop{display:none!important}
+}
+
+
+/* Mobile navigation v4 — true full-screen overlay */
+@media only screen and (max-width:1199px){
+  .main-menu .navbar-collapse{
+    top:0!important;left:0!important;right:0!important;bottom:0!important;
+    width:100vw!important;max-width:none!important;height:100dvh!important;
+    background:#202226!important;
+    transform:translateY(-18px) scale(.985)!important;
+    opacity:0!important;visibility:hidden!important;
+    transition:opacity .22s ease,transform .25s ease,visibility .25s ease!important;
+  }
+  .main-menu .navbar-collapse.show{
+    transform:translateY(0) scale(1)!important;
+    opacity:1!important;visibility:visible!important
+  }
+  .mobile-menu-backdrop{display:none!important}
+  .mobile-menu-head{
+    min-height:82px!important;padding:0 26px!important;
+    background:#202226!important
+  }
+  .mobile-menu-title{font-size:18px!important;letter-spacing:.04em;text-transform:uppercase}
+  .mobile-menu-close{width:46px!important;height:46px!important;border-radius:50%!important}
+  .main-menu .navigation{
+    width:min(100%,560px)!important;margin:18px auto 0!important;
+    padding:10px 30px!important;text-align:center!important
+  }
+  .main-menu .navigation>li{border-bottom:0!important}
+  .main-menu .navigation li a{
+    justify-content:center!important;min-height:62px!important;
+    padding:15px 8px!important;color:#fff!important;
+    font-size:25px!important;line-height:1.2!important;font-weight:700!important;
+    letter-spacing:-.3px!important
+  }
+  .main-menu .navigation li.dropdown .dropdown-btn{
+    top:11px!important;right:calc(50% - 95px)!important;
+    background:transparent!important;border:0!important
+  }
+  .main-menu .navigation li ul{
+    max-width:360px!important;margin:0 auto 8px!important;
+    background:#292c31!important;text-align:center!important
+  }
+  .main-menu .navigation li ul li a{
+    min-height:46px!important;font-size:15px!important;font-weight:550!important
+  }
+  .menu-right{
+    width:min(100%,500px)!important;margin:10px auto 0!important;
+    padding:12px 30px 34px!important;text-align:center!important
+  }
+  .menu-right form:not(.language-switcher){max-width:340px;margin:0 auto 12px!important}
+  .menu-right>.dropdown{max-width:340px;margin:0 auto 10px!important}
+  .menu-right .menu-btn{min-height:48px!important}
+}
+@media only screen and (max-width:480px){
+  .main-menu .navigation{margin-top:8px!important;padding:8px 22px!important}
+  .main-menu .navigation li a{min-height:56px!important;font-size:22px!important}
+  .mobile-menu-head{min-height:72px!important;padding:0 20px!important}
+  .menu-right{padding:8px 22px 24px!important}
+}
+
+
+/* Mobile header actions + refined slide navigation */
+.mobile-header-actions{display:none}
+@media only screen and (max-width:1199px){
+  .main-menu .navbar-header{
+    display:flex!important;align-items:center!important;justify-content:space-between!important;width:100%
+  }
+  .mobile-header-actions{
+    display:flex!important;align-items:center;gap:8px;margin-left:auto
+  }
+  .mobile-header-icon{
+    display:flex!important;align-items:center;justify-content:center;
+    width:44px;height:44px;border:0;border-radius:50%;
+    color:#182d2a!important;background:transparent;font-size:25px;text-decoration:none!important
+  }
+  .mobile-header-actions .navbar-toggle{
+    position:static!important;display:flex!important;flex-direction:column;justify-content:center;
+    width:48px!important;height:48px!important;margin:0!important;padding:9px!important;
+    border:0!important;background:transparent!important
+  }
+  .mobile-header-actions .navbar-toggle .icon-bar{
+    display:block!important;width:31px!important;height:3px!important;margin:3px auto!important;
+    border-radius:3px!important;background:#111!important
+  }
+  .menu-right .desktop-currency-selector{display:none!important}
+  .main-menu .navbar-collapse{
+    width:min(88vw,390px)!important;left:auto!important;right:0!important;
+    transform:translateX(105%)!important;opacity:1!important;
+    transition:transform .28s ease,visibility .28s ease!important
+  }
+  .main-menu .navbar-collapse.show{transform:translateX(0)!important}
+  .mobile-menu-backdrop{display:none!important}
+  body.mobile-menu-open .mobile-menu-backdrop{
+    display:block!important;background:rgba(12,15,18,.52)!important;backdrop-filter:blur(3px)
+  }
+  .main-menu .navigation{margin:6px 0 0!important;padding:10px 24px!important;text-align:left!important}
+  .main-menu .navigation li a{
+    justify-content:flex-start!important;min-height:56px!important;padding:15px 2px!important;
+    font-size:18px!important;text-align:left!important
+  }
+  .main-menu .navigation li.dropdown .dropdown-btn{right:0!important;top:8px!important}
+  .menu-right{width:auto!important;margin:0!important;padding:12px 24px 28px!important}
+  .menu-right>.dropdown{max-width:none!important}
+}
+@media only screen and (max-width:480px){
+  .main-menu .navbar-collapse{width:88vw!important;max-width:390px!important}
+  .mobile-menu-backdrop{display:none!important}
+  body.mobile-menu-open .mobile-menu-backdrop{display:block!important}
+  .mobile-header-icon{width:40px;height:40px;font-size:23px}
+  .mobile-header-actions{gap:4px}
+}
+
+
+/* BookTKIT mobile app-style homepage */
+.booktkit-mobile-categories,.booktkit-mobile-tabbar{display:none}
+@media only screen and (max-width:767px){
+ body.booktkit-home-page{background:#f7f8fa;padding-bottom:76px}
+ body.booktkit-home-page .main-header{position:sticky;top:0;z-index:1000;background:#fff;box-shadow:0 1px 0 #eceef2}
+ body.booktkit-home-page .header-upper{padding:8px 14px!important}
+ body.booktkit-home-page .logo-outer{display:none!important}
+ body.booktkit-home-page .logo-mobile img{max-width:165px!important;max-height:54px!important}
+ body.booktkit-home-page .hero-section{
+   margin:12px 14px 0!important;padding:34px 18px 20px!important;min-height:360px;
+   border-radius:20px;overflow:hidden;background-position:center!important
+ }
+ body.booktkit-home-page .hero-section:before{border-radius:20px;background:linear-gradient(90deg,rgba(5,8,15,.88),rgba(5,8,15,.22))!important}
+ body.booktkit-home-page .hero-content{max-width:100%!important}
+ body.booktkit-home-page .hero-content h1{max-width:290px;margin:0 0 10px!important;color:#fff;font-size:38px!important;line-height:1.02!important;letter-spacing:-1px;font-weight:800}
+ body.booktkit-home-page .hero-content p{max-width:290px;margin:0!important;color:rgba(255,255,255,.9)!important;font-size:14px!important;line-height:1.45!important}
+ body.booktkit-home-page .event-search{display:flex!important;position:absolute;left:18px;right:18px;bottom:20px;height:54px;margin:0!important;padding:5px!important;border-radius:15px!important;background:#fff!important}
+ body.booktkit-home-page .event-search .search-item:first-child{display:none!important}
+ body.booktkit-home-page .event-search .search-item{flex:1!important;width:auto!important;border:0!important}
+ body.booktkit-home-page .event-search .search-item label{margin:0 8px!important}
+ body.booktkit-home-page .event-search input{height:44px!important;padding:0 4px!important;font-size:14px!important}
+ body.booktkit-home-page .event-search .theme-btn{width:46px!important;height:44px!important;min-width:46px!important;padding:0!important;border-radius:12px!important;font-size:0!important}
+ body.booktkit-home-page .event-search .theme-btn:after{content:"\f002";font-family:"Font Awesome 5 Free";font-size:17px;font-weight:900;color:#111}
+ .booktkit-mobile-categories{
+   display:flex;gap:13px;overflow-x:auto;padding:17px 15px 9px;background:#f7f8fa;scrollbar-width:none
+ }
+ .booktkit-mobile-categories::-webkit-scrollbar{display:none}
+ .booktkit-mobile-categories a{flex:0 0 68px;color:#252930!important;text-align:center;font-size:11px;font-weight:650;line-height:1.2}
+ .booktkit-mobile-categories span{display:flex;align-items:center;justify-content:center;width:54px;height:54px;margin:0 auto 7px;border-radius:50%;background:#fff;border:1px solid #eceef2;box-shadow:0 5px 16px rgba(20,24,32,.06);color:var(--primary-color);font-size:18px}
+ body.booktkit-home-page .events-section{padding:22px 14px 18px!important;background:#f7f8fa!important}
+ body.booktkit-home-page .events-section .section-title{text-align:left!important;margin-bottom:14px!important}
+ body.booktkit-home-page .events-section .section-title h2{font-size:23px!important;line-height:1.2!important;letter-spacing:-.4px}
+ body.booktkit-home-page .events-tabs{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;margin:0 0 15px!important;border:0!important;scrollbar-width:none}
+ body.booktkit-home-page .events-tabs::-webkit-scrollbar{display:none}
+ body.booktkit-home-page .events-tabs .nav-link{flex:0 0 auto;padding:8px 14px!important;border:1px solid #e5e7eb!important;border-radius:20px!important;background:#fff!important;color:#4b515b!important;font-size:12px!important}
+ body.booktkit-home-page .events-tabs .nav-link.active{background:var(--primary-color)!important;color:#171717!important;border-color:var(--primary-color)!important}
+ body.booktkit-home-page .events-section .row{margin:0 -6px!important}
+ body.booktkit-home-page .events-section .item{padding:0 6px!important}
+ body.booktkit-home-page .event-item{margin-bottom:14px!important;border:1px solid #e9ebef!important;border-radius:15px!important;background:#fff!important;overflow:hidden;box-shadow:0 5px 18px rgba(20,24,32,.05)}
+ body.booktkit-home-page .event-image{height:165px!important}
+ body.booktkit-home-page .event-image img{width:100%!important;height:100%!important;object-fit:cover!important}
+ body.booktkit-home-page .event-content{padding:13px 14px 14px!important}
+ body.booktkit-home-page .event-content h5{margin:6px 0!important;font-size:17px!important;line-height:1.25!important}
+ body.booktkit-home-page .event-description{display:none!important}
+ body.booktkit-home-page .time-info{display:flex!important;gap:10px!important;margin-bottom:4px!important}
+ body.booktkit-home-page .time-info li{font-size:11px!important}
+ body.booktkit-home-page .organizer{font-size:11px!important}
+ body.booktkit-home-page .price-remain{margin-top:9px!important;padding-top:9px!important;border-top:1px solid #f0f1f3}
+ body.booktkit-home-page .location{max-width:68%;font-size:11px!important}
+ body.booktkit-home-page section:not(.events-section):not(.hero-section){padding-top:32px!important;padding-bottom:32px!important}
+ .booktkit-mobile-tabbar{
+   display:flex;position:fixed;left:0;right:0;bottom:0;z-index:9998;height:70px;padding:7px 8px max(7px,env(safe-area-inset-bottom));
+   align-items:center;justify-content:space-around;background:rgba(255,255,255,.97);border-top:1px solid #e6e8ec;box-shadow:0 -5px 20px rgba(20,24,32,.06);backdrop-filter:blur(12px)
+ }
+ .booktkit-mobile-tabbar a{display:flex;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#68707c!important;font-size:10px;font-weight:600}
+ .booktkit-mobile-tabbar i{font-size:18px}
+ .booktkit-mobile-tabbar a.active{color:var(--primary-color)!important}
+ body.booktkit-home-page .footer-section{display:none!important}
+}
+
+
+/* BookTKIT mobile app journey: discovery, details and tickets */
+@media only screen and (max-width:767px){
+ body.booktkit-events-page,body.booktkit-event-details-page,body.booktkit-tickets-page,body.booktkit-ticket-details-page{background:#f7f8fa}
+ body.booktkit-events-page .page-banner,body.booktkit-event-details-page .page-banner,body.booktkit-tickets-page .page-banner,body.booktkit-ticket-details-page .page-banner{display:none!important}
+ body.booktkit-events-page .event-page-section{padding:16px 12px 84px!important}
+ body.booktkit-events-page .event-page-section>.container{padding:0!important}
+ body.booktkit-events-page .event-page-section .col-lg-3{margin-bottom:12px}
+ body.booktkit-events-page .event-sidebar{border:0!important;border-radius:16px!important;background:#fff!important;box-shadow:0 4px 18px rgba(20,24,32,.05)}
+ body.booktkit-events-page .event-page-content>.row{margin:0 -5px!important}
+ body.booktkit-events-page .event-page-content .col-sm-6{padding:0 5px!important}
+ body.booktkit-events-page .event-item{margin-bottom:12px!important;border:1px solid #e9ebef!important;border-radius:16px!important;background:#fff!important;overflow:hidden;box-shadow:0 4px 16px rgba(20,24,32,.05)}
+ body.booktkit-events-page .event-image{height:180px!important}
+ body.booktkit-events-page .event-image img{width:100%;height:100%;object-fit:cover}
+ body.booktkit-events-page .event-content{padding:13px!important}
+ body.booktkit-events-page .event-content h5{font-size:17px!important;line-height:1.25!important;margin:6px 0!important}
+ body.booktkit-events-page .event-description{display:none!important}
+ body.booktkit-events-page .time-info{display:flex!important;gap:9px!important}
+ body.booktkit-events-page .time-info li{font-size:11px!important}
+ body.booktkit-events-page .price-remain{margin-top:10px!important;padding-top:9px!important;border-top:1px solid #eef0f3}
+
+ body.booktkit-event-details-page .event-details-section{padding:12px 12px 88px!important}
+ body.booktkit-event-details-page .event-details-section>.container{padding:0!important}
+ body.booktkit-event-details-page .event-top{padding:14px 5px 10px!important;gap:10px!important}
+ body.booktkit-event-details-page .event-top-date{min-width:58px!important;border-radius:13px!important;overflow:hidden}
+ body.booktkit-event-details-page .event-details-top .title{font-size:23px!important;line-height:1.18!important;letter-spacing:-.4px}
+ body.booktkit-event-details-page .event-details-header{margin:9px 0 0!important}
+ body.booktkit-event-details-page .event-details-header ul{display:flex!important;flex-direction:column!important;gap:5px!important}
+ body.booktkit-event-details-page .event-details-header li{font-size:12px!important}
+ body.booktkit-event-details-page .event-details-image{margin:0 0 14px!important;border-radius:18px!important;overflow:hidden;background:#fff}
+ body.booktkit-event-details-page .event-details-images img{width:100%!important;max-height:350px!important;object-fit:cover!important}
+ body.booktkit-event-details-page .event-details-image .buttons{top:12px!important;right:12px!important}
+ body.booktkit-event-details-page .event-details-content-inner,
+ body.booktkit-event-details-page .event-sidebar{padding:17px!important;border:1px solid #e9ebef!important;border-radius:17px!important;background:#fff!important;box-shadow:0 4px 16px rgba(20,24,32,.04)}
+ body.booktkit-event-details-page .event-details-content-inner{margin-bottom:12px!important}
+ body.booktkit-event-details-page .event-info{margin-bottom:10px!important}
+ body.booktkit-event-details-page .event-details-content h3,body.booktkit-event-details-page .event-details-content h4{font-size:19px!important}
+ body.booktkit-event-details-page .theme-btn{border-radius:12px!important;min-height:48px!important}
+
+ body.booktkit-tickets-page .user-dashbord,body.booktkit-ticket-details-page .user-dashbord{padding:14px 10px 84px!important}
+ body.booktkit-tickets-page .user-dashbord>.container,body.booktkit-ticket-details-page .user-dashbord>.container{padding:0!important}
+ body.booktkit-tickets-page .user-dashbord .col-lg-3,body.booktkit-ticket-details-page .user-dashbord .col-lg-3{display:none!important}
+ body.booktkit-tickets-page .user-dashbord .col-lg-9,body.booktkit-ticket-details-page .user-dashbord .col-lg-9{padding:0 5px!important}
+ body.booktkit-tickets-page .user-profile-details,body.booktkit-ticket-details-page .user-profile-details{padding:0!important}
+ body.booktkit-tickets-page .account-info,body.booktkit-ticket-details-page .account-info{border:1px solid #e8eaee!important;border-radius:18px!important;background:#fff!important;overflow:hidden;box-shadow:0 4px 18px rgba(20,24,32,.05)}
+ body.booktkit-tickets-page .account-info .title,body.booktkit-ticket-details-page .account-info .title{padding:17px 17px 10px!important;border:0!important}
+ body.booktkit-tickets-page .account-info .title h4,body.booktkit-ticket-details-page .account-info .title h4{font-size:22px!important;margin:0!important}
+ body.booktkit-tickets-page .main-info,body.booktkit-ticket-details-page .main-info{padding:8px 14px 16px!important}
+ body.booktkit-tickets-page .main-table .table{overflow:visible!important}
+ body.booktkit-tickets-page table,body.booktkit-tickets-page tbody,body.booktkit-tickets-page tr,body.booktkit-tickets-page td{display:block!important;width:100%!important}
+ body.booktkit-tickets-page thead{display:none!important}
+ body.booktkit-tickets-page tbody tr{position:relative;margin:0 0 11px!important;padding:14px!important;border:1px solid #eceef1!important;border-radius:14px!important;background:#fff!important}
+ body.booktkit-tickets-page tbody td{padding:3px 0!important;border:0!important;font-size:12px!important;color:#69717d!important}
+ body.booktkit-tickets-page tbody td:first-child{padding-right:70px!important;font-size:16px!important;font-weight:700!important;color:#20242b!important}
+ body.booktkit-tickets-page tbody td:last-child{position:absolute;right:12px;top:12px;width:auto!important}
+ body.booktkit-tickets-page tbody td .btn{padding:6px 10px!important;border-radius:9px!important;font-size:11px!important}
+ body.booktkit-tickets-page .dataTables_length,body.booktkit-tickets-page .dataTables_filter{display:none!important}
+
+ body.booktkit-events-page .footer-section,body.booktkit-event-details-page .footer-section,body.booktkit-tickets-page .footer-section,body.booktkit-ticket-details-page .footer-section{display:none!important}
+}
+
+@media only screen and (max-width:767px){
+ body.booktkit-home-page .booktkit-mobile-categories-wrap{display:block;padding:18px 14px 8px;background:#f7f8fa}
+ body.booktkit-home-page .booktkit-mobile-section-head{display:flex;align-items:center;justify-content:space-between;margin:0 1px 12px}
+ body.booktkit-home-page .booktkit-mobile-section-head h2{margin:0;font-size:20px;line-height:1.2;font-weight:800;color:#151922;letter-spacing:-.35px}
+ body.booktkit-home-page .booktkit-mobile-section-head a{font-size:12px;font-weight:700;color:#f6ae00}
+ body.booktkit-home-page .booktkit-mobile-categories{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;overflow:visible!important;padding:0!important;margin:0!important}
+ body.booktkit-home-page .booktkit-mobile-category-card{position:relative!important;display:block!important;width:100%!important;height:116px!important;min-width:0!important;padding:0!important;border:0!important;border-radius:15px!important;overflow:hidden!important;background:#222!important;box-shadow:0 4px 14px rgba(20,24,32,.10)!important}
+ body.booktkit-home-page .booktkit-mobile-category-card img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important}
+ body.booktkit-home-page .booktkit-mobile-category-overlay{position:absolute!important;inset:0!important;background:linear-gradient(180deg,rgba(0,0,0,.04) 28%,rgba(0,0,0,.72) 100%)!important}
+ body.booktkit-home-page .booktkit-mobile-category-card strong{position:absolute!important;left:12px!important;right:10px!important;bottom:10px!important;z-index:2!important;color:#fff!important;font-size:14px!important;font-weight:800!important;line-height:1.15!important;text-shadow:0 1px 3px rgba(0,0,0,.25)!important}
+}
+
+/* Mobile homepage polish v2: compact typography, rounded categories, 2-up swipe events */
+@media only screen and (max-width:767px){
+ body.booktkit-home-page .hero-section{min-height:285px!important;padding:25px 16px 18px!important;border-radius:18px!important}
+ body.booktkit-home-page .hero-content h1{max-width:255px!important;font-size:27px!important;line-height:1.08!important;letter-spacing:-.6px!important}
+ body.booktkit-home-page .hero-content p{max-width:265px!important;font-size:12px!important;line-height:1.4!important}
+ body.booktkit-home-page .booktkit-mobile-section-head h2,
+ body.booktkit-home-page .events-section .section-title h2{font-size:18px!important;line-height:1.2!important;letter-spacing:-.2px!important}
+ body.booktkit-home-page .booktkit-mobile-categories-wrap{padding:15px 12px 5px!important}
+ body.booktkit-home-page .booktkit-mobile-categories{gap:9px!important}
+ body.booktkit-home-page .booktkit-mobile-category-card{height:104px!important;border-radius:22px!important}
+ body.booktkit-home-page .booktkit-mobile-category-card img{border-radius:22px!important}
+ body.booktkit-home-page .booktkit-mobile-category-card strong{left:10px!important;bottom:9px!important;font-size:12px!important}
+ body.booktkit-home-page .events-section{padding:18px 0 20px!important;overflow:hidden!important}
+ body.booktkit-home-page .events-section>.container{max-width:none!important;padding:0!important}
+ body.booktkit-home-page .events-section .section-title{margin:0 12px 10px!important}
+ body.booktkit-home-page .events-section nav{padding-left:12px!important}
+ body.booktkit-home-page .events-tabs{padding-right:12px!important}
+ body.booktkit-home-page .events-section .tab-content{overflow:visible!important}
+ body.booktkit-home-page .events-section .tab-pane>.row{
+   display:flex!important;flex-wrap:nowrap!important;gap:10px!important;overflow-x:auto!important;
+   margin:0!important;padding:0 12px 10px!important;scroll-snap-type:x mandatory!important;
+   scrollbar-width:none!important;-webkit-overflow-scrolling:touch!important
+ }
+ body.booktkit-home-page .events-section .tab-pane>.row::-webkit-scrollbar{display:none!important}
+ body.booktkit-home-page .events-section .tab-pane>.row>.item{
+   flex:0 0 calc((100vw - 34px)/2)!important;max-width:calc((100vw - 34px)/2)!important;
+   width:calc((100vw - 34px)/2)!important;padding:0!important;scroll-snap-align:start!important
+ }
+ body.booktkit-home-page .event-item{height:100%!important;margin:0!important;border-radius:14px!important}
+ body.booktkit-home-page .event-image{height:112px!important}
+ body.booktkit-home-page .event-content{padding:9px 9px 10px!important}
+ body.booktkit-home-page .event-content h5{font-size:13px!important;line-height:1.25!important;margin:5px 0!important;min-height:32px!important}
+ body.booktkit-home-page .event-content .organizer{display:block!important;overflow:hidden!important;white-space:nowrap!important;text-overflow:ellipsis!important;font-size:9px!important}
+ body.booktkit-home-page .time-info{gap:5px!important;overflow:hidden!important}
+ body.booktkit-home-page .time-info li{font-size:9px!important;white-space:nowrap!important}
+ body.booktkit-home-page .time-info li:nth-child(2){display:none!important}
+ body.booktkit-home-page .price-remain{margin-top:6px!important;padding-top:7px!important;align-items:center!important}
+ body.booktkit-home-page .price-remain .location{max-width:58%!important;overflow:hidden!important;white-space:nowrap!important;text-overflow:ellipsis!important;font-size:9px!important}
+ body.booktkit-home-page .price-remain .price{font-size:11px!important;font-weight:800!important}
+ .booktkit-mobile-tabbar{display:flex!important;height:66px!important;visibility:visible!important;opacity:1!important}
+ .booktkit-mobile-tabbar a{font-size:9px!important}
+ .booktkit-mobile-tabbar i{font-size:17px!important}
+}
+
+/* Approved BookTKIT mobile homepage composition */
+.booktkit-mobile-category-circles,.booktkit-mobile-explore,.booktkit-mobile-how,.booktkit-mobile-partners{display:none}
+@media(max-width:767px){
+ body.booktkit-home-page{padding-bottom:72px!important}
+ body.booktkit-home-page .hero-section{margin:10px 12px 0!important;min-height:300px!important;border-radius:18px!important}
+ body.booktkit-home-page .hero-content h1{font-size:28px!important}
+ body.booktkit-home-page .event-search{left:14px!important;right:14px!important;bottom:14px!important;height:50px!important}
+ .booktkit-mobile-category-circles{display:flex;gap:13px;overflow-x:auto;padding:15px 12px 12px;background:#fff;scrollbar-width:none}
+ .booktkit-mobile-category-circles::-webkit-scrollbar{display:none}
+ .booktkit-mobile-category-circles a{flex:0 0 60px;text-align:center;color:#20242b!important}
+ .booktkit-mobile-category-circles span{display:block;width:54px;height:54px;margin:auto;border-radius:50%;overflow:hidden;border:2px solid #fff;box-shadow:0 2px 9px rgba(0,0,0,.12)}
+ .booktkit-mobile-category-circles img{width:100%;height:100%;object-fit:cover}
+ .booktkit-mobile-category-circles strong{display:block;margin-top:6px;font-size:10px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ body.booktkit-home-page .events-section{padding:15px 12px 18px!important;background:#fff!important}
+ body.booktkit-home-page .events-section>.container{padding:0!important}
+ body.booktkit-home-page .events-section .section-title{margin:0 0 11px!important}
+ body.booktkit-home-page .events-section .section-title h2{font-size:18px!important}
+ body.booktkit-home-page .events-section nav{display:none!important}
+ body.booktkit-home-page .events-section .tab-pane>.row{display:block!important;overflow:visible!important;padding:0!important;margin:0!important}
+ body.booktkit-home-page .events-section .tab-pane>.row>.item{width:100%!important;max-width:100%!important;padding:0!important;margin:0 0 11px!important}
+ body.booktkit-home-page .events-section .tab-pane>.row>.item:nth-child(n+5){display:none!important}
+ body.booktkit-home-page .event-item{display:grid!important;grid-template-columns:116px minmax(0,1fr);min-height:116px!important;border-radius:15px!important}
+ body.booktkit-home-page .event-image{height:100%!important;min-height:116px!important}
+ body.booktkit-home-page .event-content{padding:10px!important}
+ body.booktkit-home-page .event-content h5{font-size:13px!important;min-height:auto!important;margin:4px 0!important}
+ body.booktkit-home-page .event-content .time-info li{font-size:9px!important}
+ .booktkit-mobile-explore,.booktkit-mobile-how,.booktkit-mobile-partners{display:block;padding:17px 12px;background:#fff}
+ .booktkit-mobile-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+ .booktkit-mobile-section-head h2{margin:0;font-size:18px;font-weight:800;color:#181c24}
+ .booktkit-mobile-section-head a{font-size:11px;font-weight:700;color:#f5ad00}
+ .booktkit-mobile-explore-track{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+ .booktkit-mobile-explore-track::-webkit-scrollbar{display:none}
+ .booktkit-mobile-explore-card{position:relative;flex:0 0 calc((100vw - 34px)/2);height:142px;border-radius:17px;overflow:hidden;scroll-snap-align:start;background:#222}
+ .booktkit-mobile-explore-card img{width:100%;height:100%;object-fit:cover}
+ .booktkit-mobile-explore-card span{position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,rgba(0,0,0,.75))}
+ .booktkit-mobile-explore-card strong{position:absolute;left:11px;right:8px;bottom:10px;color:#fff;font-size:13px;font-weight:800}
+ .booktkit-mobile-how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+ .booktkit-mobile-how-grid div{padding:12px 5px 10px;text-align:center;border:1px solid #eef0f3;border-radius:14px;background:#fafbfc}
+ .booktkit-mobile-how-grid i{display:flex;width:38px;height:38px;margin:0 auto 7px;align-items:center;justify-content:center;border-radius:50%;background:#fff4d4;color:#f5ad00;font-size:16px}
+ .booktkit-mobile-how-grid strong,.booktkit-mobile-how-grid small{display:block}
+ .booktkit-mobile-how-grid strong{font-size:11px;color:#1c2027}
+ .booktkit-mobile-how-grid small{margin-top:2px;font-size:9px;color:#7a818b}
+ .booktkit-mobile-partner-track{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+ .booktkit-mobile-partner-track span{display:flex;flex:0 0 105px;height:52px;align-items:center;justify-content:center;border:1px solid #eceef1;border-radius:12px;background:#fff;font-size:12px;font-weight:700;color:#454b55}
+ .booktkit-mobile-tabbar{display:flex!important}
+}

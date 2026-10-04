@@ -204,6 +204,15 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
   });
 
 
+  // Mobile Homepage Studio
+  Route::get('/mobile-home', 'BackEnd\\HomePage\\MobileHomeStudioController@index')->name('admin.mobile_home.index');
+  Route::post('/mobile-home/templates', 'BackEnd\\HomePage\\MobileHomeStudioController@storeTemplate')->name('admin.mobile_home.template.store');
+  Route::post('/mobile-home/campaigns', 'BackEnd\\HomePage\\MobileHomeStudioController@storeCampaign')->name('admin.mobile_home.campaign.store');
+  Route::get('/mobile-home/campaigns/{campaign}/edit', 'BackEnd\\HomePage\\MobileHomeStudioController@edit')->name('admin.mobile_home.edit');
+  Route::post('/mobile-home/campaigns/{campaign}', 'BackEnd\\HomePage\\MobileHomeStudioController@update')->name('admin.mobile_home.update');
+  Route::post('/mobile-home/campaigns/{campaign}/publish', 'BackEnd\\HomePage\\MobileHomeStudioController@publish')->name('admin.mobile_home.publish');
+  Route::post('/mobile-home/campaigns/{campaign}/toggle', 'BackEnd\\HomePage\\MobileHomeStudioController@toggle')->name('admin.mobile_home.toggle');
+
   Route::prefix('/home-page')->middleware('permission:Home Page')->group(function () {
     Route::get('/event-features-section', 'BackEnd\HomePage\EventFeatureController@index')->name('admin.home_page.event_features_section');
     Route::post('/update-event-features-section', 'BackEnd\HomePage\EventFeatureController@update')->name('admin.home_page.update_event_feature_section');

@@ -10,6 +10,7 @@
 @section('meta-keywords', "{{ $metaKeywords }}")
 @section('meta-description', "$metaDescription")
 
+@section('body-class', 'booktkit-home-page')
 @section('hero-section')
     <!-- Hero Section Start -->
     @if ($heroSection)
@@ -54,6 +55,15 @@
     <!-- Hero Section End -->
 @endsection
 @section('content')
+    <section class="booktkit-mobile-category-circles" aria-label="{{ __('Event Categories') }}">
+      @foreach ($categories->take(6) as $category)
+        <a href="{{ route('events', ['category' => $category->slug]) }}">
+          <span><img src="{{ asset('assets/admin/img/event-category/' . $category->image) }}" alt="{{ $category->name }}"></span>
+          <strong>{{ $category->name }}</strong>
+        </a>
+      @endforeach
+    </section>
+
 
     <!-- Events Section Start -->
     @if ($secInfo->featured_section_status == 1)
@@ -1135,4 +1145,45 @@
         </section>
     @endif
     <!-- Client Logo End -->
+    <section class="booktkit-mobile-explore">
+      <div class="booktkit-mobile-section-head"><h2>{{ __('Explore Categories') }}</h2><a href="{{ route('events') }}">{{ __('See All') }}</a></div>
+      <div class="booktkit-mobile-explore-track">
+        @foreach ($categories as $category)
+          <a class="booktkit-mobile-explore-card" href="{{ route('events', ['category' => $category->slug]) }}">
+            <img src="{{ asset('assets/admin/img/event-category/' . $category->image) }}" alt="{{ $category->name }}">
+            <span></span><strong>{{ $category->name }}</strong>
+          </a>
+        @endforeach
+      </div>
+    </section>
+    <section class="booktkit-mobile-how">
+      <div class="booktkit-mobile-section-head"><h2>{{ __('How It Works') }}</h2></div>
+      <div class="booktkit-mobile-how-grid">
+        <div><i class="far fa-calendar-alt"></i><strong>1. {{ __('Browse') }}</strong><small>{{ __('Find events') }}</small></div>
+        <div><i class="fas fa-ticket-alt"></i><strong>2. {{ __('Book') }}</strong><small>{{ __('Choose tickets') }}</small></div>
+        <div><i class="fas fa-qrcode"></i><strong>3. {{ __('Enjoy') }}</strong><small>{{ __('Show your ticket') }}</small></div>
+      </div>
+    </section>
+    <section class="booktkit-mobile-partners">
+      <div class="booktkit-mobile-section-head"><h2>{{ __('Partners') }}</h2></div>
+      <div class="booktkit-mobile-partner-track">
+        <span>Razorpay</span><span>Google</span><span>Meta</span><span>WhatsApp</span>
+      </div>
+    </section>
+
+    <nav class="booktkit-mobile-tabbar" aria-label="Mobile navigation">
+      <a class="active" href="{{ route('index') }}"><i class="fas fa-home"></i><span>{{ __('Home') }}</span></a>
+      <a href="{{ route('events') }}"><i class="far fa-calendar-alt"></i><span>{{ __('Events') }}</span></a>
+      @if (Auth::guard('customer')->check())
+        <a href="{{ route('customer.dashboard') }}"><i class="fas fa-ticket-alt"></i><span>{{ __('My Tickets') }}</span></a>
+      @else
+        <a href="{{ route('customer.login') }}"><i class="fas fa-ticket-alt"></i><span>{{ __('My Tickets') }}</span></a>
+      @endif
+      <a href="{{ route('contact') }}"><i class="far fa-bell"></i><span>{{ __('Support') }}</span></a>
+      @if (Auth::guard('customer')->check())
+        <a href="{{ route('customer.dashboard') }}"><i class="far fa-user"></i><span>{{ __('Account') }}</span></a>
+      @else
+        <a href="{{ route('customer.login') }}"><i class="far fa-user"></i><span>{{ __('Account') }}</span></a>
+      @endif
+    </nav>
 @endsection
