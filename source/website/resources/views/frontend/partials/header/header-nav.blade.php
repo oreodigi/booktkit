@@ -85,7 +85,7 @@
                 @else
                   <div class="dropdown">
                     <button type="button" class="menu-btn dropdown-toggle mr-1"
-                      data-toggle="dropdown">{{ Auth::guard('customer')->user()->username }}</button>
+                      data-toggle="dropdown">{{ trim((Auth::guard('customer')->user()->fname ?? '') . ' ' . (Auth::guard('customer')->user()->lname ?? '')) ?: Auth::guard('customer')->user()->email }}</button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                       <a class="dropdown-item" href="{{ route('customer.dashboard') }}">{{ __('Dashboard') }}</a>
                       <a class="dropdown-item" href="{{ route('customer.logout') }}">{{ __('Logout') }}</a>
@@ -93,7 +93,7 @@
                   </div>
                 @endif
                 @if (!Auth::guard('organizer')->check())
-                  <div class="dropdown auth-menu-entry organizer-menu-entry">
+                  <div class="dropdown auth-menu-entry organizer-menu-entry guest-organizer-entry">
                     <a class="menu-btn" href="{{ route('organizer.login') }}">{{ __('Organizer Login') }}</a>
                   </div>
                 @else
