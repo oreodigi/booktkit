@@ -8,7 +8,7 @@ const server = new McpServer({ name: 'booktkit-devtools', version: '0.1.0' });
 server.tool(
   'booktkit_run_tests',
   'Run an approved BookTKIT Playwright suite. Read-only browser tests by default; no production data mutation.',
-  { suite: z.enum(['smoke', 'mobile', 'auth', 'organizer', 'api', 'security', 'razorpay', 'all']).default('smoke') },
+  { suite: z.enum(['smoke', 'mobile', 'auth', 'organizer', 'api', 'security', 'razorpay', 'scanner', 'contracts', 'all']).default('smoke') },
   async ({ suite }) => {
     const result = await runSuite(suite);
     return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }], isError: !result.ok };
