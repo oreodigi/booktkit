@@ -117,15 +117,7 @@
 
                 </div>
                 <div class="col-sm-12">
-                  @if ($basicInfo->google_recaptcha_status == 1)
-                    <div class="form-group">
-                      {!! NoCaptcha::renderJs() !!}
-                      {!! NoCaptcha::display() !!}
-                      @error('g-recaptcha-response')
-                        <p class="text-danger">{{ $message }}</p>
-                      @enderror
-                    </div>
-                  @endif
+                  @include('frontend.partials.recaptcha-v3', ['formId' => 'comment-form', 'action' => 'contact'])
                 </div>
                 <div class="col-sm-12">
                   <div class="form-group mb-0">
