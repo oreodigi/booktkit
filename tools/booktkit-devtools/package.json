@@ -1,6 +1,6 @@
 {
   "name": "@booktkit/devtools",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -19,7 +19,8 @@
     "test:api": "playwright test tests/api-surface.spec.js",
     "test:security": "playwright test tests/security-boundaries.spec.js tests/mutation-guard.spec.js",
     "test:scanner": "playwright test tests/scanner-contract.spec.js",
-    "test:contracts": "playwright test tests/mobile-api-contract.spec.js tests/razorpay-contract.spec.js tests/scanner-contract.spec.js"
+    "test:contracts": "playwright test tests/mobile-api-contract.spec.js tests/razorpay-contract.spec.js tests/scanner-contract.spec.js",
+    "test:run": "node src/cli.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.2",
