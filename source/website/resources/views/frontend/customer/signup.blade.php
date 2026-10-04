@@ -112,15 +112,7 @@
                 </div>
               </div>
               <div class="col-sm-6">
-                @if ($basicInfo->google_recaptcha_status == 1)
-                  <div class="form-group">
-                    {!! NoCaptcha::renderJs() !!}
-                    {!! NoCaptcha::display() !!}
-                    @error('g-recaptcha-response')
-                      <p class="text-danger">{{ $message }}</p>
-                    @enderror
-                  </div>
-                @endif
+                @include('frontend.partials.recaptcha-v3', ['formId' => 'login-form', 'action' => 'customer_signup'])
               </div>
             </div>
             <div class="form-group mb-0">
