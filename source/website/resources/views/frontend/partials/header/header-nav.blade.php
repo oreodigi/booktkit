@@ -26,6 +26,7 @@
             </div>
 
             <div class="navbar-collapse collapse clearfix" id="main-menu">
+              <div class="mobile-menu-head d-xl-none"><span class="mobile-menu-title">{{ __('Menu') }}</span><button type="button" class="mobile-menu-close" aria-label="Close menu">&times;</button></div>
               @php
                 $links = json_decode($menuInfos, true);
               @endphp
@@ -116,3 +117,7 @@
   </div>
   <!--End Header Upper-->
 </header>
+<div class="mobile-menu-backdrop"></div>
+<script>
+document.addEventListener("DOMContentLoaded",function(){var t=document.querySelector(".navbar-toggle"),c=document.querySelector(".mobile-menu-close"),b=document.querySelector(".mobile-menu-backdrop"),m=document.getElementById("main-menu");function closeMenu(){if(m){m.classList.remove("show");document.body.classList.remove("mobile-menu-open")}}function openMenu(){document.body.classList.add("mobile-menu-open")}if(t)t.addEventListener("click",function(){setTimeout(function(){m&&m.classList.contains("show")?openMenu():closeMenu()},10)});if(c)c.addEventListener("click",closeMenu);if(b)b.addEventListener("click",closeMenu);document.querySelectorAll("#main-menu a").forEach(function(a){a.addEventListener("click",function(){if(!a.closest("li.dropdown")||a.closest(".dropdown-menu"))closeMenu()})})});
+</script>
