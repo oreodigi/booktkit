@@ -13,11 +13,16 @@ on:
           - contracts
           - mobile
           - auth
+          - signup
+          - login
           - organizer
+          - event-creation
+          - checkout
           - api
           - security
           - razorpay
           - scanner
+          - diagnostics
           - all
       base_url:
         description: Target URL. Production is always read-only.
@@ -46,7 +51,7 @@ jobs:
         run: |
           node -e "const u=new URL(process.env.BOOKTKIT_BASE_URL); if(!['https:'].includes(u.protocol)) process.exit(2); const allowed=['booktkit.com','www.booktkit.com']; if(!allowed.includes(u.hostname) && !u.hostname.endsWith('.booktkit.com')) process.exit(3)"
       - run: npm ci
-      - run: npx playwright install --with-deps chromium webkit
+      - run: npx playwright install --with-deps chromium firefox webkit
       - name: Run selected suite
         run: node src/cli.js "${{ inputs.suite }}"
       - name: Upload Playwright artifacts

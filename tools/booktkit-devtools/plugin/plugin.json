@@ -1,0 +1,12 @@
+{
+  "name": "BookTKIT Testing",
+  "version": "1.0.0",
+  "description": "BookTKIT-specific Playwright QA and regression control plane.",
+  "mcp": {
+    "transport": "streamable-http",
+    "path": "/mcp",
+    "authentication": "bearer"
+  },
+  "skill": "SKILL.md",
+  "sourceRepository": "oreodigi/booktkit"
+}

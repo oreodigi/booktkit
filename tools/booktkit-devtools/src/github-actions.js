@@ -1,7 +1,7 @@
 const OWNER = 'oreodigi';
 const REPO = 'booktkit';
 const WORKFLOW = 'booktkit-e2e.yml';
-const ALLOWED_SUITES = new Set(['smoke','contracts','mobile','auth','organizer','api','security','razorpay','scanner','all']);
+const ALLOWED_SUITES = new Set(['smoke','contracts','mobile','auth','signup','login','organizer','event-creation','checkout','api','security','razorpay','scanner','diagnostics','all']);
 
 function headers() {
   const token = process.env.BOOKTKIT_GITHUB_TOKEN;
