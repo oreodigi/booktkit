@@ -15,7 +15,9 @@
     "mcp": "node src/mcp-server.js",
     "test:auth": "playwright test tests/organizer-auth.spec.js tests/customer-auth.spec.js",
     "test:organizer": "playwright test tests/organizer-capabilities.spec.js tests/staging-event.spec.js",
-    "test:razorpay": "playwright test tests/razorpay.spec.js"
+    "test:razorpay": "playwright test tests/razorpay.spec.js",
+    "test:api": "playwright test tests/api-surface.spec.js",
+    "test:security": "playwright test tests/security-boundaries.spec.js tests/mutation-guard.spec.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.2",
