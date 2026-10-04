@@ -101,7 +101,7 @@ class HomeController extends Controller
     $queryResult['partnerInfo'] = PartnerSection::where('language_id', $language->id)->first();
     $queryResult['partners'] = Partner::orderBy('serial_number', 'asc')->get();
     $mobileHomeResolver = app(MobileHomeResolver::class);
-    $queryResult['mobileHomeCampaign'] = $mobileHomeResolver->active() ?: $mobileHomeResolver->fallback();
+    $queryResult['mobileHomeCampaign'] = session('mobile_home_preview_campaign') ? \App\Models\MobileHomeCampaign::with(['template','sections'=>fn($q)=>$q->orderBy('position')])->find(session('mobile_home_preview_campaign')) : ($mobileHomeResolver->active() ?: $mobileHomeResolver->fallback());
     $queryResult['footerInfo'] = FooterContent::where('language_id', $language->id)->first();
     $queryResult['quickLinkInfos'] = QuickLink::orderBy('serial_number', 'asc')->get();
 
