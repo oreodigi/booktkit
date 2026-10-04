@@ -39,8 +39,13 @@ jobs:
         working-directory: tools/booktkit-devtools
     env:
       BOOKTKIT_BASE_URL: ${{ inputs.base_url }}
-      BOOKTKIT_ALLOW_MUTATIONS: "false"
-      BOOKTKIT_RAZORPAY_TEST_ENABLED: "false"
+      # Mutation suites are permitted only on the isolated staging hostname.
+      BOOKTKIT_ALLOW_MUTATIONS: ${{ inputs.base_url == 'https://test.booktkit.com' && 'true' || 'false' }}
+      BOOKTKIT_RAZORPAY_TEST_ENABLED: ${{ inputs.base_url == 'https://test.booktkit.com' && 'true' || 'false' }}
+      BOOKTKIT_TEST_ORGANIZER_EMAIL: ${{ secrets.BOOKTKIT_TEST_ORGANIZER_EMAIL }}
+      BOOKTKIT_TEST_ORGANIZER_PASSWORD: ${{ secrets.BOOKTKIT_TEST_ORGANIZER_PASSWORD }}
+      BOOKTKIT_TEST_CUSTOMER_EMAIL: ${{ secrets.BOOKTKIT_TEST_CUSTOMER_EMAIL }}
+      BOOKTKIT_TEST_CUSTOMER_PASSWORD: ${{ secrets.BOOKTKIT_TEST_CUSTOMER_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -49,7 +54,7 @@ jobs:
       - name: Validate target
         shell: bash
         run: |
-          node -e "const u=new URL(process.env.BOOKTKIT_BASE_URL); if(!['https:'].includes(u.protocol)) process.exit(2); const allowed=['booktkit.com','www.booktkit.com']; if(!allowed.includes(u.hostname) && !u.hostname.endsWith('.booktkit.com')) process.exit(3)"
+          node -e "const u=new URL(process.env.BOOKTKIT_BASE_URL); if(u.protocol!=='https:') process.exit(2); const allowed=['booktkit.com','www.booktkit.com','test.booktkit.com']; if(!allowed.includes(u.hostname)) process.exit(3); if(process.env.BOOKTKIT_ALLOW_MUTATIONS==='true' && u.hostname!=='test.booktkit.com') process.exit(4)"
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox webkit
       - name: Run selected suite
