@@ -9,7 +9,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  workers: 2,
   reporter: [['list'], ['html', { outputFolder: 'artifacts/html-report', open: 'never' }]],
   outputDir: 'artifacts/test-results',
   use: {

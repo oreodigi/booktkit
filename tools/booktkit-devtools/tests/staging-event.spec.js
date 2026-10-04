@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { assertMutationAllowed } from '../src/safety.js';
 
 test.describe('Organizer event builder @mutation', () => {
+  test.skip(process.env.BOOKTKIT_ALLOW_MUTATIONS !== 'true', 'requires explicitly enabled staging tests');
   test.beforeEach(() => assertMutationAllowed());
 
   test('venue event form exposes core scheduling and pricing controls', async ({ page }) => {

@@ -857,10 +857,10 @@
 
 @section('script')
     @if ($settings->google_map_status == 1)
+        <script src="{{ asset('assets/admin/js/edit-map-init.js') }}"></script>
         <script
             src="https://maps.googleapis.com/maps/api/js?key={{ $settings->google_map_api_key }}&libraries=places&callback=initMap"
             async defer></script>
-        <script src="{{ asset('assets/admin/js/edit-map-init.js') }}"></script>
     @endif
     <script type="text/javascript" src="{{ asset('assets/admin/js/admin-partial.js') }}"></script>
     <script src="{{ asset('assets/admin/js/admin_dropzone.js') }}"></script>

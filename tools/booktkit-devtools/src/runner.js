@@ -1,10 +1,13 @@
 import { spawn } from 'node:child_process';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
 
 const allowedSuites = new Set(['all', 'smoke', 'mobile', 'auth', 'organizer', 'api', 'security', 'razorpay', 'scanner', 'contracts']);
 
 export function runSuite(suite = 'smoke') {
   if (!allowedSuites.has(suite)) throw new Error('Unsupported suite');
-  const args = ['playwright', 'test'];
+  const args = [require.resolve('@playwright/test/cli'), 'test'];
   if (suite === 'smoke') args.push('--grep', '@smoke');
   if (suite === 'mobile') args.push('--project=mobile-chrome');
   if (suite === 'auth') args.push('tests/organizer-auth.spec.js', 'tests/customer-auth.spec.js');
@@ -16,7 +19,7 @@ export function runSuite(suite = 'smoke') {
   if (suite === 'contracts') args.push('tests/mobile-api-contract.spec.js', 'tests/razorpay-contract.spec.js', 'tests/scanner-contract.spec.js');
 
   return new Promise((resolve) => {
-    const child = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', args, {
+    const child = spawn(process.execPath, args, {
       cwd: new URL('..', import.meta.url),
       env: process.env,
       shell: false
@@ -24,6 +27,7 @@ export function runSuite(suite = 'smoke') {
     let stdout = '', stderr = '';
     child.stdout.on('data', d => stdout += d);
     child.stderr.on('data', d => stderr += d);
+    child.on('error', error => resolve({ ok: false, code: null, stdout, stderr: error.message }));
     child.on('close', code => resolve({ ok: code === 0, code, stdout: stdout.slice(-12000), stderr: stderr.slice(-12000) }));
   });
 }

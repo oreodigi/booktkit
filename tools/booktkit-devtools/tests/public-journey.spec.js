@@ -5,7 +5,7 @@ test.describe('Public customer journey @smoke', () => {
   for (const [path, label] of [['/', 'home'], ['/events', 'events'], ['/organizers', 'organizers'], ['/contact', 'contact'], ['/about-us', 'about']]) {
     test(label + ' page is healthy', async ({ page }) => {
       const d = attachDiagnostics(page);
-      const response = await page.goto(path, { waitUntil: 'domcontentloaded' });
+      const response = await page.goto(path, { waitUntil: 'load' });
       expect(response).not.toBeNull();
       expect(response.status()).toBeLessThan(400);
       await expect(page.locator('body')).toBeVisible();

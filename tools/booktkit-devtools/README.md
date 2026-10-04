@@ -13,8 +13,8 @@ Requires Node.js 20+.
 
 ```bash
 cd tools/booktkit-devtools
-npm install
-npx playwright install chromium
+npm ci
+npx playwright install chromium webkit
 npm run test:smoke
 npm run mcp
 ```

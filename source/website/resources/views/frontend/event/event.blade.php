@@ -524,5 +524,7 @@
     <script src="{{ asset('assets/front/js/custom_script.js') }}"></script>
     @if ($basicInfo->google_map_status == 1)
         <script src="{{ asset('assets/front/js/geo-search.js') }}"></script>
+        <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key={{ $basicInfo->google_map_api_key }}&libraries=places&callback=initMap"></script>
     @endif
 @endsection

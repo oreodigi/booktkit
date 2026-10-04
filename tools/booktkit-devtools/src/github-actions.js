@@ -23,7 +23,7 @@ function validateTarget(baseUrl) {
   return u.toString().replace(/\/$/, '');
 }
 
-export async function dispatchSuite({ suite='smoke', baseUrl='https://www.booktkit.com', ref='feature/booktkit-devtools' }={}) {
+export async function dispatchSuite({ suite='smoke', baseUrl='https://www.booktkit.com', ref='main' }={}) {
   if (!ALLOWED_SUITES.has(suite)) throw new Error('Unsupported suite');
   const target = validateTarget(baseUrl);
   const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW}/dispatches`, {

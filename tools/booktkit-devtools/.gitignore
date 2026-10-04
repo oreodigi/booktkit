@@ -2,3 +2,4 @@ node_modules/
 artifacts/
 .env
 playwright/.cache/
+test-summary.json
