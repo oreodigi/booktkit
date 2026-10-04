@@ -14,6 +14,7 @@ class VerifyCsrfToken extends Middleware
   protected $except = [
     '*/flutterwave/notify',
     '*/razorpay/notify',
+    'api/v1/webhooks/razorpay',
     '*/mercadopago/notify',
     '*/paytm/notify',
     'organizer/check-qrcode/',
