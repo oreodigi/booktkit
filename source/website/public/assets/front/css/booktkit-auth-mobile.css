@@ -1192,3 +1192,47 @@
  body.booktkit-home-page .booktkit-mobile-category-overlay{position:absolute!important;inset:0!important;background:linear-gradient(180deg,rgba(0,0,0,.04) 28%,rgba(0,0,0,.72) 100%)!important}
  body.booktkit-home-page .booktkit-mobile-category-card strong{position:absolute!important;left:12px!important;right:10px!important;bottom:10px!important;z-index:2!important;color:#fff!important;font-size:14px!important;font-weight:800!important;line-height:1.15!important;text-shadow:0 1px 3px rgba(0,0,0,.25)!important}
 }
+
+/* Mobile homepage polish v2: compact typography, rounded categories, 2-up swipe events */
+@media only screen and (max-width:767px){
+ body.booktkit-home-page .hero-section{min-height:285px!important;padding:25px 16px 18px!important;border-radius:18px!important}
+ body.booktkit-home-page .hero-content h1{max-width:255px!important;font-size:27px!important;line-height:1.08!important;letter-spacing:-.6px!important}
+ body.booktkit-home-page .hero-content p{max-width:265px!important;font-size:12px!important;line-height:1.4!important}
+ body.booktkit-home-page .booktkit-mobile-section-head h2,
+ body.booktkit-home-page .events-section .section-title h2{font-size:18px!important;line-height:1.2!important;letter-spacing:-.2px!important}
+ body.booktkit-home-page .booktkit-mobile-categories-wrap{padding:15px 12px 5px!important}
+ body.booktkit-home-page .booktkit-mobile-categories{gap:9px!important}
+ body.booktkit-home-page .booktkit-mobile-category-card{height:104px!important;border-radius:22px!important}
+ body.booktkit-home-page .booktkit-mobile-category-card img{border-radius:22px!important}
+ body.booktkit-home-page .booktkit-mobile-category-card strong{left:10px!important;bottom:9px!important;font-size:12px!important}
+ body.booktkit-home-page .events-section{padding:18px 0 20px!important;overflow:hidden!important}
+ body.booktkit-home-page .events-section>.container{max-width:none!important;padding:0!important}
+ body.booktkit-home-page .events-section .section-title{margin:0 12px 10px!important}
+ body.booktkit-home-page .events-section nav{padding-left:12px!important}
+ body.booktkit-home-page .events-tabs{padding-right:12px!important}
+ body.booktkit-home-page .events-section .tab-content{overflow:visible!important}
+ body.booktkit-home-page .events-section .tab-pane>.row{
+   display:flex!important;flex-wrap:nowrap!important;gap:10px!important;overflow-x:auto!important;
+   margin:0!important;padding:0 12px 10px!important;scroll-snap-type:x mandatory!important;
+   scrollbar-width:none!important;-webkit-overflow-scrolling:touch!important
+ }
+ body.booktkit-home-page .events-section .tab-pane>.row::-webkit-scrollbar{display:none!important}
+ body.booktkit-home-page .events-section .tab-pane>.row>.item{
+   flex:0 0 calc((100vw - 34px)/2)!important;max-width:calc((100vw - 34px)/2)!important;
+   width:calc((100vw - 34px)/2)!important;padding:0!important;scroll-snap-align:start!important
+ }
+ body.booktkit-home-page .event-item{height:100%!important;margin:0!important;border-radius:14px!important}
+ body.booktkit-home-page .event-image{height:112px!important}
+ body.booktkit-home-page .event-content{padding:9px 9px 10px!important}
+ body.booktkit-home-page .event-content h5{font-size:13px!important;line-height:1.25!important;margin:5px 0!important;min-height:32px!important}
+ body.booktkit-home-page .event-content .organizer{display:block!important;overflow:hidden!important;white-space:nowrap!important;text-overflow:ellipsis!important;font-size:9px!important}
+ body.booktkit-home-page .time-info{gap:5px!important;overflow:hidden!important}
+ body.booktkit-home-page .time-info li{font-size:9px!important;white-space:nowrap!important}
+ body.booktkit-home-page .time-info li:nth-child(2){display:none!important}
+ body.booktkit-home-page .price-remain{margin-top:6px!important;padding-top:7px!important;align-items:center!important}
+ body.booktkit-home-page .price-remain .location{max-width:58%!important;overflow:hidden!important;white-space:nowrap!important;text-overflow:ellipsis!important;font-size:9px!important}
+ body.booktkit-home-page .price-remain .price{font-size:11px!important;font-weight:800!important}
+ .booktkit-mobile-tabbar{display:flex!important;height:66px!important;visibility:visible!important;opacity:1!important}
+ .booktkit-mobile-tabbar a{font-size:9px!important}
+ .booktkit-mobile-tabbar i{font-size:17px!important}
+}
