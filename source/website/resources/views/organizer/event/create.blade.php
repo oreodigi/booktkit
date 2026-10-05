@@ -85,7 +85,7 @@
                                 </div>
                                 <p class="text-warning">{{ __('Required: 1170×570. Maximum saved size 1 MB. Larger originals are compressed automatically after crop/resize.') }}</p>
                             </div>
-                            <form id="eventForm" action="{{ route('organizer.event_management.store_event') }}"
+                            <form id="eventForm" data-actor="organizer" data-mode="create" data-event-type="{{ $event->event_type ?? request('type', 'venue') }}" action="{{ route('organizer.event_management.store_event') }}"
                                 method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" name="event_type" value="{{ request()->input('type') }}">
@@ -735,14 +735,14 @@
 
 @section('script')
     @if ($settings->google_map_status == 1)
-        <script src="{{ asset('assets/admin/js/map-init.js') }}?v={{ @filemtime(public_path('assets/admin/js/map-init.js')) }}"></script>
+        <script src="{{ asset('assets/admin/js/event-location.js') }}?v={{ @filemtime(public_path('assets/admin/js/event-location.js')) }}"></script>
         <script
             src="https://maps.googleapis.com/maps/api/js?key={{ $settings->google_map_api_key }}&libraries=places&callback=initMap"
             async defer></script>
     @endif
     <script type="text/javascript" src="{{ asset('assets/admin/js/admin-partial.js') }}"></script>
     <script src="{{ asset('assets/admin/js/admin_dropzone.js') }}"></script>
-    <script src="{{ asset('assets/admin/js/event-create-wizard.js') }}?v={{ @filemtime(public_path('assets/admin/js/event-create-wizard.js')) }}"></script>
+    <script src="{{ asset('assets/admin/js/event-wizard.js') }}?v={{ @filemtime(public_path('assets/admin/js/event-wizard.js')) }}"></script>
     <script>
         $(document).ready(function() {
             $('.js-example-basic-single').select2();
