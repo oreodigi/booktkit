@@ -128,6 +128,7 @@
                         <th scope="col">{{ __('Ticket') }}</th>
                         <th scope="col">{{ __('Status') }}</th>
                         <th scope="col">{{ __('Featured') }}</th>
+                        <th scope="col">{{ __('Duplicate') }}</th>
                         <th scope="col">{{ __('Actions') }}</th>
                       </tr>
                     </thead>
@@ -193,6 +194,14 @@
                             </form>
                           </td>
                           <td>
+                            <form action="{{ route('organizer.event_management.duplicate_event', ['id' => $event->id]) }}" method="post" class="d-inline">
+                              @csrf
+                              <button type="submit" class="btn btn-outline-primary btn-sm" title="{{ __('Duplicate Event') }}">
+                                <i class="far fa-copy"></i> {{ __('Duplicate') }}
+                              </button>
+                            </form>
+                          </td>
+                          <td>
                             <div class="dropdown">
                               <button class="btn btn-secondary dropdown-toggle btn-sm" type="button"
                                 id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
@@ -210,16 +219,6 @@
                                   class="dropdown-item">
                                   {{ __('Ticket Settings') }}
                                 </a>
-
-                                <form class="d-block"
-                                  action="{{ route('organizer.event_management.duplicate_event', ['id' => $event->id]) }}"
-                                  method="post">
-                                  @csrf
-                                  <button type="submit" class="btn btn-sm">
-                                    {{ __('Duplicate') }}
-                                  </button>
-                                </form>
-
                                 <form class="deleteForm d-block"
                                   action="{{ route('organizer.event_management.delete_event', ['id' => $event->id]) }}"
                                   method="post">
