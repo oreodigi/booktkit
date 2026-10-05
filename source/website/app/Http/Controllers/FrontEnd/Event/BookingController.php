@@ -24,6 +24,7 @@ use App\Http\Controllers\FrontEnd\PaymentGateway\ToyyibpayController;
 use App\Http\Controllers\FrontEnd\PaymentGateway\XenditController;
 use App\Http\Controllers\FrontEnd\PaymentGateway\YocoController;
 use App\Jobs\BookingInvoiceJob;
+use App\Services\Tickets\TicketDeliveryService;
 use App\Models\BasicSettings\Basic;
 use App\Models\BasicSettings\MailTemplate;
 use App\Models\Event;
@@ -227,7 +228,7 @@ class BookingController extends Controller
 
 
         // Deliver the same secure one-time QR credentials used by the scanner.
-        app(\App\Services\Tickets\TicketDeliveryService::class)->deliver($bookingInfo);
+        app(TicketDeliveryService::class)->deliver($bookingInfo);
 
         $request->session()->forget('event_id');
         $request->session()->forget('selTickets');
