@@ -11,6 +11,7 @@ use App\Services\Payments\RazorpayRouteService;
 use App\Services\Payments\PaymentLedgerService;
 use App\Services\Payments\AuthoritativeTicketPricingService;
 use App\Services\Payments\BookingFinalizationService;
+use App\Jobs\Payments\TransferOrganizerPayment;
 class PaymentController extends Controller {
  public function createRazorpayOrder(Request $r, PaymentOrderService $orders, RazorpayRouteService $razorpay, AuthoritativeTicketPricingService $pricing){
   $data=$r->validate([
@@ -46,8 +47,9 @@ class PaymentController extends Controller {
    $order->update(['gateway_payment_id'=>$data['razorpay_payment_id'],'status'=>'paid','paid_at'=>now()]);
    $booking=$bookings->finalize($order);
    $ledger->recordPaid($order);
-   $profile=$order->organizer_id ? OrganizerPaymentProfile::where('organizer_id',$order->organizer_id)->first() : null;
-   if($order->settlement_mode==='razorpay_split' && $profile && $profile->canSplit()) $razorpay->transferToOrganizer($order,$profile->razorpay_account_id);
+   if($order->settlement_mode==='razorpay_split') {
+    DB::afterCommit(fn()=>TransferOrganizerPayment::dispatch($order->id));
+   }
    return response()->json(['success'=>true,'status'=>'paid','booking_id'=>$booking->booking_id]);
   }); } catch(\Razorpay\Api\Errors\SignatureVerificationError $e) {
    return response()->json(['success'=>false,'message'=>'Invalid payment signature.'],422);
