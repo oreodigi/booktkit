@@ -48,9 +48,9 @@
 </div></div></div>
 
 <div class="card"><div class="card-header"><div class="card-title">2. Tax details</div></div><div class="card-body"><div class="row">
-<div class="col-md-4 form-group"><label>Business PAN *</label><input class="form-control text-uppercase" name="pan" maxlength="10" value="{{ old('pan',$profile->maskedPan()) }}" placeholder="AAAAA9999A" required @disabled($locked)><small class="text-muted">Stored encrypted. Existing value is masked; enter the full PAN only when changing it.</small></div>
-<div class="col-md-4 form-group"><label>Stakeholder / person PAN</label><input class="form-control text-uppercase" name="stakeholder_pan" maxlength="10" value="{{ old('stakeholder_pan',$profile->maskedStakeholderPan()) }}" placeholder="Required for incorporated/entity types" @disabled($locked)></div>
-<div class="col-md-4 form-group"><label>GSTIN (optional)</label><input class="form-control text-uppercase" name="gstin" maxlength="15" value="{{ old('gstin',$profile->maskedGstin()) }}" @disabled($locked)><small class="text-muted">GSTIN PAN segment must match the business PAN.</small></div>
+<div class="col-md-4 form-group"><label>Business PAN *</label><input class="form-control text-uppercase" name="pan" maxlength="10" value="{{ old('pan') }}" placeholder="{{ $profile->maskedPan() ?: 'AAAAA9999A' }}" @disabled($locked)><small class="text-muted">Stored encrypted. Existing value is masked; enter the full PAN only when changing it.</small></div>
+<div class="col-md-4 form-group"><label>Stakeholder / person PAN</label><input class="form-control text-uppercase" name="stakeholder_pan" maxlength="10" value="{{ old('stakeholder_pan') }}" placeholder="{{ $profile->maskedStakeholderPan() ?: 'Required for incorporated/entity types' }}" @disabled($locked)></div>
+<div class="col-md-4 form-group"><label>GSTIN (optional)</label><input class="form-control text-uppercase" name="gstin" maxlength="15" value="{{ old('gstin') }}" placeholder="{{ $profile->maskedGstin() ?: '' }}" @disabled($locked)><small class="text-muted">GSTIN PAN segment must match the business PAN.</small></div>
 </div></div></div>
 
 <div class="card"><div class="card-header"><div class="card-title">3. Bank account</div></div><div class="card-body"><div class="row">
