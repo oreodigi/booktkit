@@ -6,7 +6,7 @@ const startedAt = new Date().toISOString();
 const result = await runSuite(suite);
 const summary = {
   suite,
-  baseURL: process.env.BOOKTKIT_BASE_URL || 'https://www.booktkit.com',
+  baseURL: process.env.BOOKTKIT_BASE_URL || 'https://test.booktkit.com',
   startedAt,
   finishedAt: new Date().toISOString(),
   ...result

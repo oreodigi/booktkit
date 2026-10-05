@@ -153,7 +153,7 @@ class EventBookingController extends Controller
     $mailBody = str_replace('{website_title}', $websiteTitle, $mailBody);
 
     // initialize a new mail
-    $mail = new PHPMailer(true);
+    $mail = new \App\Support\EnvironmentMailer(true);
     $mail->CharSet = 'UTF-8';
     $mail->Encoding = 'base64';
 

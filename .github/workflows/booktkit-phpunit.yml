@@ -1,0 +1,52 @@
+name: BookTKIT PHPUnit
+on:
+  push:
+    branches: [main]
+    paths: ['source/website/**', '.github/workflows/booktkit-phpunit.yml']
+  pull_request:
+    paths: ['source/website/**', '.github/workflows/booktkit-phpunit.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: isolated-ci-password
+          MYSQL_DATABASE: booktkit_test
+        ports: ['3306:3306']
+        options: --health-cmd="mysqladmin ping -pisolated-ci-password" --health-interval=10s --health-timeout=5s --health-retries=10
+    defaults:
+      run:
+        working-directory: source/website
+    env:
+      APP_ENV: testing
+      APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: '3306'
+      DB_DATABASE: booktkit_test
+      DB_USERNAME: root
+      DB_PASSWORD: isolated-ci-password
+      MAIL_MAILER: array
+      SESSION_DRIVER: array
+      CACHE_DRIVER: array
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_mysql, gd, zip, bcmath, intl
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist --no-progress --no-scripts
+      - name: Apply maintained installer provider stubs
+        run: |
+          cp ../../deploy/vendor-patches/KdInstallerServiceProvider.php vendor/kreativdev/installer/src/KdInstallerServiceProvider.php
+          cp ../../deploy/vendor-patches/LaravelInstallerServiceProvider.php vendor/rachidlaasri/laravel-installer/src/Providers/LaravelInstallerServiceProvider.php
+          mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
+          php artisan package:discover --ansi
+      - run: vendor/bin/phpunit

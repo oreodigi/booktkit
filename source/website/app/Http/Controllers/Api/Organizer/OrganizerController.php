@@ -125,7 +125,7 @@ class OrganizerController extends Controller
       );
 
       try {
-        $mail = new PHPMailer(true);
+        $mail = new \App\Support\EnvironmentMailer(true);
         $mail->isSMTP();
         $mail->Host       = $smtp->smtp_host;
         $mail->SMTPAuth   = true;

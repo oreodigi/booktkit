@@ -298,7 +298,7 @@ class OrganizerAiTokenPurchaseService
       'websiteTitle' => $info->website_title ?? config('app.name'),
     ])->render();
 
-    $mail = new PHPMailer(true);
+    $mail = new \App\Support\EnvironmentMailer(true);
     $mail->CharSet = 'UTF-8';
     $mail->Encoding = 'base64';
 

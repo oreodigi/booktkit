@@ -1,7 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
-import { runSuite, allowedSuites } from './runner.js';
+import { startSuite, getRunStatus, getRunLog, allowedSuites } from './runner.js';
 
 const server = new McpServer({ name: 'booktkit-devtools', version: '1.0.0' });
 const suites = [...allowedSuites];
@@ -10,13 +10,17 @@ function response(result) {
   return { content: [{ type:'text', text:JSON.stringify(result, null, 2) }], isError:!result.ok };
 }
 function register(name, description, suite) {
-  server.tool(name, description, {}, async () => response(await runSuite(suite)));
+  server.tool(name, description, {}, async () => response(startSuite(suite)));
 }
+
+server.tool('start_suite', 'Start a bounded background test run and return its run_id immediately.', {suite:z.enum(suites).default('smoke')}, async ({suite}) => response(startSuite(suite)));
+server.tool('get_run_status', 'Get test progress and real result counts.', {run_id:z.string()}, async ({run_id}) => response(getRunStatus(run_id)));
+server.tool('get_run_log', 'Read a bounded log tail.', {run_id:z.string(),tail:z.number().int().min(1).max(500).default(100)}, async ({run_id,tail}) => response({ok:true,...getRunLog(run_id,tail)}));
 
 server.tool('booktkit_run_tests',
   'Run an approved BookTKIT Playwright suite against BOOKTKIT_BASE_URL. Production is read-only.',
   { suite:z.enum(suites).default('smoke') },
-  async ({ suite }) => response(await runSuite(suite))
+  async ({ suite }) => response(startSuite(suite))
 );
 
 register('booktkit_health_check', 'Check public BookTKIT pages and smoke coverage.', 'smoke');

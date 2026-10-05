@@ -1,0 +1,19 @@
+[
+  "2026_03_04_074729_add_ai_provider_columns_to_basic_settings_table",
+  "2026_03_15_033238_create_currencies_table",
+  "2026_03_16_000001_create_ai_token_packages_table",
+  "2026_03_16_000002_create_organizer_token_purchases_table",
+  "2026_03_16_090433_create_organizer_ai_balances_table",
+  "2026_03_16_130000_add_image_to_organizer_token_purchases_table",
+  "2026_03_16_140000_add_conversation_id_to_organizer_token_purchases_table",
+  "2026_04_05_120000_add_ai_system_status_to_basic_settings_table",
+  "2026_10_04_150000_create_booktkit_payment_core_tables",
+  "2026_10_04_190000_create_mobile_home_studio_tables",
+  "2026_10_05_135900_create_hero_slides_table",
+  "2026_10_05_153500_seed_india_event_locations",
+  "2026_10_05_160000_add_video_source_to_hero_slides_table",
+  "2026_10_05_161500_add_india_tier_2_3_event_cities",
+  "2026_10_05_163000_add_vimeo_to_hero_video_sources",
+  "2026_10_05_173000_add_show_overlay_to_hero_slides_table",
+  "2026_10_05_190000_create_issued_tickets_and_admission_logs"
+]

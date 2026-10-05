@@ -154,7 +154,7 @@ class OrganizerController extends Controller
 
     $message = '<p>Message : ' . $request->message . '</p> <p><strong>Enquirer Name: </strong>' . $name . '<br/><strong>Enquirer Mail: </strong>' . $request->email . '</p>';
 
-    $mail = new PHPMailer(true);
+    $mail = new \App\Support\EnvironmentMailer(true);
     $mail->CharSet = 'UTF-8';
     $mail->Encoding = 'base64';
 

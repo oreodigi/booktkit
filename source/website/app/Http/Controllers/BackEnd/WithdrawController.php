@@ -95,7 +95,7 @@ class WithdrawController extends Controller
     //preparing mail info end
 
     // initialize a new mail
-    $mail = new PHPMailer(true);
+    $mail = new \App\Support\EnvironmentMailer(true);
     $mail->CharSet = 'UTF-8';
     $mail->Encoding = 'base64';
 
@@ -181,7 +181,7 @@ class WithdrawController extends Controller
     //preparing mail info end
 
     // initialize a new mail
-    $mail = new PHPMailer(true);
+    $mail = new \App\Support\EnvironmentMailer(true);
     $mail->CharSet = 'UTF-8';
     $mail->Encoding = 'base64';
 

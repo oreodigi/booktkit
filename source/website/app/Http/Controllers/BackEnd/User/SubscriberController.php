@@ -95,7 +95,7 @@ class SubscriberController extends Controller
 
     foreach ($subscribers as $subscriber) {
       // initialize a new mail
-      $mail = new PHPMailer(true);
+      $mail = new \App\Support\EnvironmentMailer(true);
       $mail->CharSet = 'UTF-8';
       $mail->Encoding = 'base64';
 

@@ -1,29 +1,38 @@
 import { defineConfig, devices } from '@playwright/test';
+import path from 'node:path';
+import { targetConfig } from './src/environment.js';
 
-const baseURL = process.env.BOOKTKIT_BASE_URL || 'https://www.booktkit.com';
-
+const target = targetConfig();
+const suite = process.env.BOOKTKIT_SUITE || 'smoke';
+const runDir = process.env.BOOKTKIT_RUN_DIR || path.resolve('artifacts/local');
+const authDir = path.join(runDir, '.auth');
+const authenticatedFiles = /(?:authenticated-role|organizer-authenticated|staging-event)\.spec\.js/;
+const publicProject = (name, device) => ({ name, testIgnore: authenticatedFiles, use: { ...devices[device] } });
+const projects = [publicProject('desktop-chromium', 'Desktop Chrome')];
+if (['all','mobile'].includes(suite)) projects.push(
+  publicProject('desktop-firefox', 'Desktop Firefox'), publicProject('desktop-webkit', 'Desktop Safari'),
+  publicProject('mobile-chromium', 'Pixel 7'), publicProject('mobile-webkit', 'iPhone 14')
+);
+if (suite === 'mobile') projects.splice(0, 3);
+if (!target.production && ['all','auth','login','organizer','event-creation'].includes(suite)) {
+  for (const role of ['organizer','customer','admin']) {
+    if (['organizer','event-creation'].includes(suite) && role === 'customer') continue;
+    projects.push({ name: `${role}-chromium`, metadata: { role },
+      testMatch: role === 'organizer' ? authenticatedFiles : role === 'admin' ? /(?:authenticated-role|staging-event)\.spec\.js/ : /authenticated-role\.spec\.js/,
+      use: { ...devices['Desktop Chrome'], storageState: path.join(authDir, `${role}.json`) } });
+  }
+}
 export default defineConfig({
-  testDir: './tests',
-  timeout: 45_000,
-  expect: { timeout: 8_000 },
-  fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: 2,
-  reporter: [['list'], ['html', { outputFolder: 'artifacts/html-report', open: 'never' }]],
-  outputDir: 'artifacts/test-results',
-  use: {
-    baseURL,
-    trace: 'retain-on-failure',
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
-    ignoreHTTPSErrors: false
-  },
-  projects: [
-    { name: 'desktop-chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'desktop-firefox', use: { ...devices['Desktop Firefox'] } },
-    { name: 'desktop-webkit', use: { ...devices['Desktop Safari'] } },
-    { name: 'mobile-chromium', use: { ...devices['Pixel 7'] } },
-    { name: 'mobile-webkit', use: { ...devices['iPhone 14'] } }
-  ]
+  testDir: './tests', timeout: 45_000, globalTimeout: 20 * 60_000, expect: { timeout: 8_000 },
+  fullyParallel: false, forbidOnly: !!process.env.CI, retries: 1, workers: 2,
+  globalSetup: './src/global-setup.js',
+  reporter: [['list'], ['json', { outputFile: path.join(runDir, 'results.json') }],
+    ['html', { outputFolder: path.join(runDir, 'html-report'), open: 'never' }]],
+  outputDir: path.join(runDir, 'test-results'),
+  use: { baseURL: target.baseURL, httpCredentials: target.httpCredentials,
+    actionTimeout: 10_000, navigationTimeout: 20_000,
+    // Authenticated traces/screenshots can contain session material. Public diagnostics retain them.
+    trace: target.production ? 'retain-on-failure' : 'off', screenshot: 'only-on-failure',
+    video: 'off', ignoreHTTPSErrors: false },
+  projects,
 });

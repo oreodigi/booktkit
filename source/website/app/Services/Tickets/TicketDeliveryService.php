@@ -61,7 +61,7 @@ class TicketDeliveryService
         $body .= '<p><strong>Your secure QR ticket(s) are attached as a PDF.</strong> Each QR is valid for one admission only.</p>';
         if (is_numeric($booking->customer_id)) $body .= '<p><a href="' . route('customer.booking_details', $booking->id) . '">View your tickets on BookTkit</a></p>';
 
-        $mail = new PHPMailer(true); $mail->CharSet = 'UTF-8'; $mail->Encoding = 'base64';
+        $mail = new \App\Support\EnvironmentMailer(true); $mail->CharSet = 'UTF-8'; $mail->Encoding = 'base64';
         if ((int)($info->smtp_status ?? 0) === 1) {
             $mail->isSMTP(); $mail->Host=$info->smtp_host; $mail->SMTPAuth=true;
             $mail->Username=$info->smtp_username; $mail->Password=$info->smtp_password;

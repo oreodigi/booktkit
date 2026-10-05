@@ -1,71 +1,75 @@
 name: BookTKIT E2E
-
+run-name: 'Staging ${{ inputs.suite || ''all'' }} ${{ inputs.request_id }}'
 on:
+  schedule:
+    - cron: '30 20 * * *'
   workflow_dispatch:
     inputs:
       suite:
-        description: Approved BookTKIT test suite
-        required: true
-        default: smoke
+        description: Staging suite
         type: choice
-        options:
-          - smoke
-          - contracts
-          - mobile
-          - auth
-          - signup
-          - login
-          - organizer
-          - event-creation
-          - checkout
-          - api
-          - security
-          - razorpay
-          - scanner
-          - diagnostics
-          - all
+        default: smoke
+        options: [smoke, auth, organizer, event-creation, mobile, all, contracts, api, security, scanner, diagnostics, signup, login, checkout, razorpay]
       base_url:
-        description: Target URL. Production is always read-only.
-        required: true
-        default: https://www.booktkit.com
+        description: Isolated staging URL only
+        default: https://test.booktkit.com
         type: string
-
+      request_id:
+        description: Optional MCP correlation identifier
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: booktkit-staging-tests
+  cancel-in-progress: false
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 22
     defaults:
       run:
         working-directory: tools/booktkit-devtools
     env:
-      BOOKTKIT_BASE_URL: ${{ inputs.base_url }}
-      # Mutation suites are permitted only on the isolated staging hostname.
-      BOOKTKIT_ALLOW_MUTATIONS: ${{ inputs.base_url == 'https://test.booktkit.com' && 'true' || 'false' }}
-      BOOKTKIT_RAZORPAY_TEST_ENABLED: ${{ inputs.base_url == 'https://test.booktkit.com' && 'true' || 'false' }}
+      BOOKTKIT_BASE_URL: https://test.booktkit.com
+      BOOKTKIT_ALLOW_MUTATIONS: 'true'
+      BOOKTKIT_RAZORPAY_TEST_ENABLED: 'false'
+      BOOKTKIT_RUN_TIMEOUT_MINUTES: '15'
+      BOOKTKIT_STAGING_HTTP_USERNAME: ${{ secrets.BOOKTKIT_STAGING_HTTP_USERNAME }}
+      BOOKTKIT_STAGING_HTTP_PASSWORD: ${{ secrets.BOOKTKIT_STAGING_HTTP_PASSWORD }}
+      BOOKTKIT_TEST_ORGANIZER_USERNAME: ${{ secrets.BOOKTKIT_TEST_ORGANIZER_USERNAME }}
       BOOKTKIT_TEST_ORGANIZER_EMAIL: ${{ secrets.BOOKTKIT_TEST_ORGANIZER_EMAIL }}
       BOOKTKIT_TEST_ORGANIZER_PASSWORD: ${{ secrets.BOOKTKIT_TEST_ORGANIZER_PASSWORD }}
+      BOOKTKIT_TEST_CUSTOMER_USERNAME: ${{ secrets.BOOKTKIT_TEST_CUSTOMER_USERNAME }}
       BOOKTKIT_TEST_CUSTOMER_EMAIL: ${{ secrets.BOOKTKIT_TEST_CUSTOMER_EMAIL }}
       BOOKTKIT_TEST_CUSTOMER_PASSWORD: ${{ secrets.BOOKTKIT_TEST_CUSTOMER_PASSWORD }}
+      BOOKTKIT_TEST_ADMIN_USERNAME: ${{ secrets.BOOKTKIT_TEST_ADMIN_USERNAME }}
+      BOOKTKIT_TEST_ADMIN_PASSWORD: ${{ secrets.BOOKTKIT_TEST_ADMIN_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate target
-        shell: bash
-        run: |
-          node -e "const u=new URL(process.env.BOOKTKIT_BASE_URL); if(u.protocol!=='https:') process.exit(2); const allowed=['booktkit.com','www.booktkit.com','test.booktkit.com']; if(!allowed.includes(u.hostname)) process.exit(3); if(process.env.BOOKTKIT_ALLOW_MUTATIONS==='true' && u.hostname!=='test.booktkit.com') process.exit(4)"
+          cache: npm
+          cache-dependency-path: tools/booktkit-devtools/package-lock.json
+      - name: Validate staging target
+        env:
+          REQUESTED_URL: ${{ inputs.base_url }}
+        run: node -e "if(process.env.REQUESTED_URL && process.env.REQUESTED_URL !== 'https://test.booktkit.com') process.exit(1)"
       - run: npm ci
-      - run: npx playwright install --with-deps chromium firefox webkit
-      - name: Run selected suite
-        run: node src/cli.js "${{ inputs.suite }}"
-      - name: Upload Playwright artifacts
+      - run: npx playwright install --with-deps chromium
+      - if: github.event_name == 'schedule' || inputs.suite == 'all' || inputs.suite == 'mobile'
+        run: npx playwright install --with-deps firefox webkit
+      - name: Run suite
+        env:
+          SUITE: ${{ inputs.suite || 'all' }}
+        run: node src/cli.js "$SUITE"
+      - name: Upload sanitized result summary and logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: booktkit-e2e-${{ inputs.suite }}-${{ github.run_id }}
+          name: staging-${{ inputs.suite || 'all' }}-${{ github.run_id }}
           path: |
-            tools/booktkit-devtools/artifacts/
             tools/booktkit-devtools/test-summary.json
-          if-no-files-found: ignore
-          retention-days: 14
+            tools/booktkit-devtools/artifacts/runs/*/status.json
+            tools/booktkit-devtools/artifacts/runs/*/run.log
+          retention-days: 3

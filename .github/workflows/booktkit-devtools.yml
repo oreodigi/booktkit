@@ -1,44 +1,38 @@
 name: BookTKIT DevTools
-
 on:
-  pull_request:
-    paths:
-      - 'tools/booktkit-devtools/**'
-      - '.github/workflows/booktkit-devtools.yml'
-      - '.github/workflows/booktkit-e2e.yml'
-      - 'source/website/**'
   push:
     branches: [main]
-    paths:
-      - 'tools/booktkit-devtools/**'
-      - '.github/workflows/booktkit-*.yml'
-      - 'source/website/**'
+    paths: ['source/website/**', 'tools/booktkit-devtools/**', '.github/workflows/booktkit-*.yml']
   workflow_dispatch:
-
+permissions:
+  contents: read
+concurrency:
+  group: booktkit-production-smoke
+  cancel-in-progress: true
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 5
     defaults:
       run:
         working-directory: tools/booktkit-devtools
     env:
-      BOOKTKIT_BASE_URL: https://www.booktkit.com
-      BOOKTKIT_ALLOW_MUTATIONS: "false"
-      BOOKTKIT_RAZORPAY_TEST_ENABLED: "false"
+      BOOKTKIT_BASE_URL: https://booktkit.com
+      BOOKTKIT_ALLOW_MUTATIONS: 'false'
+      BOOKTKIT_RUN_TIMEOUT_MINUTES: '3'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: tools/booktkit-devtools/package-lock.json
       - run: npm ci
-      - run: npx playwright install --with-deps chromium firefox webkit
-      - run: node src/cli.js all
+      - run: npx playwright install --with-deps chromium
+      - run: node src/cli.js smoke
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: booktkit-playwright-report
-          path: |
-            tools/booktkit-devtools/artifacts/
-            tools/booktkit-devtools/test-summary.json
-          if-no-files-found: ignore
+          name: production-smoke-${{ github.run_id }}
+          path: tools/booktkit-devtools/test-summary.json
+          retention-days: 3

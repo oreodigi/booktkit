@@ -21,8 +21,17 @@ class RecaptchaV3Service
             ->first();
     }
 
+    private function stagingTestMode(): bool
+    {
+        return app()->environment('staging')
+            && config('staging.recaptcha_test_mode') === true
+            && parse_url(config('app.url'), PHP_URL_HOST) === 'test.booktkit.com'
+            && config('database.connections.mysql.database') === 'booktkit_stage';
+    }
+
     public function enabled(): bool
     {
+        if ($this->stagingTestMode()) return false;
         return (int) ($this->settings()->google_recaptcha_status ?? 0) === 1;
     }
 
@@ -33,6 +42,7 @@ class RecaptchaV3Service
 
     public function verify(Request $request, string $expectedAction, ?float $minimumScore = null): void
     {
+        if ($this->stagingTestMode() && $request->getHost() === 'test.booktkit.com') return;
         $settings = $this->settings();
 
         if ((int) ($settings->google_recaptcha_status ?? 0) !== 1) {
