@@ -1,150 +1,85 @@
 @extends('backend.layout')
-
-{{-- this style will be applied when the direction of language is right-to-left --}}
 @includeIf('backend.partials.rtl-style')
 
 @section('content')
-  <div class="page-header">
-    <h4 class="page-title">{{ __('Hero Section') }}</h4>
-    <ul class="breadcrumbs">
-      <li class="nav-home">
-        <a href="{{route('admin.dashboard')}}">
-          <i class="flaticon-home"></i>
-        </a>
-      </li>
-      <li class="separator">
-        <i class="flaticon-right-arrow"></i>
-      </li>
-      <li class="nav-item">
-        <a href="#">{{ __('Home Page') }}</a>
-      </li>
-      <li class="separator">
-        <i class="flaticon-right-arrow"></i>
-      </li>
-      <li class="nav-item">
-        <a href="#">{{ __('Hero Section') }}</a>
-      </li>
-    </ul>
-  </div>
+<div class="page-header">
+  <h4 class="page-title">{{ __('Hero Banners') }}</h4>
+  <ul class="breadcrumbs"><li class="nav-home"><a href="{{ route('admin.dashboard') }}"><i class="flaticon-home"></i></a></li><li class="separator"><i class="flaticon-right-arrow"></i></li><li class="nav-item">{{ __('Home Page') }}</li><li class="separator"><i class="flaticon-right-arrow"></i></li><li class="nav-item">{{ __('Hero Banners') }}</li></ul>
+</div>
 
-  <div class="row">
-    <div class="col-md-12">
-      <div class="card">
-        <div class="card-header">
+<div class="row">
+  <div class="col-12">
+    <div class="card mb-4">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <div><div class="card-title">{{ __('Homepage Banner Slider') }}</div><small class="text-muted">{{ __('Add multiple image/video banners. Active banners rotate automatically on desktop and mobile.') }}</small></div>
+        <div style="min-width:160px">@includeIf('backend.partials.languages')</div>
+      </div>
+      <div class="card-body">
+        <form action="{{ route('admin.home_page.hero_slides.store', ['language'=>request('language')]) }}" method="POST" enctype="multipart/form-data">
+          @csrf
           <div class="row">
-            <div class="col-lg-10">
-              <div class="card-title">{{ __('Update Hero Section') }}</div>
-            </div>
-
-            <div class="col-lg-2">
-              @includeIf('backend.partials.languages')
-            </div>
+            <div class="col-lg-3"><div class="form-group"><label>{{ __('Media Type') }} *</label><select name="media_type" class="form-control hero-media-type"><option value="image">{{ __('Image') }}</option><option value="video">{{ __('Video') }}</option></select></div></div>
+            <div class="col-lg-3 hero-image-field"><div class="form-group"><label>{{ __('Banner Image') }}</label><input type="file" name="image" class="form-control" accept="image/*"><small class="text-muted">{{ __('Recommended 1920×720. For video, this can be the poster image.') }}</small></div></div>
+            <div class="col-lg-3 hero-video-field" style="display:none"><div class="form-group"><label>{{ __('Background Video') }}</label><input type="file" name="video" class="form-control" accept="video/mp4,video/webm,video/quicktime"><small class="text-muted">{{ __('MP4/WebM/MOV, maximum 50 MB. Video autoplays muted and loops.') }}</small></div></div>
+            <div class="col-lg-3"><div class="form-group"><label>{{ __('Order') }}</label><input type="number" min="0" name="sort_order" value="{{ ($slides->max('sort_order') ?? 0) + 10 }}" class="form-control"></div></div>
+            <div class="col-lg-6"><div class="form-group"><label>{{ __('Title') }}</label><input name="title" class="form-control" placeholder="{{ __('Banner headline') }}"></div></div>
+            <div class="col-lg-6"><div class="form-group"><label>{{ __('Subtitle') }}</label><input name="subtitle" class="form-control" placeholder="{{ __('Short supporting text') }}"></div></div>
+            <div class="col-lg-3"><div class="form-group"><label>{{ __('Button Text') }}</label><input name="button_text" class="form-control" value="{{ __('View Event') }}"></div></div>
+            <div class="col-lg-4"><div class="form-group"><label>{{ __('Connect Event') }}</label><select name="event_id" class="form-control"><option value="">{{ __('No event / use custom URL') }}</option>@foreach($events as $event)<option value="{{ $event->event_id }}">{{ $event->title }}</option>@endforeach</select><small class="text-muted">{{ __('When selected, the button opens this event automatically.') }}</small></div></div>
+            <div class="col-lg-4"><div class="form-group"><label>{{ __('Custom Button URL') }}</label><input name="custom_url" class="form-control ltr" placeholder="/events or https://..."><small class="text-muted">{{ __('Used only when no event is connected.') }}</small></div></div>
+            <div class="col-lg-1"><div class="form-group"><label>{{ __('Active') }}</label><div><label><input type="checkbox" name="status" value="1" checked> {{ __('Yes') }}</label></div></div></div>
           </div>
-        </div>
-
-        <div class="card-body">
-          <div class="row">
-            <div class="col-lg-8 offset-lg-2">
-              <form id="heroForm" action="{{ route('admin.home_page.update_hero_section', ['language' => request()->input('language')]) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="form-group">
-                  <label for="">{{ __('Background Image') . '*' }}</label>
-                  <br>
-                  <div class="thumb-preview">
-                    @if (!empty($data->background_image))
-                      <img src="{{ asset('assets/admin/img/hero-section/' . $data->background_image) }}" alt="background image" class="uploaded-background-img">
-                    @else
-                      <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="..." class="uploaded-background-img">
-                    @endif
-                  </div>
-
-                  <div class="mt-3">
-                    <div role="button" class="btn btn-primary btn-sm upload-btn">
-                      {{ __('Choose Image') }}
-                      <input type="file" class="background-img-input" name="background_image">
-                    </div>
-                  </div>
-                  @error('background_image')
-                    <p class="mt-2 mb-0 text-danger">{{ $message }}</p>
-                  @enderror
-                </div>
-
-                <div class="row">
-                  <div class="col-lg-6">
-                    <div class="form-group">
-                      <label for="">{{ __('First Title') }}</label>
-                      <input type="text" class="form-control" name="first_title" value="{{ empty($data->first_title) ? '' : $data->first_title }}" placeholder="{{ __('Enter First Title') }}">
-                    </div>
-                  </div>
-
-                  <div class="col-lg-6">
-                    <div class="form-group">
-                      <label for="">{{ __('Second Title') }}</label>
-                      <input type="text" class="form-control" name="second_title" value="{{ empty($data->second_title) ? '' : $data->second_title }}" placeholder="{{ __('Enter Second Title') }}">
-                    </div>
-                  </div>
-                </div>
-
-                @if ($themeInfo->theme_version == 1 || $themeInfo->theme_version == 3)
-                  <div class="row">
-                    <div class="col-lg-6">
-                      <div class="form-group">
-                        <label for="">{{ __('Button Text') }}</label>
-                        <input type="text" class="form-control" name="first_button" value="{{ empty($data->first_button) ? '' : $data->first_button }}" placeholder="Enter First Button Name">
-                      </div>
-                    </div>
-                  </div>
-                @endif
-
-                @if ($themeInfo->theme_version == 2)
-                  <div class="row">
-                    <div class="col-lg-6">
-                      <div class="form-group">
-                        <label for="">{{ __('Video URL') }}</label>
-                        <input type="url" class="form-control ltr" name="video_url" value="{{ empty($data->video_url) ? '' : $data->video_url }}" placeholder="{{ __('Enter Video URL') }}">
-                      </div>
-                    </div>
-                  </div>
-                @endif
-
-                @if ($themeInfo->theme_version == 3)
-                  <div class="form-group">
-                    <label for="">{{ __('Image') }}</label>
-                    <br>
-                    <div class="thumb-preview">
-                      @if (!empty($data->image))
-                        <img src="{{ asset('assets/admin/img/hero-section/' . $data->image) }}" alt="image" class="uploaded-img">
-                      @else
-                        <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="..." class="uploaded-img">
-                      @endif
-                    </div>
-
-                    <div class="mt-3">
-                      <div role="button" class="btn btn-primary btn-sm upload-btn">
-                        {{ __('Choose Image') }}
-                        <input type="file" class="img-input" name="image">
-                      </div>
-                    </div>
-                    @error('image')
-                      <p class="mt-2 mb-0 text-danger">{{ $message }}</p>
-                    @enderror
-                  </div>
-                @endif
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-footer">
-          <div class="row">
-            <div class="col-12 text-center">
-              <button type="submit" form="heroForm" class="btn btn-success">
-                {{ __('Update') }}
-              </button>
-            </div>
-          </div>
-        </div>
+          <button class="btn btn-primary"><i class="fas fa-plus"></i> {{ __('Add Banner') }}</button>
+        </form>
       </div>
     </div>
+
+    @forelse($slides as $slide)
+    <div class="card mb-3">
+      <div class="card-body">
+        <form action="{{ route('admin.home_page.hero_slides.update', $slide) }}" method="POST" enctype="multipart/form-data">
+          @csrf
+          <div class="row align-items-start">
+            <div class="col-lg-3 mb-3">
+              <div style="height:145px;border-radius:10px;overflow:hidden;background:#111">
+                @if($slide->media_type==='video' && $slide->video)
+                  <video src="{{ asset('assets/admin/img/hero-slides/'.$slide->video) }}" @if($slide->image) poster="{{ asset('assets/admin/img/hero-slides/'.$slide->image) }}" @endif muted playsinline style="width:100%;height:100%;object-fit:cover"></video>
+                @elseif($slide->image)
+                  <img src="{{ asset('assets/admin/img/hero-slides/'.$slide->image) }}" style="width:100%;height:100%;object-fit:cover" alt="">
+                @endif
+              </div>
+              <small class="text-muted">{{ strtoupper($slide->media_type) }} · #{{ $slide->id }}</small>
+            </div>
+            <div class="col-lg-9"><div class="row">
+              <div class="col-md-3"><div class="form-group"><label>{{ __('Media Type') }}</label><select name="media_type" class="form-control hero-media-type"><option value="image" @selected($slide->media_type==='image')>{{ __('Image') }}</option><option value="video" @selected($slide->media_type==='video')>{{ __('Video') }}</option></select></div></div>
+              <div class="col-md-3 hero-image-field"><div class="form-group"><label>{{ __('Replace Image / Poster') }}</label><input type="file" name="image" class="form-control" accept="image/*"></div></div>
+              <div class="col-md-3 hero-video-field" @if($slide->media_type!=='video') style="display:none" @endif><div class="form-group"><label>{{ __('Replace Video') }}</label><input type="file" name="video" class="form-control" accept="video/mp4,video/webm,video/quicktime"></div></div>
+              <div class="col-md-3"><div class="form-group"><label>{{ __('Order') }}</label><input type="number" min="0" name="sort_order" value="{{ $slide->sort_order }}" class="form-control"></div></div>
+              <div class="col-md-6"><div class="form-group"><label>{{ __('Title') }}</label><input name="title" value="{{ $slide->title }}" class="form-control"></div></div>
+              <div class="col-md-6"><div class="form-group"><label>{{ __('Subtitle') }}</label><input name="subtitle" value="{{ $slide->subtitle }}" class="form-control"></div></div>
+              <div class="col-md-3"><div class="form-group"><label>{{ __('Button Text') }}</label><input name="button_text" value="{{ $slide->button_text }}" class="form-control"></div></div>
+              <div class="col-md-4"><div class="form-group"><label>{{ __('Connect Event') }}</label><select name="event_id" class="form-control"><option value="">{{ __('No event') }}</option>@foreach($events as $event)<option value="{{ $event->event_id }}" @selected($slide->event_id==$event->event_id)>{{ $event->title }}</option>@endforeach</select></div></div>
+              <div class="col-md-4"><div class="form-group"><label>{{ __('Custom URL') }}</label><input name="custom_url" value="{{ $slide->custom_url }}" class="form-control ltr"></div></div>
+              <div class="col-md-1"><div class="form-group"><label>{{ __('Active') }}</label><div><input type="checkbox" name="status" value="1" @checked($slide->status)></div></div></div>
+              <div class="col-12"><button class="btn btn-success btn-sm">{{ __('Save Banner') }}</button></div>
+            </div></div>
+          </div>
+        </form>
+        <form action="{{ route('admin.home_page.hero_slides.destroy', $slide) }}" method="POST" class="mt-2" onsubmit="return confirm('{{ __('Delete this banner?') }}')">@csrf<button class="btn btn-danger btn-sm">{{ __('Delete') }}</button></form>
+      </div>
+    </div>
+    @empty
+      <div class="alert alert-info">{{ __('No slider banners yet. Add the first banner above. Until then, the existing hero banner remains on the website.') }}</div>
+    @endforelse
   </div>
+</div>
+@endsection
+
+@section('script')
+<script>
+document.querySelectorAll('.hero-media-type').forEach(function(select){
+  function sync(){var form=select.closest('form'),video=form.querySelector('.hero-video-field');if(video)video.style.display=select.value==='video'?'block':'none'}
+  select.addEventListener('change',sync);sync();
+});
+</script>
 @endsection
