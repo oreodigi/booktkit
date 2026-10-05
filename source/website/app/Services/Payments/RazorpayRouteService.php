@@ -38,7 +38,19 @@ class RazorpayRouteService {
    'status'=>$data['status']??'processed','reason'=>$reason,'gateway_payload'=>$data,'processed_at'=>now()]);
   $order->increment('refunded_amount',$amountPaise); $order->refresh();
   $order->refund_status=$order->refunded_amount >= $order->customer_total ? 'full' : 'partial'; $order->save();
-  return $refund;
+  $transfer=$order->transfers()->whereNotNull('gateway_transfer_id')->first();
+  if($transfer && $transfer->amount > $transfer->reversed_amount){
+   $target=(int) round($amountPaise * ((int)$order->organizer_amount / max(1,(int)$order->customer_total));
+   $reverseAmount=min($target,(int)$transfer->amount-(int)$transfer->reversed_amount);
+   if($reverseAmount>0){
+    $reversal=$this->api->transfer->fetch($transfer->gateway_transfer_id)->reverse(['amount'=>$reverseAmount,'notes'=>['payment_order_uuid'=>$order->uuid,'refund_id'=>$refund->gateway_refund_id]]);
+    $rd=$reversal->toArray();
+    $refund->update(['gateway_reversal_id'=>$rd['id']??null,'reversal_amount'=>$reverseAmount,'reversal_status'=>$rd['status']??'created']);
+    $transfer->increment('reversed_amount',$reverseAmount);
+    if($transfer->fresh()->reversed_amount >= $transfer->amount) $transfer->update(['status'=>'reversed']);
+   }
+  }
+  return $refund->fresh();
  }
  public function transferToOrganizer(PaymentOrder $order,string $accountId): ?PaymentTransfer {
   if($order->organizer_amount<=0) return null;
