@@ -84,7 +84,7 @@ class EventController extends Controller
   {
 
     $rules = [
-      'file' => 'required|image|mimes:jpg,jpeg,png|max:500'
+      'file' => 'required|image|mimes:jpg,jpeg,png|max:1024'
     ];
     $messages = [
       'file.required' => 'Please upload an image file.',
