@@ -142,7 +142,7 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::get('all-state', 'BackEnd\Event\EventController@searchSate')->name('admin.get_state');
     Route::get('all-city', 'BackEnd\Event\EventController@getSearchCity')->name('admin.get_city');
 
-    Route::get('get-state/', 'BackEnd\Event\CityController@get_state')->name('get.city.state');
+    Route::get('get-state/', 'BackEnd\Event\CityController@get_state')->name('admin.get.state');
     Route::get('get-cities/', 'BackEnd\Event\CityController@getcities')->name('get.cities.state');
 
 
