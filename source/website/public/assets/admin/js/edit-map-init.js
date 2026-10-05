@@ -39,7 +39,7 @@ function initMap() {
       var latitude = place.geometry.location.lat();
       var longitude = place.geometry.location.lng();
 
-      setLatLng(latitude, longitude)
+      setLatLng(latitude, longitude);\n      window.dispatchEvent(new CustomEvent('booktkit:place-selected',{detail:place}));
 
       var icon = {
         url: place.icon,
@@ -98,7 +98,7 @@ function geocodeLatLng(geocoder, map, latLng) {
       if (results[0]) {
         var placeName = getPlaceName(results);
         if (placeName) {
-          $('#search-address_' + defaultLang).val(results[0].formatted_address);
+          $('#search-address_' + defaultLang).val(results[0].formatted_address);\n          window.dispatchEvent(new CustomEvent('booktkit:place-selected',{detail:results[0]}));
           setMarker(latLng, placeName);
         } else {
           console.log('No place name found');
