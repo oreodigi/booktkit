@@ -147,8 +147,9 @@ class Deployment:
         ref=self.args.branch
         if not ref or ref.startswith('-') or any(x in ref for x in ['..','~','^',':','\\']):
             raise RuntimeError('Invalid branch')
-        run(['git','fetch','--quiet','origin','refs/heads/'+ref],timeout=90)
-        commit=run(['git','rev-parse','FETCH_HEAD'])
+        remote_ref='refs/remotes/booktkit-deploy/'+ref
+        run(['git','fetch','--quiet','origin','+refs/heads/'+ref+':'+remote_ref],timeout=90)
+        commit=run(['git','rev-parse',remote_ref])
         previous=json.loads(self.state.read_text()) if self.state.exists() else {'commit':None,'files':{}}
         if previous['commit']==commit and not self.args.migrate and not self.args.adopt:
             print('Already deployed '+commit); return
@@ -253,7 +254,7 @@ def main():
     os.umask(0o077)
     os.environ['GIT_SSH_COMMAND']='ssh -i /home/booktkit/.ssh/booktkit_github -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/home/booktkit/.ssh/known_hosts_booktkit'
     deployment=Deployment(args)
-    # Shared repository lock prevents concurrent FETCH_HEAD races between targets.
+    # Shared repository lock serializes all deployer mutations of the bare repository.
     with open(str(REPO)+'.lock','a') as lock:
         try:fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
         except BlockingIOError:print('Another deployment is running');return
