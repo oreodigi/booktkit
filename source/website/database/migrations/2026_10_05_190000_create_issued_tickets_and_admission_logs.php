@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('legacy_unique_id')->nullable();
             $table->string('ticket_name')->nullable();
             $table->string('token_hash', 64)->unique();
-            $table->text('token_ciphertext');
             $table->string('status', 20)->default('active');
             $table->timestamp('issued_at')->nullable();
             $table->timestamp('checked_in_at')->nullable();
