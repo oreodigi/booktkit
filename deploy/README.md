@@ -9,7 +9,7 @@ The installed runner is `/home/booktkit/booktkit-deploy/deploy.py`. It runs as b
 | production | /home/booktkit/public_html | booktkit_ems | /home/booktkit/booktkit-deploy |
 | staging | /home/booktkit/staging | booktkit_stage | /home/booktkit/booktkit-staging-deploy |
 
-Both targets default to branch main. Production refuses other branches. Staging accepts `--branch BRANCH`.
+Production deploys only main. Staging deploys only staging. The runner rejects any other branch for either target.
 
 ```sh
 python3 /home/booktkit/booktkit-deploy/deploy.py --target staging --check
@@ -43,3 +43,27 @@ HTTP Basic authentication and noindex headers protect staging. Its credentials a
 `artisan booktkit:prepare-staging --reset --credentials=PRIVATE_JSON` is destructive and rejects any environment/database/hostname except the exact staging target. It removes customer/organizer/admin data, credentials, tokens, bookings and payment records, scrubs integration credentials, and creates synthetic customer, organizer, admin and scanner accounts plus venue/online events with free/paid tickets. Run only after a backup. Do not expose its credential file or auth storage states.
 
 Google supplies always-pass keys for reCAPTCHA v2, not v3 (https://developers.google.com/recaptcha/docs/faq). Automated staging uses an explicit test mode requiring the staging environment, exact hostname and staging DB. Production CAPTCHA remains active. Real v3 scoring is outside the deterministic auth tests.
+
+
+## Promotion flow
+
+work → staging → tests pass → PR → main → production
+
+Push work to staging. The account cron deploys staging to the isolated docroot.
+BookTKIT Staging Gate waits up to five minutes for the authenticated staging marker
+to equal the pushed SHA, then runs smoke, auth, organizer and event-creation.
+It verifies the marker before and after each suite and requires 5/3/1/4 passes
+with zero failed, skipped or flaky tests. A newer deployment invalidates an older run.
+
+Open a same-repository staging → main PR after the gate passes. The required
+check is staging-gate (GitHub Actions). PR gate runs reject other source branches.
+Do not push directly to main. Production's runner follows main only.
+
+Main protection must require a PR and staging-gate, enforce administrators,
+require up-to-date checks, and disallow force pushes and deletion.
+Private-repository branch protection requires a supporting GitHub plan and
+repository Administration write permission. If GitHub rejects protection,
+this is NOT an enforced production gate; report the blocker.
+
+Use merge commits to preserve staging ancestry. After promotion, synchronize
+main back into staging before the next change. Never force-push either branch.
