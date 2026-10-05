@@ -15,6 +15,10 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
   <meta name="csrf-token" content="{{ csrf_token() }}">
+  @php
+    $booktkitBuildVersion = @filemtime(public_path('assets/front/js/script.js')) ?: config('app.version', '1');
+  @endphp
+  <meta name="booktkit-build-version" content="{{ $booktkitBuildVersion }}">
 
   <!-- Title -->
   <title>@yield('pageHeading') {{ '| ' . $websiteInfo->website_title }}</title>
@@ -26,6 +30,30 @@
 </head>
 
 <body class="@yield('body-class')">
+  <script>
+    (function () {
+      var version = document.querySelector('meta[name="booktkit-build-version"]').content;
+      var key = 'booktkit_build_version';
+      var previous = null;
+      try { previous = localStorage.getItem(key); } catch (e) {}
+      if (previous && previous !== version && !sessionStorage.getItem('booktkit_build_refresh')) {
+        sessionStorage.setItem('booktkit_build_refresh', '1');
+        Promise.resolve().then(async function () {
+          if ('caches' in window) {
+            var names = await caches.keys();
+            await Promise.all(names.map(function (name) { return caches.delete(name); }));
+          }
+          try { localStorage.setItem(key, version); } catch (e) {}
+          var url = new URL(window.location.href);
+          url.searchParams.set('_v', version);
+          window.location.replace(url.toString());
+        });
+        return;
+      }
+      try { localStorage.setItem(key, version); } catch (e) {}
+      try { sessionStorage.removeItem('booktkit_build_refresh'); } catch (e) {}
+    })();
+  </script>
   <div class="page-wrapper">
 
     <!-- Preloader -->
