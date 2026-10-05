@@ -1435,15 +1435,15 @@
                         const active = children.some(item => item.classList.contains('active'));
                         const wrapper = document.createElement('li');
                         wrapper.className = 'nav-item admin-nav-group' + (active ? ' active' : '');
-                        wrapper.innerHTML = \`
-                            <a data-toggle="collapse" href="#\${group.id}" aria-expanded="\${active ? 'true' : 'false'}">
-                                <i class="\${group.icon}"></i>
-                                <p>\${group.label}</p>
+                        wrapper.innerHTML = `
+                            <a data-toggle="collapse" href="#${group.id}" aria-expanded="${active ? 'true' : 'false'}">
+                                <i class="${group.icon}"></i>
+                                <p>${group.label}</p>
                                 <span class="caret"></span>
                             </a>
-                            <div id="\${group.id}" class="collapse\${active ? ' show' : ''}">
+                            <div id="${group.id}" class="collapse${active ? ' show' : ''}">
                                 <ul class="nav nav-collapse"></ul>
-                            </div>\`;
+                            </div>`;
 
                         const list = wrapper.querySelector('ul');
                         children.forEach(item => list.appendChild(item));
