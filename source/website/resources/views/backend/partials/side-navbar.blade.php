@@ -1336,7 +1336,7 @@
                             request()->routeIs('admin.mobile_interface_gsetting')) active @endif">
                         <a href="{{ route('admin.mobile_interface',['language' => $defaultLang->code]) }}">
                             <i class="fas fa-mobile-alt"></i>
-                            <p>{{ __('Mobile Interface') }}</p>
+                            <p>{{ __('Mobile App Settings') }}</p>
                         </a>
                     </li>
                 @endif
@@ -1402,6 +1402,57 @@
                 @endif
 
             </ul>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const nav = document.querySelector('.sidebar-content > .nav.nav-primary');
+                    if (!nav || nav.dataset.grouped === '1') return;
+
+                    const groups = [
+                        { id: 'adminEventsGroup', label: 'Events', icon: 'fal fa-calendar-alt', items: ['Event Management', 'Event Bookings'] },
+                        { id: 'adminUsersGroup', label: 'Users', icon: 'fal fa-users', items: ['Organizers Management', 'Customers Management'] },
+                        { id: 'adminFinanceGroup', label: 'Finance & Payments', icon: 'fal fa-wallet', items: ['BookTKIT Finance', 'Transactions', 'Withdraw Method', 'Payment Gateways', 'Currencies'] },
+                        { id: 'adminAiGroup', label: 'AI Management', icon: 'fal fa-robot', items: ['AI Token Management'] },
+                        { id: 'adminCommerceGroup', label: 'Store / Commerce', icon: 'fal fa-shopping-cart', items: ['Shop Management'] },
+                        { id: 'adminSupportGroup', label: 'Support & Communication', icon: 'fal fa-headset', items: ['Support Tickets', 'Push Notification', 'Subscribers', 'Announcement Popups'] },
+                        { id: 'adminUiGroup', label: 'UI & Frontend', icon: 'fal fa-palette', items: ['Menu Builder', 'Mobile Homepage', 'Home Page', 'Footer', 'Custom Pages', 'Blog Management', 'FAQ Management', 'Contact Page', 'Ads', 'Mobile App Settings'] },
+                        { id: 'adminScannerGroup', label: 'Scanner & Admission', icon: 'fal fa-qrcode', items: ['Pwa Scanner'] },
+                        { id: 'adminSystemGroup', label: 'System & Settings', icon: 'fal fa-cogs', items: ['Basic Settings', 'PWA Settings', 'Language Management', 'Admin Language Keywords'] },
+                        { id: 'adminAdministrationGroup', label: 'Administration', icon: 'fal fa-user-shield', items: ['Admin Management'] }
+                    ];
+
+                    const directItems = Array.from(nav.children).filter(el => el.matches('li.nav-item'));
+                    const byLabel = new Map();
+                    directItems.forEach(item => {
+                        const label = item.querySelector(':scope > a > p');
+                        if (label) byLabel.set(label.textContent.trim(), item);
+                    });
+
+                    groups.forEach(group => {
+                        const children = group.items.map(label => byLabel.get(label)).filter(Boolean);
+                        if (!children.length) return;
+
+                        const active = children.some(item => item.classList.contains('active'));
+                        const wrapper = document.createElement('li');
+                        wrapper.className = 'nav-item admin-nav-group' + (active ? ' active' : '');
+                        wrapper.innerHTML = \`
+                            <a data-toggle="collapse" href="#\${group.id}" aria-expanded="\${active ? 'true' : 'false'}">
+                                <i class="\${group.icon}"></i>
+                                <p>\${group.label}</p>
+                                <span class="caret"></span>
+                            </a>
+                            <div id="\${group.id}" class="collapse\${active ? ' show' : ''}">
+                                <ul class="nav nav-collapse"></ul>
+                            </div>\`;
+
+                        const list = wrapper.querySelector('ul');
+                        children.forEach(item => list.appendChild(item));
+                        nav.appendChild(wrapper);
+                    });
+
+                    nav.dataset.grouped = '1';
+                });
+            </script>
         </div>
     </div>
 </div>
