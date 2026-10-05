@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        $locations = {
+        $locations = [
   'Andhra Pradesh' => [
     'Visakhapatnam',
     'Vijayawada',
@@ -309,7 +309,7 @@ return new class extends Migration
     'Mahe',
     'Yanam'
   ]
-};
+];
 
         $now = now();
         $languages = DB::table('languages')->pluck('id');
