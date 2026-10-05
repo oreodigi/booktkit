@@ -139,6 +139,15 @@ Route::prefix('/organizer')->group(function () {
   });
 });
 
+Route::prefix('/staff-scanner')->group(function () {
+  Route::post('/login', 'ScannerApi\\StaffScannerController@login')->middleware('throttle:staff-login');
+  Route::middleware(['auth:staff_sanctum','throttle:staff-api'])->group(function () {
+    Route::get('/events', 'ScannerApi\\StaffScannerController@events');
+    Route::post('/scan', 'ScannerApi\\StaffScannerController@scan');
+    Route::post('/logout', 'ScannerApi\\StaffScannerController@logout');
+  });
+});
+
 Route::prefix('/admin')->group(function () {
   Route::post('/login/submit', [AdminScannerController::class, 'loginSubmit'])->name('api.admin.login_submit');
   Route::get('/authentication-fail', [AdminScannerController::class, 'authentication_fail'])->name('api.admin.authentication.fail');
