@@ -215,6 +215,13 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::post('/transfers/{id}/retry', 'BackEnd\\Payments\\OrganizerPayoutController@retryTransfer')->name('admin.organizer_payouts.transfers.retry');
   });
 
+  // Organizer workforce oversight
+  Route::get('/organizer-workforce', 'BackEnd\\OrganizerWorkforceController@index')->name('admin.organizer_workforce.index');
+  Route::put('/organizer-workforce/{id}', 'BackEnd\\OrganizerWorkforceController@update')->name('admin.organizer_workforce.update');
+  Route::post('/organizer-workforce/{id}/reset-password', 'BackEnd\\OrganizerWorkforceController@resetPassword')->name('admin.organizer_workforce.reset_password');
+  Route::delete('/organizer-workforce/{id}', 'BackEnd\\OrganizerWorkforceController@destroy')->name('admin.organizer_workforce.destroy');
+  Route::post('/organizer-workforce/{id}/impersonate', 'BackEnd\\OrganizerWorkforceController@impersonate')->name('admin.organizer_workforce.impersonate');
+
   // Mobile Homepage Studio
   Route::get('/mobile-home', 'BackEnd\\HomePage\\MobileHomeStudioController@index')->name('admin.mobile_home.index');
   Route::post('/mobile-home/templates', 'BackEnd\\HomePage\\MobileHomeStudioController@storeTemplate')->name('admin.mobile_home.template.store');
