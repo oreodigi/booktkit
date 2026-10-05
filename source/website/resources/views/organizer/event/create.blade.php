@@ -88,7 +88,7 @@
                             <form id="eventForm" data-actor="organizer" data-mode="create" data-event-type="{{ $event->event_type ?? request('type', 'venue') }}" action="{{ route('organizer.event_management.store_event') }}"
                                 method="POST" enctype="multipart/form-data">
                                 @csrf
-                                <input type="hidden" name="event_type" value="{{ request()->input('type') }}">
+                                <input type="hidden" name="event_type" value="{{ request('type', 'venue') }}">
                                 <div class="form-group">
                                     <label for="">{{ __('Thumbnail Image') . '*' }}</label>
                                     <br>
