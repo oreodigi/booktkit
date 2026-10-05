@@ -56,6 +56,10 @@ return [
       'driver' => 'sanctum',
       'provider' => 'organizers',
     ],
+    'staff_sanctum' => [
+      'driver' => 'sanctum',
+      'provider' => 'staff',
+    ],
     
     'admin_sanctum' => [
       'driver' => 'sanctum',
@@ -69,6 +73,10 @@ return [
     'organizer' => [
       'driver' => 'session',
       'provider' => 'organizers'
+    ],
+    'staff' => [
+      'driver' => 'session',
+      'provider' => 'staff'
     ],
     'customer' => [
       'driver' => 'session',
@@ -106,6 +114,10 @@ return [
     'organizers' => [
       'driver' => 'eloquent',
       'model' => App\Models\Organizer::class
+    ],
+    'staff' => [
+      'driver' => 'eloquent',
+      'model' => App\Models\OrganizerStaff::class
     ],
     'customers' => [
       'driver' => 'eloquent',
