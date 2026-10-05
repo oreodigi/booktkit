@@ -49,6 +49,17 @@ class HeroController extends Controller
         return $query['v'] ?? null;
     }
 
+    private function vimeoId(?string $url): ?string
+    {
+        if (!$url) return null;
+        $parts = parse_url(trim($url));
+        if (!$parts || empty($parts['host'])) return null;
+        $host = strtolower(preg_replace('/^www\\./', '', $parts['host']));
+        if (!in_array($host, ['vimeo.com', 'player.vimeo.com'], true)) return null;
+        if (preg_match('~/(?:video/)?([0-9]+)(?:$|[/?#])~', $parts['path'] ?? '', $m)) return $m[1];
+        return null;
+    }
+
     private function videoRules(Request $request, bool $creating): array
     {
         if ($request->media_type !== 'video') return [];
@@ -56,6 +67,9 @@ class HeroController extends Controller
         if ($source === 'upload') return ['video' => ($creating ? 'required|' : 'nullable|').'file|mimes:mp4,webm,mov|max:5120'];
         if ($source === 'youtube') return ['video_url' => ['required','url','max:1500', function ($attribute, $value, $fail) {
             if (!$this->youtubeId($value)) $fail('Please enter a valid YouTube video URL.');
+        }]];
+        if ($source === 'vimeo') return ['video_url' => ['required','url','max:1500', function ($attribute, $value, $fail) {
+            if (!$this->vimeoId($value)) $fail('Please enter a valid Vimeo video URL.');
         }]];
         return ['video_url' => 'required|url|max:1500'];
     }
@@ -89,7 +103,7 @@ class HeroController extends Controller
             'custom_url' => 'nullable|string|max:1000',
             'sort_order' => 'nullable|integer|min:0|max:9999',
             'image' => $request->media_type === 'image' ? ['required', new ImageMimeTypeRule()] : ['nullable', new ImageMimeTypeRule()],
-            'video_source' => 'nullable|required_if:media_type,video|in:upload,youtube,url',
+            'video_source' => 'nullable|required_if:media_type,video|in:upload,youtube,vimeo,url',
             'video_url' => 'nullable|string|max:1500',
             'video' => 'nullable'
         ];
@@ -128,7 +142,7 @@ class HeroController extends Controller
             'custom_url' => 'nullable|string|max:1000',
             'sort_order' => 'nullable|integer|min:0|max:9999',
             'image' => ['nullable', new ImageMimeTypeRule()],
-            'video_source' => 'nullable|required_if:media_type,video|in:upload,youtube,url',
+            'video_source' => 'nullable|required_if:media_type,video|in:upload,youtube,vimeo,url',
             'video_url' => 'nullable|string|max:1500',
             'video' => 'nullable',
         ];
