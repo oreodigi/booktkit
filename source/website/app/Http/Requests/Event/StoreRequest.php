@@ -118,8 +118,8 @@ class StoreRequest extends FormRequest
     }
 
     if ($this->event_type == 'venue') {
-      $ruleArray['latitude'] = 'required_if:event_type,venue';
-      $ruleArray['longitude'] = 'required_if:event_type,venue';
+      $ruleArray['latitude'] = 'nullable';
+      $ruleArray['longitude'] = 'nullable';
     }
 
     $bs = DB::table('basic_settings')
@@ -152,7 +152,7 @@ class StoreRequest extends FormRequest
       }
 
       $ruleArray[$language->code . '_category_id'] = 'required';
-      $ruleArray[$language->code . '_description'] = 'required|min:30';
+      $ruleArray[$language->code . '_description'] = 'required|min:30|max:1200';
       $ruleArray[$language->code . '_address'] = 'required_if:event_type,venue';
       $ruleArray[$language->code . '_city'] = 'required_if:event_type,venue';
     }
@@ -181,7 +181,7 @@ class StoreRequest extends FormRequest
 
       $messageArray[$code . '_category_id.required'] = 'The category field is required for ' . $langNameText;
       $messageArray[$code . '_description.required'] = 'The description field is required for ' . $langNameText;
-      $messageArray[$code . '_description.min'] = 'The description must be at least 30 characters for ' . $langNameText;
+      $messageArray[$code . '_description.min'] = 'The description must be at least 30 characters for ' . $langNameText;\n      $messageArray[$code . '_description.max'] = 'Keep the description concise (maximum 1200 characters) for ' . $langNameText;
     }
 
     return $messageArray;
