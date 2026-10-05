@@ -162,12 +162,12 @@ class HomeController extends Controller
 
     if ($event->event_type == 'online') {
       $ticket = Ticket::where('event_id', $event->id)->orderBy('price', 'asc')->first();
-      $start_price = $ticket->price;
+      $start_price = $ticket ? $ticket->price : 0;
     } else {
       $ticket = Ticket::where('event_id', $event->id)->whereNotNull('price')->orderBy('price', 'asc')->first();
       if (!$ticket) {
-        $ticket = Ticket::where('event_id', $event->id)->whereNotNull('f_price')->orderBy('price', 'asc')->first();
-        $start_price = $ticket->f_price;
+        $ticket = Ticket::where('event_id', $event->id)->whereNotNull('f_price')->orderBy('f_price', 'asc')->first();
+        $start_price = $ticket ? $ticket->f_price : 0;
       } else {
         $start_price = $ticket->price;
       }
