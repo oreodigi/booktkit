@@ -2,6 +2,23 @@
 
 use Illuminate\Support\Facades\Route;
 
+Route::prefix('staff')->group(function () {
+  Route::middleware('guest:staff')->group(function () {
+    Route::get('login','StaffAuthController@login')->name('staff.login');
+    Route::post('login','StaffAuthController@authenticate')->middleware('throttle:staff-login')->name('staff.authenticate');
+  });
+  Route::middleware(['auth:staff','staff.assignment'])->group(function () {
+    Route::get('/','StaffAuthController@home')->name('staff.home');
+    Route::get('change-password','StaffAuthController@editPassword')->name('staff.password.edit');
+    Route::post('change-password','StaffAuthController@updatePassword')->name('staff.password.update');
+    Route::post('logout','StaffAuthController@logout')->name('staff.logout');
+  });
+});
+
+<?php
+
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | User Interface Routes
@@ -61,6 +78,9 @@ Route::prefix('/organizer/ai-token-purchase')->group(function () {
 });
 
 Route::prefix('/organizer')->middleware('auth:organizer', 'Deactive:organizer', 'EmailStatus:organizer', 'adminLang')->group(function () {
+  Route::get('/team', 'BackEnd\\Organizer\\StaffController@index')->name('organizer.staff.index');
+  Route::post('/team', 'BackEnd\\Organizer\\StaffController@store')->name('organizer.staff.store');
+  Route::put('/team/{id}', 'BackEnd\\Organizer\\StaffController@update')->name('organizer.staff.update');
   Route::get('/dashboard', 'BackEnd\Organizer\OrganizerController@index')->name('organizer.dashboard');
   Route::get('monthly-income', 'BackEnd\Organizer\OrganizerController@monthly_income')->name('organizer.monthly_income');
   Route::get('/transaction', 'BackEnd\Organizer\OrganizerController@transaction')->name('organizer.transcation');
