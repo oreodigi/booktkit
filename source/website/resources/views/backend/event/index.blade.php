@@ -127,6 +127,7 @@
                         <th scope="col">{{ __('Ticket') }}</th>
                         <th scope="col">{{ __('Status') }}</th>
                         <th scope="col">{{ __('Featured') }}</th>
+                        <th scope="col">{{ __('Duplicate') }}</th>
                         <th scope="col">{{ __('Actions') }}</th>
                       </tr>
                     </thead>
@@ -198,6 +199,14 @@
                                   {{ __('No') }}
                                 </option>
                               </select>
+                            </form>
+                          </td>
+                          <td>
+                            <form action="{{ route('admin.event_management.duplicate_event', ['id' => $event->id]) }}" method="post" class="d-inline">
+                              @csrf
+                              <button type="submit" class="btn btn-outline-primary btn-sm" title="{{ __('Duplicate Event') }}">
+                                <i class="far fa-copy"></i> {{ __('Duplicate') }}
+                              </button>
                             </form>
                           </td>
                           <td>
