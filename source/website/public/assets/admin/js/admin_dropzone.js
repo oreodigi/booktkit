@@ -9,7 +9,7 @@
   // Dropzone initialization
   Dropzone.options.myDropzone = {
     acceptedFiles: '.png, .jpg, .jpeg',
-    maxFilesize: 12,
+    maxFilesize: 0.5,
     transformFile: function (file, done) {
       if (typeof window.booktkitProcessEventImage === 'function') {
         window.booktkitProcessEventImage(file, 1170, 570, function (processed) { done(processed); });
@@ -55,6 +55,7 @@
       this.removeFile(file);
     },
     success: function (file, response) {
+      file.serverFileId = response.file_id;
       if (response.status == 'error') {
 
         var content = {};
@@ -114,6 +115,8 @@
       }
     }
   };
+
+  window.booktkitRemoveGalleryImage = function(fileid) { rmvimg(fileid); };
 
   function rmvimg(fileid) {
     // If you want to the delete the file on the server as well,
