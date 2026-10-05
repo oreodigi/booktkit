@@ -1,3 +1,12 @@
+@php
+  // Some auth routes render this shared footer without the usual frontend
+  // controller payload. Normalise optional footer collections/records here so
+  // a missing CMS footer setting can never turn login/signup pages into 500s.
+  $footerInfo = $footerInfo ?? null;
+  $socialMediaInfos = $socialMediaInfos ?? collect();
+  $quickLinkInfos = $quickLinkInfos ?? collect();
+  $bex = $bex ?? null;
+@endphp
 <footer class="footer-section bg-lighter pt-100"
   style="background:#{{ $footerInfo ? $footerInfo->footer_background_color : '' }}">
   <div class="container">
