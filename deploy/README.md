@@ -67,3 +67,5 @@ this is NOT an enforced production gate; report the blocker.
 
 Use merge commits to preserve staging ancestry. After promotion, synchronize
 main back into staging before the next change. Never force-push either branch.
+
+Staging isolation probe: 2026-10-05 UTC. This documentation-only commit must reach staging without changing production.
