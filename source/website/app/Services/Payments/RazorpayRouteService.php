@@ -58,4 +58,10 @@ class RazorpayRouteService {
   } catch(\Throwable $e) { $row->update(['status'=>'failed','last_error'=>$e->getMessage(),'processed_at'=>now()]); throw $e; }
   return $row;
  }
+ public function releaseHold(PaymentTransfer $transfer): PaymentTransfer {
+  if(!$transfer->gateway_transfer_id||!$transfer->on_hold)return $transfer;
+  $r=$this->api->transfer->fetch($transfer->gateway_transfer_id)->edit(['on_hold'=>false]);
+  $transfer->update(['on_hold'=>false,'released_at'=>now(),'status'=>$r->status??$transfer->status,'gateway_payload'=>$r->toArray()]);
+  return $transfer->fresh();
+ }
 }
