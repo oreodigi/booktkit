@@ -9,6 +9,7 @@ use App\Models\Event\EventCountry;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class StateController extends Controller
 {
@@ -42,7 +43,7 @@ class StateController extends Controller
   {
     $rules = [
       'language_id' => 'required',
-      'name' => 'required|unique:event_countries,name',
+      'name' => ['required', Rule::unique('event_states', 'name')->where(fn ($query) => $query->where('language_id', $request->language_id)->where('country_id', $request->country_id))],
       'status' => 'required',
       'serial_number' => 'required|numeric|min:0',
     ];
@@ -80,8 +81,10 @@ class StateController extends Controller
 
   public function update(Request $request)
   {
+    $languageId = EventState::whereKey($request->id)->value('language_id');
+
     $rules = [
-      'name' => 'required|unique:event_countries,name,' . $request->id,
+      'name' => ['required', Rule::unique('event_states', 'name')->where(fn ($query) => $query->where('language_id', $languageId)->where('country_id', $request->country_id))->ignore($request->id)],
       'status' => 'required',
       'serial_number' => 'required|numeric|min:0',
     ];
