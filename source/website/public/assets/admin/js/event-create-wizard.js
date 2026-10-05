@@ -5,11 +5,16 @@ var key="booktkit:event-draft:"+location.pathname+":"+new URLSearchParams(locati
 function save(){var o={};$(form).find(":input[name]").each(function(){var n=this.name;if(!n||n==="_token"||this.type==="file")return;if((this.type==="checkbox"||this.type==="radio")&&!this.checked)return;o[n]=this.value});try{localStorage.setItem(key,JSON.stringify(o))}catch(e){}}
 function restore(){try{var o=JSON.parse(localStorage.getItem(key)||"{}");Object.keys(o).forEach(function(n){var $e=$(form).find('[name="'+CSS.escape(n)+'"]');if(!$e.length)return;if($e.first().is(":radio,:checkbox"))$e.filter('[value="'+CSS.escape(String(o[n]))+'"]').prop("checked",true).trigger("change");else $e.val(o[n]).trigger("change")})}catch(e){}}
 var timer;$(form).on("input change","input,select,textarea",function(){clearTimeout(timer);timer=setTimeout(save,250)});
+var eventType=new URLSearchParams(location.search).get("type"),isOnline=eventType==="online";
 var $gallery=$("#my-dropzone").closest(".col-lg-12"),children=$(form).children();children.attr("data-btk-step","4");
 $("#accordion").attr("data-btk-step","1");
 $("#single_dates,#multiple_dates,.countDownStatus").attr("data-btk-step","2");$(".eventDateType").closest(".row").attr("data-btk-step","2");
 $gallery.attr("data-btk-step","3");children.filter(".form-group").first().attr("data-btk-step","3");
-var nav=$('<div class="btk-wizard-nav"><button type="button" data-step="1">1 <span>Event Details</span></button><button type="button" data-step="2">2 <span>Schedule</span></button><button type="button" data-step="3">3 <span>Media</span></button><button type="button" data-step="4">4 <span>Publishing</span></button></div>');
+if(isOnline){
+  var onlineNames=["ticket_available_type","ticket_available","max_ticket_buy_type","max_buy_ticket","price","pricing_type","meeting_url","early_bird_discount_type","discount_type","early_bird_discount_amount","early_bird_discount_date","early_bird_discount_time"];
+  onlineNames.forEach(function(name){$(form).find('[name="'+name+'"]').each(function(){var $row=$(this).closest(".row");if($row.length&&$row.parent().is(form))$row.attr("data-btk-step","4");else $(this).closest(".col-lg-6,.col-lg-12").attr("data-btk-online-field","1")})});
+}
+var nav=$('<div class="btk-wizard-nav"><button type="button" data-step="1">1 <span>Event Details</span></button><button type="button" data-step="2">2 <span>Schedule</span></button><button type="button" data-step="3">3 <span>Media</span></button><button type="button" data-step="4">4 <span>'+(isOnline?'Tickets & Online':'Publishing')+'</span></button></div>');
 $(".card-body .col-lg-8.mx-auto").first().prepend(nav);
 var actions=$('<div class="btk-wizard-actions"><button type="button" class="btn btn-light btk-prev">Back</button><span class="btk-autosave">Draft autosaves on this device</span><button type="button" class="btn btn-primary btk-next">Continue</button></div>');$(".card-footer .row").before(actions);var step=1;
 function show(n){step=Math.max(1,Math.min(4,n));$("[data-btk-step]").hide();$('[data-btk-step="'+step+'"]').show();nav.find("button").removeClass("active done").each(function(){var s=+this.dataset.step;$(this).toggleClass("active",s===step).toggleClass("done",s<step)});$(".btk-prev").toggle(step>1);$(".btk-next").toggle(step<4);$("#EventSubmit").toggle(step===4);window.scrollTo({top:0,behavior:"smooth"})}
