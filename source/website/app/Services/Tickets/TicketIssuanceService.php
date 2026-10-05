@@ -27,9 +27,10 @@ class TicketIssuanceService
             $issued = [];
 
             foreach ($definitions as $definition) {
-                $token = 'btk_' . Str::random(64);
+                $uuid = (string) Str::uuid();
+                $token = $this->tokenForUuid($uuid);
                 $ticket = IssuedTicket::create([
-                    'uuid' => (string) Str::uuid(),
+                    'uuid' => $uuid,
                     'booking_id' => $booking->id,
                     'event_id' => $booking->event_id,
                     'organizer_id' => $booking->organizer_id,
@@ -80,6 +81,12 @@ class TicketIssuanceService
         return $definitions;
     }
 
+    public function tokenForUuid(string $uuid): string
+    {
+        $signature = rtrim(strtr(base64_encode(hash_hmac('sha256', $uuid, (string) config('app.key'), true)), '+/', '-_'), '=');
+        return 'btk_' . $uuid . '.' . $signature;
+    }
+
     private function present($tickets): array
     {
         return $tickets->map(function (IssuedTicket $ticket) {
@@ -89,7 +96,7 @@ class TicketIssuanceService
                 'ticket_name' => $ticket->ticket_name ?: 'Ticket',
                 'status' => $ticket->status,
                 'checked_in_at' => optional($ticket->checked_in_at)->toIso8601String(),
-                'token' => $ticket->getAttribute('plain_token'),
+                'token' => $ticket->getAttribute('plain_token') ?: $this->tokenForUuid($ticket->uuid),
             ];
         })->all();
     }
