@@ -8,7 +8,8 @@ class EnsureStaffAssignment {
   if($staff->must_change_password && !$request->routeIs('staff.password.*','staff.logout'))return redirect()->route('staff.password.edit');
   if($permission&&!$staff->hasPermission($permission))abort(403);
   $event=$request->route('event');$eventId=is_object($event)?$event->id:$event;
-  if($eventId&&!$staff->assignedTo((int)$eventId,$request->route('location')))abort(403);
+  $location=$request->route('location');$locationId=is_object($location)?$location->id:$location;
+  if($eventId&&!($locationId!==null?$staff->assignedTo((int)$eventId,(int)$locationId):$staff->assignedToEvent((int)$eventId)))abort(403);
   return $next($request);
  }
 }
