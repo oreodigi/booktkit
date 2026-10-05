@@ -5,6 +5,7 @@ use App\Models\Event\Booking;
 use App\Models\Event\Ticket;
 use App\Models\Payments\PaymentOrder;
 use App\Services\Tickets\TicketIssuanceService;
+use App\Services\Tickets\TicketDeliveryService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 class BookingFinalizationService {
@@ -49,7 +50,7 @@ class BookingFinalizationService {
   $order->booking_id=$booking->id; $order->save();
   app(TicketIssuanceService::class)->ensureForBooking($booking);
   DB::afterCommit(function () use ($booking) {
-   app(\\App\\Services\\Tickets\\TicketDeliveryService::class)->deliver($booking->fresh());
+   app(TicketDeliveryService::class)->deliver($booking->fresh());
   });
   return $booking;
  }
