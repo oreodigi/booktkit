@@ -77,13 +77,14 @@ class OrganizerPayoutKycController extends Controller
             throw ValidationException::withMessages(['bank_account_number' => 'Bank account number is required.']);
         }
 
-        if (!empty($data['bank_account_number'])) {
-            $data['bank_account_last4'] = substr($data['bank_account_number'], -4);
-        }
+        $bankNumber = $data['bank_account_number'] ?? null;
+        if (!empty($bankNumber)) $data['bank_account_last4'] = substr($bankNumber, -4);
         unset($data['bank_account_number']);
 
         $submit = (bool) ($data['submit_kyc'] ?? false);
         unset($data['submit_kyc']);
+        $termsAccepted = (bool) ($data['route_terms_accepted'] ?? false);
+        unset($data['route_terms_accepted']);
 
         $profile->fill($data);
         $profile->kyc_status = $submit ? 'submitted' : 'draft';
@@ -92,6 +93,16 @@ class OrganizerPayoutKycController extends Controller
             $profile->kyc_remarks = null;
         }
         $profile->save();
+
+        if ($submit) {
+            if (!$termsAccepted && !$profile->route_terms_accepted_at) {
+                throw ValidationException::withMessages(['route_terms_accepted' => 'Consent is required for Razorpay Route onboarding.']);
+            }
+            if (!$profile->razorpay_product_id && empty($bankNumber)) {
+                throw ValidationException::withMessages(['bank_account_number' => 'Re-enter the bank account number for initial Razorpay onboarding.']);
+            }
+            $profile = !empty($bankNumber) ? $route->onboard($profile, $bankNumber, true) : $route->sync($profile);
+        }
 
         return redirect()->route('organizer.payouts.kyc')
             ->with('success', $submit ? 'Payout details submitted for verification.' : 'Payout details saved as draft.');
