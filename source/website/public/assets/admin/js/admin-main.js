@@ -1237,7 +1237,11 @@ $("#EventSubmit").on('click', function (e) {
       });
 
       if (data.status == 'success') {
-        location.reload();
+        if (data.redirect) {
+          window.location.assign(data.redirect);
+        } else {
+          location.reload();
+        }
       }
     },
     error: function (error) {
