@@ -12,7 +12,7 @@
           ? route('event.details', [$eventSlug, $slide->event_id])
           : ($slide->custom_url ?: route('events'));
       @endphp
-      <article class="bkt-hero-slide {{ $loop->first ? 'is-active' : '' }}" data-slide="{{ $loop->index }}">
+      <article class="bkt-hero-slide {{ $loop->first ? 'is-active' : '' }} {{ $slide->show_overlay ? '' : 'bkt-no-overlay' }}" data-slide="{{ $loop->index }}">
         @if($slide->media_type === 'video')
           @if(($slide->video_source ?: 'upload') === 'youtube' && $slide->video_url)
             @php
