@@ -15,21 +15,21 @@ class RazorpayLinkedAccountService {
     'email'=>$p->contact_email,'phone'=>$p->contact_phone,'legal_business_name'=>$p->legal_business_name,'business_type'=>'route','type'=>'route',
     'profile'=>['category'=>$p->business_category,'subcategory'=>$p->business_subcategory],
     'legal_info'=>array_filter(['pan'=>$p->pan,'gst'=>$p->gstin]),'notes'=>['reference_id'=>'organizer_'.$p->organizer_id]
-   ])->throw()->json(); $p->razorpay_account_id=$r['id']; $p->save();
+   ])->throw()->json(); $p->razorpay_account_id=$r['id']; $this->remember($p,'account',$r); $p->save();
   }
   if(!$p->razorpay_stakeholder_id){
    $r=$this->http()->post('https://api.razorpay.com/v2/accounts/'.$p->razorpay_account_id.'/stakeholders',[
     'name'=>$p->contact_name,'email'=>$p->contact_email,'relationship'=>['director'=>true,'executive'=>true],
     'phone'=>['primary'=>$p->contact_phone],'kyc'=>['pan'=>$p->stakeholder_pan ?: $p->pan]
-   ])->throw()->json(); $p->razorpay_stakeholder_id=$r['id']; $p->save();
+   ])->throw()->json(); $p->razorpay_stakeholder_id=$r['id']; $this->remember($p,'stakeholder',$r); $p->save();
   }
   if(!$p->razorpay_product_id){
    $r=$this->http()->post('https://api.razorpay.com/v2/accounts/'.$p->razorpay_account_id.'/products',['product_name'=>'route','tnc_accepted'=>true,'applicable_identified'=>true])->throw()->json();
-   $p->razorpay_product_id=$r['id']; $p->save();
+   $p->razorpay_product_id=$r['id']; $this->remember($p,'product',$r); $p->save();
   }
-  $this->http()->patch('https://api.razorpay.com/v2/accounts/'.$p->razorpay_account_id.'/products/'.$p->razorpay_product_id,[
+  $bank=$this->http()->patch('https://api.razorpay.com/v2/accounts/'.$p->razorpay_account_id.'/products/'.$p->razorpay_product_id,[
    'settlements'=>['account_number'=>$bankAccount,'ifsc_code'=>$p->bank_ifsc,'beneficiary_name'=>$p->bank_account_holder],'tnc_accepted'=>true
-  ])->throw();
+  ])->throw()->json(); $this->remember($p,'settlements',$bank);
   $p->route_terms_accepted_at=$p->route_terms_accepted_at ?: now(); $p->save();
   return $this->sync($p);
  }
@@ -42,6 +42,7 @@ class RazorpayLinkedAccountService {
   $p->kyc_status=match($status){'activated','active'=>'activated','needs_clarification'=>'needs_clarification','rejected'=>'rejected','suspended'=>'suspended',default=>'under_review'};
   $p->split_enabled=$p->kyc_status==='activated';
   if($p->split_enabled&&!$p->activated_at)$p->activated_at=now();
-  $p->save(); return $p->fresh();
+  $this->remember($p,'account_sync',$a); $this->remember($p,'product_sync',$r); $p->save(); return $p->fresh();
  }
+ private function remember(OrganizerPaymentProfile $p,string $step,array $r): void { array_walk_recursive($r,function(&$v,$k){if(in_array(strtolower((string)$k),['pan','gst','gstin','account_number'],true))$v='[REDACTED]';}); $m=$p->metadata?:[];$m['route'][$step]=['at'=>now()->toIso8601String(),'response'=>$r];$p->metadata=$m; }
 }
