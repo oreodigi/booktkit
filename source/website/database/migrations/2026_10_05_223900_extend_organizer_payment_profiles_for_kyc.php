@@ -5,7 +5,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
-        \Illuminate\Support\Facades\DB::statement('ALTER TABLE organizer_payment_profiles MODIFY gstin TEXT NULL');
+        if (\Illuminate\Support\Facades\DB::getDriverName() === 'mysql') {
+            \Illuminate\Support\Facades\DB::statement('ALTER TABLE organizer_payment_profiles MODIFY gstin TEXT NULL');
+        }
         Schema::table('organizer_payment_profiles', function (Blueprint $table) {
             $table->string('business_type', 32)->nullable()->after('organizer_id');
             $table->string('legal_business_name')->nullable();
@@ -45,5 +47,8 @@ return new class extends Migration {
                 'razorpay_stakeholder_id','razorpay_product_id'
             ]);
         });
+        if (\Illuminate\Support\Facades\DB::getDriverName() === 'mysql') {
+            \Illuminate\Support\Facades\DB::statement('ALTER TABLE organizer_payment_profiles MODIFY gstin VARCHAR(20) NULL');
+        }
     }
 };
