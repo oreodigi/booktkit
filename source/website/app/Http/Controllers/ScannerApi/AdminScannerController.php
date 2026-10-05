@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use App\Services\Tickets\TicketAdmissionService;
 
 class AdminScannerController extends Controller
 {
@@ -68,78 +69,20 @@ class AdminScannerController extends Controller
       'token' => $token
     ], 200);
   }
-  public function check_qrcode(Request $request)
+  public function check_qrcode(Request $request, TicketAdmissionService $admission)
   {
-    if (str_contains($request->booking_id, '__')) {
-      $ids = explode('__', $request->booking_id);
-      $booking_id = $ids[0];
-      $unique_id = $ids[1];
-      $check = Booking::where([['booking_id', $booking_id]])->first();
-      if ($check) {
-        // check payment status completed or not
-        if ($check->paymentStatus == 'completed' || $check->paymentStatus == 'free') {
-          //check scanned_tickets column empty or not
-          if (is_null($check->scanned_tickets)) {
-            $scannedTicketArr = [
-              $unique_id
-            ];
-            $check->scanned_tickets = json_encode($scannedTicketArr);
-            $check->save();
-            return response()
-            ->json([
-              'alert_type' => 'success',
-              'message' => 'Verified',
-              'booking_id' => $request->booking_id
-            ]);
-          } else {
-            //ticket random id will be insert
-            $scannedTicketArr = json_decode($check->scanned_tickets, true);
-            if (! in_array($unique_id, $scannedTicketArr)) {
-              array_push($scannedTicketArr, $unique_id);
-              $check->scanned_tickets = json_encode($scannedTicketArr);
-              $check->save();
-              return response()->json(
-                ['alert_type' => 'success',
-                 'message' => 'Verified',
-                'booking_id' => $request->booking_id
-              ]);
-            } else {
-              return response()->json(
-                ['alert_type' => 'error',
-                 'message' => 'Already Scanned',
-                'booking_id' => $request->booking_id]
-              );
-            }
-          }
-        } elseif ($check->paymentStatus == 'pending') {
-          return response()->json([
-            'alert_type' => 'error',
-            'message' => 'Payment incomplete',
-            'booking_id' => $request->booking_id]
-          );
-        } elseif ($check->paymentStatus == 'rejected') {
-          return response()->json(
-            ['alert_type' => 'error',
-             'message' => 'Payment Rejected',
-            'booking_id' => $request->booking_id]
-          );
-        }
-      } else {
-        return response()->json(
-          ['alert_type' => 'error',
-          'message' => 'Unverified']
-        );
-      }
-    } else {
-      return response()->json(
-        [
-          'alert_type' => 'error',
-         'message' => 'Unverified'
-        ]);
-    }
+    $request->validate(['booking_id' => 'required|string|max:255']);
+    $admin = Auth::guard('admin_sanctum')->user();
+
+    return response()->json($admission->admit(
+      $request->booking_id,
+      'admin',
+      (int) $admin->id,
+      $request->header('X-Device-Name'),
+      $request->ip()
+    ));
   }
 
-  //check qr code
   public function logoutSubmit(Request $request)
   {
     $request->user()->currentAccessToken()->delete();

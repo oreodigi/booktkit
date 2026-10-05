@@ -11,6 +11,7 @@ use App\Models\BasicSettings\PageHeading;
 use App\Models\Customer;
 use App\Models\Event;
 use App\Models\Event\Booking;
+use App\Services\Tickets\TicketIssuanceService;
 use App\Models\Event\EventContent;
 use App\Models\Language;
 use App\Models\Organizer;
@@ -537,6 +538,7 @@ class CustomerController extends Controller
     // attached invoice with path
     $booking->invoice = !empty($booking->invoice) ? asset('assets/admin/file/invoices/'.$booking->invoice) : null;
     $data['booking'] = $booking;
+    $data['tickets'] = app(TicketIssuanceService::class)->ensureForBooking($booking);
 
     //organizer
     if (!is_null(@$booking->organizer_id)) {

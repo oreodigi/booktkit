@@ -165,11 +165,18 @@ class ScannerProvider extends ChangeNotifier {
           if (res.bookingId != null) 'booking_id': res.bookingId,
         };
       } else {
-        payload = {'value': code};
+        payload = {
+          'value': code,
+          'apiMessage': 'Scanner session expired. Sign in again before admitting attendees.',
+          'alertType': 'error',
+        };
       }
     } catch (_) {
-      // Fallback to basic payload on network or parsing errors
-      payload = {'value': code};
+      payload = {
+        'value': code,
+        'apiMessage': 'Verification failed. Check the network connection and scan again. Do not admit this ticket.',
+        'alertType': 'error',
+      };
     } finally {
       _loaderTimer?.cancel();
       if (_verifyingUi) {
