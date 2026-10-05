@@ -69,7 +69,7 @@
                                 <p class="text-warning">{{ __('Required: 1170×570. Maximum saved size 1 MB. Larger originals are compressed automatically after crop/resize.') }}</p>
                             </div>
                             <div class="btk-shared-event-wizard" data-event-wizard-actor="admin" data-event-wizard-mode="create">
-<form id="eventForm" data-actor="admin" data-mode="create" data-event-type="{{ $event->event_type ?? request('type', 'venue') }}" action="{{ route('admin.event_management.store_event') }}" method="POST"
+<form id="eventForm" data-actor="admin" data-mode="create" data-event-type="{{ request('type', 'venue') }}" action="{{ route('admin.event_management.store_event') }}" method="POST"
                                 enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" name="event_type" value="{{ request('type', 'venue') }}">
