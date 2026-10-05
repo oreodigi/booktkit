@@ -26,6 +26,13 @@ class EventFormRequest extends FormRequest
         $rules = [
             'event_id' => ['nullable','integer','exists:events,id'],
             'event_type' => ['required', Rule::in(['venue','online'])],
+            'box_office_enabled' => ['nullable','boolean'],
+            'reentry_policy' => ['required_if:box_office_enabled,1', Rule::in(['none','unlimited','limited'])],
+            'max_reentries' => ['nullable','required_if:reentry_policy,limited','integer','min:1'],
+            'box_office_locations' => ['nullable','required_if:box_office_enabled,1','array','min:1'],
+            'box_office_locations.*.name' => ['required_with:box_office_locations','string','max:255'],
+            'box_office_locations.*.address' => ['nullable','string','max:500'],
+            'box_office_locations.*.active' => ['nullable','boolean'],
             'date_type' => ['required', Rule::in(['single','multiple'])],
             'status' => ['required'],
             'is_featured' => ['required'],
@@ -88,6 +95,9 @@ class EventFormRequest extends FormRequest
                     $end=strtotime(($this->input("m_end_date.$i") ?: '').' '.($this->input("m_end_time.$i") ?: ''));
                     if ($start && $end && $end <= $start) $validator->errors()->add("m_end_time.$i",'Event end must be after the start.');
                 }
+            }
+            if ($this->boolean('box_office_enabled') && $this->input('event_type') !== 'venue') {
+                $validator->errors()->add('box_office_enabled','Box Office Event must use the venue event type.');
             }
             $eventId=(int)$this->input('event_id');
             if ($eventId && $this->input('event_type') && ($event=Event::find($eventId)) && $event->event_type !== $this->input('event_type') && $event->booking()->exists()) {

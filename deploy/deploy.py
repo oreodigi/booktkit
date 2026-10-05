@@ -242,12 +242,14 @@ class Deployment:
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--target',choices=['production','staging'],required=True)
-    parser.add_argument('--branch',default='main')
+    parser.add_argument('--branch',default=None)
     parser.add_argument('--migrate',action='store_true',help='Explicit production migration approval; staging always migrates')
     parser.add_argument('--check',action='store_true')
     parser.add_argument('--adopt',action='store_true',help='Adopt only an exactly matching live baseline')
     args=parser.parse_args()
-    if args.target=='production' and args.branch!='main':parser.error('Production deploys main only')
+    expected_branch = 'staging' if args.target == 'staging' else 'main'
+    args.branch = args.branch or expected_branch
+    if args.branch != expected_branch: parser.error(args.target + ' deploys ' + expected_branch + ' only')
     os.umask(0o077)
     os.environ['GIT_SSH_COMMAND']='ssh -i /home/booktkit/.ssh/booktkit_github -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/home/booktkit/.ssh/known_hosts_booktkit'
     deployment=Deployment(args)

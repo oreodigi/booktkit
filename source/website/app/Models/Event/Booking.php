@@ -48,6 +48,11 @@ class Booking extends Model
     'scan_status',
     'conversation_id',
     'fcm_token',
+    'booking_source',
+    'sold_by_staff_id',
+    'box_office_location_id',
+    'sale_uuid',
+    'counter_payment_method',
   ];
 
   public function event()
@@ -66,6 +71,10 @@ class Booking extends Model
   public function organizer()
   {
     return $this->belongsTo(Organizer::class);
+  }
+  public function issuedTickets()
+  {
+    return $this->hasMany(IssuedTicket::class, 'booking_id');
   }
 
   protected static function boot()

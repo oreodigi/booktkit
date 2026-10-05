@@ -3,6 +3,26 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BackEnd\Organizer\OrganizerPayoutKycController;
 
+Route::prefix('staff')->group(function () {
+  Route::middleware('guest:staff')->group(function () {
+    Route::get('login','StaffAuthController@login')->name('staff.login');
+    Route::post('login','StaffAuthController@authenticate')->middleware('throttle:staff-login')->name('staff.authenticate');
+  });
+  Route::middleware(['auth:staff','staff.assignment'])->group(function () {
+    Route::get('/','StaffAuthController@home')->name('staff.home');
+    Route::get('shifts','StaffShiftController@index')->middleware('staff.assignment:box_office.sell')->name('staff.shifts.index');
+    Route::post('shifts/open','StaffShiftController@open')->middleware('staff.assignment:box_office.sell')->name('staff.shifts.open');
+    Route::post('shifts/{id}/close','StaffShiftController@close')->middleware('staff.assignment:box_office.sell')->name('staff.shifts.close');
+    Route::get('box-office','StaffBoxOfficeController@index')->middleware('staff.assignment:box_office.sell')->name('staff.boxoffice.index');
+    Route::post('box-office/sales','StaffBoxOfficeController@store')->middleware('staff.assignment:box_office.sell')->name('staff.boxoffice.store');
+    Route::get('box-office/sales/{id}/print','StaffBoxOfficeController@print')->middleware('staff.assignment:box_office.sell')->name('staff.boxoffice.print');
+    Route::post('box-office/sales/{id}/reprint','StaffBoxOfficeController@reprint')->middleware('staff.assignment:box_office.reprint')->name('staff.boxoffice.reprint');
+    Route::get('change-password','StaffAuthController@editPassword')->name('staff.password.edit');
+    Route::post('change-password','StaffAuthController@updatePassword')->name('staff.password.update');
+    Route::post('logout','StaffAuthController@logout')->name('staff.logout');
+  });
+});
+
 /*
 |--------------------------------------------------------------------------
 | User Interface Routes
@@ -62,6 +82,18 @@ Route::prefix('/organizer/ai-token-purchase')->group(function () {
 });
 
 Route::prefix('/organizer')->middleware('auth:organizer', 'Deactive:organizer', 'EmailStatus:organizer', 'adminLang')->group(function () {
+  Route::get('/box-office/reports', 'BackEnd\\Organizer\\BoxOfficeReportController@index')->name('organizer.boxoffice.reports.index');
+  Route::get('/box-office/shifts', 'BackEnd\\Organizer\\BoxOfficeShiftController@index')->name('organizer.boxoffice.shifts.index');
+  Route::post('/box-office/shifts/{id}/verify', 'BackEnd\\Organizer\\BoxOfficeShiftController@verify')->name('organizer.boxoffice.shifts.verify');
+  Route::get('/box-office', 'BackEnd\\Organizer\\BoxOfficeController@index')->name('organizer.boxoffice.index');
+  Route::post('/box-office/sales', 'BackEnd\\Organizer\\BoxOfficeController@store')->name('organizer.boxoffice.store');
+  Route::get('/box-office/sales/{id}/print', 'BackEnd\\Organizer\\BoxOfficeController@print')->name('organizer.boxoffice.print');
+  Route::post('/box-office/sales/{id}/reprint', 'BackEnd\\Organizer\\BoxOfficeController@reprint')->name('organizer.boxoffice.reprint');
+  Route::post('/box-office/sales/{id}/void-request', 'BackEnd\\Organizer\\BoxOfficeController@requestVoid')->name('organizer.boxoffice.void.request');
+  Route::post('/box-office/sales/{id}/void-approve', 'BackEnd\\Organizer\\BoxOfficeController@approveVoid')->name('organizer.boxoffice.void.approve');
+  Route::get('/team', 'BackEnd\\Organizer\\StaffController@index')->name('organizer.staff.index');
+  Route::post('/team', 'BackEnd\\Organizer\\StaffController@store')->name('organizer.staff.store');
+  Route::put('/team/{id}', 'BackEnd\\Organizer\\StaffController@update')->name('organizer.staff.update');
   Route::get('/dashboard', 'BackEnd\Organizer\OrganizerController@index')->name('organizer.dashboard');
   Route::get('/payouts-kyc', [OrganizerPayoutKycController::class, 'edit'])->name('organizer.payouts.kyc');
   Route::post('/payouts-kyc', [OrganizerPayoutKycController::class, 'save'])->name('organizer.payouts.kyc.save');

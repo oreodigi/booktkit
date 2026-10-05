@@ -1,0 +1,9 @@
+<?php
+namespace App\Http\Controllers;
+use App\Models\Event;use App\Models\BoxOfficeSale;use App\Services\BoxOffice\BoxOfficeSaleService;use Illuminate\Http\Request;use Illuminate\Validation\Rule;
+class StaffBoxOfficeController extends Controller{
+ public function index(){ $s=auth('staff')->user();$ids=$s->assignments()->pluck('event_id');return view('staff.pos',['events'=>Event::where('organizer_id',$s->organizer_id)->whereIn('id',$ids)->where('box_office_enabled',1)->with(['boxOfficeLocations','tickets'])->get()]);}
+ public function store(Request $r,BoxOfficeSaleService $svc){$s=auth('staff')->user();$d=$r->validate(['sale_uuid'=>'required|uuid','event_id'=>'required|integer','location_id'=>'required|integer','customer_name'=>'required|string|max:120','customer_phone'=>'required|string|max:30','customer_email'=>'nullable|email','deliver_email'=>'nullable|boolean','payment_method'=>['required',Rule::in(['cash','card','upi','other'])],'items'=>'required|array|min:1','items.*.ticket_id'=>'required|integer','items.*.quantity'=>'required|integer|min:1','items.*.variation'=>'nullable|string']);if(!$s->assignedTo((int)$d['event_id'],(int)$d['location_id']))abort(403);$sale=$svc->sell($d,$s->organizer_id,$s->id);return redirect()->route('staff.boxoffice.print',$sale->id);}
+ public function print($id){$s=auth('staff')->user();$sale=BoxOfficeSale::where('organizer_id',$s->organizer_id)->where('staff_id',$s->id)->with('booking')->findOrFail($id);return view('organizer.box-office.print',compact('sale'));}
+ public function reprint($id){$s=auth('staff')->user();$sale=BoxOfficeSale::where('organizer_id',$s->organizer_id)->where('staff_id',$s->id)->findOrFail($id);$sale->logs()->create(['action'=>'reprint','actor_staff_id'=>$s->id]);return redirect()->route('staff.boxoffice.print',$sale->id);}
+}

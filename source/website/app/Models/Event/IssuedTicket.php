@@ -10,12 +10,13 @@ class IssuedTicket extends Model
         'uuid', 'booking_id', 'event_id', 'organizer_id', 'customer_id',
         'ticket_type_id', 'legacy_unique_id', 'ticket_name', 'token_hash',
         'status', 'issued_at', 'checked_in_at', 'checked_in_by_type',
-        'checked_in_by_id',
+        'checked_in_by_id', 'presence_state', 'entry_count', 'exit_count', 'last_admission_at',
     ];
 
     protected $casts = [
         'issued_at' => 'datetime',
         'checked_in_at' => 'datetime',
+        'last_admission_at' => 'datetime',
     ];
 
     protected $hidden = ['token_hash'];

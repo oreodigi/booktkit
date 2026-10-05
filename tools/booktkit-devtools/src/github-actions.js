@@ -7,7 +7,7 @@ async function api(path, options={},signal=AbortSignal.timeout(20_000)) {
  if(!response.ok)throw new Error(`GitHub API returned HTTP ${response.status}`);
  return response;
 }
-export async function dispatchSuite({suite='smoke',baseUrl='https://test.booktkit.com',ref='main'}={}){
+export async function dispatchSuite({suite='smoke',baseUrl='https://test.booktkit.com',ref='staging'}={}){
  if(!suites.has(suite))throw new Error('Unsupported suite');
  if(baseUrl!=='https://test.booktkit.com')throw new Error('Remote suites require isolated staging');
  const run_id=randomUUID();

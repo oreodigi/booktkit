@@ -1,0 +1,81 @@
+name: BookTKIT Staging Gate
+on:
+  push:
+    branches: [staging]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: booktkit-staging-tests
+  cancel-in-progress: false
+jobs:
+  staging-gate:
+    name: staging-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: tools/booktkit-devtools
+    env:
+      EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      BOOKTKIT_BASE_URL: https://test.booktkit.com
+      BOOKTKIT_ALLOW_MUTATIONS: 'true'
+      BOOKTKIT_RAZORPAY_TEST_ENABLED: 'false'
+      BOOKTKIT_RUN_TIMEOUT_MINUTES: '3'
+      BOOKTKIT_STAGING_HTTP_USERNAME: ${{ secrets.BOOKTKIT_STAGING_HTTP_USERNAME }}
+      BOOKTKIT_STAGING_HTTP_PASSWORD: ${{ secrets.BOOKTKIT_STAGING_HTTP_PASSWORD }}
+      BOOKTKIT_TEST_CUSTOMER_USERNAME: ${{ secrets.BOOKTKIT_TEST_CUSTOMER_USERNAME }}
+      BOOKTKIT_TEST_CUSTOMER_EMAIL: ${{ secrets.BOOKTKIT_TEST_CUSTOMER_EMAIL }}
+      BOOKTKIT_TEST_CUSTOMER_PASSWORD: ${{ secrets.BOOKTKIT_TEST_CUSTOMER_PASSWORD }}
+      BOOKTKIT_TEST_ORGANIZER_USERNAME: ${{ secrets.BOOKTKIT_TEST_ORGANIZER_USERNAME }}
+      BOOKTKIT_TEST_ORGANIZER_EMAIL: ${{ secrets.BOOKTKIT_TEST_ORGANIZER_EMAIL }}
+      BOOKTKIT_TEST_ORGANIZER_PASSWORD: ${{ secrets.BOOKTKIT_TEST_ORGANIZER_PASSWORD }}
+      BOOKTKIT_TEST_ADMIN_USERNAME: ${{ secrets.BOOKTKIT_TEST_ADMIN_USERNAME }}
+      BOOKTKIT_TEST_ADMIN_EMAIL: ${{ secrets.BOOKTKIT_TEST_ADMIN_EMAIL }}
+      BOOKTKIT_TEST_ADMIN_PASSWORD: ${{ secrets.BOOKTKIT_TEST_ADMIN_PASSWORD }}
+      BOOKTKIT_TEST_SCANNER_USERNAME: ${{ secrets.BOOKTKIT_TEST_SCANNER_USERNAME }}
+      BOOKTKIT_TEST_SCANNER_EMAIL: ${{ secrets.BOOKTKIT_TEST_SCANNER_EMAIL }}
+      BOOKTKIT_TEST_SCANNER_PASSWORD: ${{ secrets.BOOKTKIT_TEST_SCANNER_PASSWORD }}
+    steps:
+      - name: Require staging as the promotion source
+        working-directory: .
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REF: ${{ github.head_ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            test "$HEAD_REF" = staging
+            test "$HEAD_REPO" = "$GITHUB_REPOSITORY"
+          fi
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tools/booktkit-devtools/package-lock.json
+      - name: Wait for the staging deployment marker
+        run: node src/verify-deployment.js --wait
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Run four staging suites with zero failures or skips
+        run: |
+          set -euo pipefail
+          for suite in smoke auth organizer event-creation; do
+            node src/verify-deployment.js
+            node src/cli.js "$suite"
+            node -e 'const fs=require("fs");const r=JSON.parse(fs.readFileSync("test-summary.json"));const n={smoke:5,auth:3,organizer:1,"event-creation":4};if(!r.ok||r.counts?.passed!==n[r.suite]||r.counts.failed||r.counts.skipped||r.counts.flaky)process.exit(1)'
+            node src/verify-deployment.js
+          done
+      - name: Upload sanitized results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-gate-${{ github.run_id }}
+          path: |
+            tools/booktkit-devtools/artifacts/runs/*/status.json
+            tools/booktkit-devtools/artifacts/runs/*/run.log
+          retention-days: 3

@@ -46,6 +46,8 @@ jobs:
       BOOKTKIT_TEST_ADMIN_PASSWORD: ${{ secrets.BOOKTKIT_TEST_ADMIN_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: staging
       - uses: actions/setup-node@v4
         with:
           node-version: 22

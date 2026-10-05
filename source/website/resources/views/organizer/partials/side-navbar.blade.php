@@ -242,6 +242,19 @@
             <p>{{ __('Payments & Settlements') }}</p>
           </a>
         </li>
+        <li class="nav-item {{ request()->routeIs('organizer.boxoffice.reports.*') ? 'active' : '' }}"><a href="{{ route('organizer.boxoffice.reports.index') }}"><i class="fal fa-chart-bar"></i><p>{{ __('Box Office Reports') }}</p></a></li>
+        <li class="nav-item {{ request()->routeIs('organizer.boxoffice.*') ? 'active' : '' }}">
+          <a href="{{ route('organizer.boxoffice.index') }}">
+            <i class="fal fa-cash-register"></i>
+            <p>{{ __('Box Office') }}</p>
+          </a>
+        </li>
+        <li class="nav-item {{ request()->routeIs('organizer.staff.*') ? 'active' : '' }}">
+          <a href="{{ route('organizer.staff.index') }}">
+            <i class="fal fa-user-friends"></i>
+            <p>{{ __('Team') }}</p>
+          </a>
+        </li>
         <li class="nav-item @if (request()->routeIs('organizer.payouts.kyc*')) active @endif">
           <a href="{{ route('organizer.payouts.kyc') }}">
             <i class="fal fa-id-card"></i>

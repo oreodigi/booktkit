@@ -27,6 +27,11 @@ class Organizer extends Model implements AuthenticatableContract
     'theme_version'
   ];
 
+  public function staff()
+  {
+    return $this->hasMany(OrganizerStaff::class);
+  }
+
   //withdraw
   public function withdraws()
   {
