@@ -5,6 +5,7 @@ use App\Models\PaymentGateway\OnlineGateway;
 use App\Models\Payments\PaymentOrder;
 use App\Models\Payments\PaymentTransfer;
 use App\Models\Payments\PaymentRefund;
+use Illuminate\Support\Facades\DB;
 class RazorpayRouteService {
  private Api $api;
  public function __construct(){
@@ -45,10 +46,15 @@ class RazorpayRouteService {
   $row=PaymentTransfer::create(['payment_order_id'=>$order->id,'organizer_id'=>$order->organizer_id,'linked_account_id'=>$accountId,
    'amount'=>$order->organizer_amount,'currency'=>$order->currency,'status'=>'pending','attempts'=>1]);
   try {
+   $holdDays=max(0,(int)(DB::table('payment_settings')->where('key','transfer_hold_days')->value('value') ?? 2));
+   $eventEnd=DB::table('events')->where('id',$order->event_id)->value('end_date_time');
+   $releaseAt=\Carbon\Carbon::parse($eventEnd ?: now())->addDays($holdDays);
    $payment=$this->api->payment->fetch($order->gateway_payment_id);
-   $result=$payment->transfer(['transfers'=>[['account'=>$accountId,'amount'=>$order->organizer_amount,'currency'=>$order->currency,'notes'=>['payment_order_uuid'=>$order->uuid]]]]);
+   $result=$payment->transfer(['transfers'=>[['account'=>$accountId,'amount'=>$order->organizer_amount,'currency'=>$order->currency,
+    'on_hold'=>true,'on_hold_until'=>$releaseAt->timestamp,'notes'=>['payment_order_uuid'=>$order->uuid]]]]);
    $data=$result->toArray(); $first=$data['items'][0] ?? $data[0] ?? null;
-   $row->update(['gateway_transfer_id'=>$first['id']??null,'status'=>$first['status']??'created','gateway_payload'=>$data,'processed_at'=>now()]);
+   $row->update(['gateway_transfer_id'=>$first['id']??null,'status'=>$first['status']??'created','gateway_payload'=>$data,
+    'on_hold'=>true,'hold_release_at'=>$releaseAt,'processed_at'=>now()]);
   } catch(\Throwable $e) { $row->update(['status'=>'failed','last_error'=>$e->getMessage(),'processed_at'=>now()]); throw $e; }
   return $row;
  }
