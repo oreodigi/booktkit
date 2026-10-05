@@ -205,6 +205,13 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
   });
 
 
+  Route::prefix('/payments-v2')->middleware('permission:Transaction')->group(function () {
+    Route::get('/', 'BackEnd\\PaymentFinanceController@index')->name('admin.payments.finance');
+    Route::post('/fee-rules', 'BackEnd\\PaymentFinanceController@storeFeeRule')->name('admin.payments.fee_rules.store');
+    Route::put('/fee-rules/{id}', 'BackEnd\\PaymentFinanceController@updateFeeRule')->name('admin.payments.fee_rules.update');
+    Route::delete('/fee-rules/{id}', 'BackEnd\\PaymentFinanceController@destroyFeeRule')->name('admin.payments.fee_rules.destroy');
+  });
+
   Route::prefix('/organizer-payouts')->middleware('permission:Organizer Mangement')->group(function () {
     Route::get('/', 'BackEnd\\Payments\\OrganizerPayoutController@index')->name('admin.organizer_payouts.index');
     Route::post('/hold-days', 'BackEnd\\Payments\\OrganizerPayoutController@holdDays')->name('admin.organizer_payouts.hold_days');
