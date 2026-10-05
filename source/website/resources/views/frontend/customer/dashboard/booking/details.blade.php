@@ -232,6 +232,33 @@
                                         </div>
                                     </div>
 
+                                    @if (!empty($issuedTickets))
+                                        <div class="mt-4 mb-4">
+                                            <h5>{{ __('Your Tickets') }}</h5>
+                                            <p class="text-muted">{{ __('Show one QR code per attendee at the entrance. Each QR can be admitted only once.') }}</p>
+                                            <div class="row">
+                                                @foreach ($issuedTickets as $index => $issuedTicket)
+                                                    <div class="col-md-6 mb-3">
+                                                        <div class="card h-100 text-center p-3">
+                                                            <h6>{{ $issuedTicket['ticket_name'] }} · {{ __('Ticket') }} {{ $index + 1 }} / {{ count($issuedTickets) }}</h6>
+                                                            <div class="my-3">
+                                                                {!! QrCode::size(220)->margin(1)->generate($issuedTicket['token']) !!}
+                                                            </div>
+                                                            <div>
+                                                                @if (!empty($issuedTicket['checked_in_at']))
+                                                                    <span class="badge badge-secondary">{{ __('Already checked in') }}</span>
+                                                                @else
+                                                                    <span class="badge badge-success">{{ __('Valid') }}</span>
+                                                                @endif
+                                                            </div>
+                                                            <small class="text-muted mt-2">{{ $issuedTicket['uuid'] }}</small>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+
                                     @if ($booking->variation != null)
                                         <div class="table-responsive product-list">
                                             <h5>{{ __('Booked Tickets') }}</h5>
