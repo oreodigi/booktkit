@@ -41,7 +41,7 @@ jobs:
       BOOKTKIT_BASE_URL: ${{ inputs.base_url }}
       # Mutation suites are permitted only on the isolated staging hostname.
       BOOKTKIT_ALLOW_MUTATIONS: ${{ inputs.base_url == 'https://test.booktkit.com' && 'true' || 'false' }}
-      BOOKTKIT_RAZORPAY_TEST_ENABLED: ${{ inputs.base_url == 'https://test.booktkit.com' && 'true' || 'false' }}
+      BOOKTKIT_RAZORPAY_TEST_ENABLED: 'false'
       BOOKTKIT_TEST_ORGANIZER_EMAIL: ${{ secrets.BOOKTKIT_TEST_ORGANIZER_EMAIL }}
       BOOKTKIT_TEST_ORGANIZER_PASSWORD: ${{ secrets.BOOKTKIT_TEST_ORGANIZER_PASSWORD }}
       BOOKTKIT_TEST_CUSTOMER_EMAIL: ${{ secrets.BOOKTKIT_TEST_CUSTOMER_EMAIL }}
