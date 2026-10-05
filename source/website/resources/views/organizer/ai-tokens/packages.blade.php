@@ -36,13 +36,21 @@
             <ul class="list-unstyled mb-0">
               <li class="mb-2"><strong>{{ __('Content Tokens') }}:</strong> {{ $package->ai_token_limit }}</li>
               <li class="mb-2"><strong>{{ __('Image Limit') }}:</strong> {{ $package->ai_image_limit }}</li>
-              <li><strong>{{ __('Price') }}:</strong> {{ symbolPrice($package->price) }}</li>
+              <li><strong>{{ __('Price') }}:</strong>
+                @if ((float) $package->price <= 0)
+                  <span class="badge badge-success">{{ __('Free') }}</span>
+                @else
+                  {{ symbolPrice($package->price) }}
+                @endif
+              </li>
             </ul>
           </div>
           <div class="card-footer">
             <form action="{{ route('organizer.ai_token_purchase.start_checkout', ['id' => $package->id]) }}" method="POST">
               @csrf
-              <button type="submit" class="btn btn-primary btn-block">{{ __('Buy Now') }}</button>
+              <button type="submit" class="btn btn-primary btn-block">
+                {{ (float) $package->price <= 0 ? __('Activate Free Package') : __('Buy Now') }}
+              </button>
             </form>
           </div>
         </div>
