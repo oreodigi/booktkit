@@ -6,7 +6,7 @@
   <div class="bkt-hero-track">
     @foreach($slides as $slide)
       @php
-        $eventContent = $slide->event?->content ?? null;
+        $eventContent = $slide->event?->information ?? null;
         $eventSlug = $eventContent?->slug;
         $targetUrl = $slide->event_id && $eventSlug
           ? route('event.details', [$eventSlug, $slide->event_id])
