@@ -34,6 +34,10 @@ class Handler extends ExceptionHandler
         'current_password',
         'password',
         'password_confirmation',
+        'pan',
+        'stakeholder_pan',
+        'gstin',
+        'bank_account_number',
     ];
 
     /**
