@@ -109,9 +109,9 @@ class StoreRequest extends FormRequest
         $ruleArray['price'] = 'required';
       }
 
-      if ($request['early_bird_discount_type'] == 'enable' && $request['discount_type'] == 'percentage') {
+      if (($request['early_bird_discount_type'] ?? null) == 'enable' && ($request['discount_type'] ?? null) == 'percentage') {
         $ruleArray['early_bird_discount_amount'] = 'numeric|between:1,99';
-      } elseif ($request['early_bird_discount_type'] == 'enable' && $request['discount_type'] == 'fixed') {
+      } elseif (($request['early_bird_discount_type'] ?? null) == 'enable' && ($request['discount_type'] ?? null) == 'fixed') {
         $price = $request['price'] - 1;
         $ruleArray['early_bird_discount_amount'] = "numeric|between:1,$price";
       }
@@ -181,7 +181,8 @@ class StoreRequest extends FormRequest
 
       $messageArray[$code . '_category_id.required'] = 'The category field is required for ' . $langNameText;
       $messageArray[$code . '_description.required'] = 'The description field is required for ' . $langNameText;
-      $messageArray[$code . '_description.min'] = 'The description must be at least 30 characters for ' . $langNameText;\n      $messageArray[$code . '_description.max'] = 'Keep the description concise (maximum 1200 characters) for ' . $langNameText;
+      $messageArray[$code . '_description.min'] = 'The description must be at least 30 characters for ' . $langNameText;
+      $messageArray[$code . '_description.max'] = 'Keep the description concise (maximum 1200 characters) for ' . $langNameText;
     }
 
     return $messageArray;
