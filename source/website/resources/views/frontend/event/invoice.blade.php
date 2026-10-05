@@ -162,6 +162,18 @@
             ];
         }
     }
+
+    if (isset($issuedTickets) && !empty($issuedTickets)) {
+        $ticketItems = [];
+        foreach ($issuedTickets as $issuedTicket) {
+            $ticketItems[] = [
+                'qr' => $filePath('assets/admin/qrcodes/secure_' . $issuedTicket['uuid'] . '.svg'),
+                'label' => $issuedTicket['ticket_name'] ?? __('Ticket'),
+                'slot_name' => null,
+                'seat_name' => null,
+            ];
+        }
+    }
 @endphp
 
 <head>
