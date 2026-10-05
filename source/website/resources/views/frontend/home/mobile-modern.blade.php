@@ -10,7 +10,9 @@ $mhEvents=DB::table('event_contents')->join('events','events.id','=','event_cont
 <div class="bkm-app bkm-template-{{ $mhTemplate }}" style="--bkm-accent:{{ $mhAccent }};--bkm-surface:{{ $mhSurface }};--bkm-radius:{{ $mhRadius }}px">
 <header class="bkm-header"><a href="{{ route('index') }}" class="bkm-brand"><img src="{{ asset('assets/admin/img/' . $websiteInfo->logo) }}" alt="{{ $websiteInfo->website_title }}"></a><div class="bkm-actions"><a href="{{ route('contact') }}" aria-label="{{ __('Support') }}"><i class="fas fa-headphones"></i></a><a href="{{ Auth::guard('customer')->check()?route('customer.dashboard'):route('customer.login') }}" aria-label="{{ __('Account') }}"><i class="fas fa-user-circle"></i></a></div></header>
 @if(isset($heroSlides) && $heroSlides->count())
-  @php($mobileHero = true)
+  @php
+    $mobileHero = true;
+  @endphp
   @include('frontend.home.hero-slider')
 @endif
 @foreach($mhSections as $section)
