@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
  public function up(): void {
-  DB::statement('ALTER TABLE organizer_payment_profiles MODIFY metadata LONGTEXT NULL');
   Schema::table('organizer_payment_profiles',function(Blueprint $t){
    $t->boolean('split_suspended')->default(false);
    $t->timestamp('route_terms_accepted_at')->nullable();
