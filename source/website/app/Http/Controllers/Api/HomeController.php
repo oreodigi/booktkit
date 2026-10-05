@@ -196,7 +196,7 @@ class HomeController extends Controller
       'organizer' => $organizer_name,
       'event_type' => $event->event_type,
       'address' => $event->address,
-      'start_price' => $ticket->pricing_type == 'free' ? $ticket->pricing_type : $start_price,
+      'start_price' => $ticket && $ticket->pricing_type == 'free' ? $ticket->pricing_type : $start_price,
       'wishlist' => !is_null($wishlist) ? 'yes' : 'no',
       'dates' => $dates,
     ];
