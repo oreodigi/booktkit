@@ -1,0 +1,11 @@
+<?php
+namespace App\Http\Controllers\BackEnd;
+use App\Http\Controllers\Controller;use App\Models\OrganizerStaff;use App\Models\StaffAuditLog;use Illuminate\Http\Request;use Illuminate\Support\Facades\Hash;
+class OrganizerWorkforceController extends Controller{
+ public function index(Request $r){$q=OrganizerStaff::with('organizer')->withCount('sales')->latest();if($r->filled('organizer_id'))$q->where('organizer_id',$r->organizer_id);if($r->filled('q')){$s=$r->q;$q->where(fn($x)=>$x->where('name','like',"%$s%")->orWhere('username','like',"%$s%")->orWhere('email','like',"%$s%"));}return view('backend.organizer-workforce.index',['staff'=>$q->paginate(40)->withQueryString(),'roles'=>config('staff.roles')]);}
+ public function update(Request $r,$id){$s=OrganizerStaff::findOrFail($id);$d=$r->validate(['name'=>'required|string|max:120','job_title'=>'nullable|string|max:100','role'=>'required|in:'.implode(',',array_keys(config('staff.roles'))),'active'=>'nullable|boolean']);$d['active']=$r->boolean('active');$s->update($d);if(!$s->active)$s->tokens()->delete();$this->audit($s,'admin_updated');return back()->with('success','Team profile updated by admin.');}
+ public function resetPassword(Request $r,$id){$s=OrganizerStaff::findOrFail($id);$d=$r->validate(['password'=>'required|string|min:8|max:100']);$s->update(['password'=>Hash::make($d['password']),'must_change_password'=>true]);$s->tokens()->delete();$this->audit($s,'admin_password_reset');return back()->with('success','Password reset and staff sessions revoked.');}
+ public function destroy($id){$s=OrganizerStaff::findOrFail($id);$this->audit($s,'admin_deleted',['name'=>$s->name]);$s->tokens()->delete();$s->delete();return back()->with('success','Team member deleted. Historical sale records remain.');}
+ public function impersonate($id){$s=OrganizerStaff::where('active',1)->findOrFail($id);$this->audit($s,'admin_impersonation_started');session(['staff_impersonated_by_admin'=>auth('admin')->id()]);auth('staff')->login($s);return redirect()->route('staff.home');}
+ private function audit($s,$action,$meta=null){StaffAuditLog::create(['organizer_id'=>$s->organizer_id,'staff_id'=>$s->id,'admin_id'=>auth('admin')->id(),'action'=>$action,'meta'=>$meta,'ip'=>request()->ip()]);}
+}
