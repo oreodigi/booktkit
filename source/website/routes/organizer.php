@@ -9,6 +9,10 @@ Route::prefix('staff')->group(function () {
   });
   Route::middleware(['auth:staff','staff.assignment'])->group(function () {
     Route::get('/','StaffAuthController@home')->name('staff.home');
+    Route::get('box-office','StaffBoxOfficeController@index')->middleware('staff.assignment:box_office.sell')->name('staff.boxoffice.index');
+    Route::post('box-office/sales','StaffBoxOfficeController@store')->middleware('staff.assignment:box_office.sell')->name('staff.boxoffice.store');
+    Route::get('box-office/sales/{id}/print','StaffBoxOfficeController@print')->middleware('staff.assignment:box_office.sell')->name('staff.boxoffice.print');
+    Route::post('box-office/sales/{id}/reprint','StaffBoxOfficeController@reprint')->middleware('staff.assignment:box_office.reprint')->name('staff.boxoffice.reprint');
     Route::get('change-password','StaffAuthController@editPassword')->name('staff.password.edit');
     Route::post('change-password','StaffAuthController@updatePassword')->name('staff.password.update');
     Route::post('logout','StaffAuthController@logout')->name('staff.logout');
