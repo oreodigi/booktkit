@@ -8,7 +8,8 @@ class PaymentOrderService {
   if($existing=PaymentOrder::where('idempotency_key',$idempotencyKey)->first()) return $existing;
   $profile=$organizerId ? OrganizerPaymentProfile::where('organizer_id',$organizerId)->first() : null;
   $pricing=(new PlatformFeeCalculator)->calculate($ticketAmountPaise,$profile);
-  $routing=(new SettlementRoutingService)->resolve($profile);\n  $settlement=$routing['mode'];
+  $routing=(new SettlementRoutingService)->resolve($profile);
+  $settlement=$routing['mode'];
   return PaymentOrder::create(['uuid'=>(string)Str::uuid(),'event_id'=>$eventId,'organizer_id'=>$organizerId,'currency'=>'INR',
    'ticket_amount'=>$pricing['ticket_amount'],'platform_fee'=>$pricing['platform_fee'],'tax_amount'=>$taxPaise,
    'customer_total'=>$pricing['customer_total']+$taxPaise,'organizer_amount'=>$pricing['organizer_amount'],
