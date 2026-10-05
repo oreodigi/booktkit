@@ -72,6 +72,10 @@ class Booking extends Model
   {
     return $this->belongsTo(Organizer::class);
   }
+  public function issuedTickets()
+  {
+    return $this->hasMany(IssuedTicket::class, 'booking_id');
+  }
 
   protected static function boot()
   {
