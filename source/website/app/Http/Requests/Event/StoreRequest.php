@@ -39,7 +39,7 @@ class StoreRequest extends FormRequest
       'slider_images' => 'required',
       'thumbnail' => $hasUploadedThumbnail ? [
         new ImageMimeTypeRule(),
-        'max:500',
+        'max:1024',
         function ($attribute, $value, $fail) {
           if ($value && is_file($value->getPathname())) {
             [$width, $height] = getimagesize($value->getPathname());
