@@ -126,6 +126,44 @@
                                 @csrf
                                 <input type="hidden" name="event_id" value="{{ $event->id }}">
                                 <input type="hidden" name="event_type" value="{{ $event->event_type }}">
+                                <input type="hidden" name="box_office_enabled" value="{{ $event->box_office_enabled ? 1 : 0 }}">
+                                @if ($event->box_office_enabled)
+                                <div class="card border-danger mb-4">
+                                  <div class="card-header"><strong>{{ __('Special Event — Box Office') }}</strong></div>
+                                  <div class="card-body">
+                                    <div class="form-group"><label>{{ __('Re-entry Policy') }} *</label>
+                                      <select name="reentry_policy" class="form-control">
+                                        @foreach (['none'=>'No re-entry','unlimited'=>'Unlimited re-entry','limited'=>'Limited re-entry'] as $value=>$label)
+                                          <option value="{{ $value }}" {{ '{{ $event->reentry_policy ?? 'none' }}' === $value ? 'selected' : '' }}>{{ __($label) }}</option>
+                                        @endforeach
+                                      </select>
+                                    </div>
+                                    <div class="form-group"><label>{{ __('Maximum Re-entries') }}</label>
+                                      <input type="number" min="1" name="max_reentries" value="{{ $event->max_reentries }}" class="form-control" placeholder="{{ __('Required only for limited re-entry') }}">
+                                    </div>
+                                    <label><strong>{{ __('Box Office Locations') }} *</strong></label>
+                                    <div id="boxOfficeLocations">
+                                      @php($boxLocations = $event->boxOfficeLocations)
+                                      @foreach ($boxLocations as $i => $location)
+                                      <div class="row mb-2 box-office-location-row">
+                                        <div class="col-md-5"><input class="form-control" name="box_office_locations[{{ $i }}][name]" value="{{ optional($location)->name }}" placeholder="{{ __('Counter name') }}" required></div>
+                                        <div class="col-md-6"><input class="form-control" name="box_office_locations[{{ $i }}][address]" value="{{ optional($location)->address }}" placeholder="{{ __('Counter address') }}"></div>
+                                        <div class="col-md-1"><button type="button" class="btn btn-danger remove-box-office-location">&times;</button></div>
+                                      </div>
+                                      @endforeach
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="addBoxOfficeLocation">{{ __('Add Counter') }}</button>
+                                  </div>
+                                </div>
+                                <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                  const wrap=document.getElementById('boxOfficeLocations'), add=document.getElementById('addBoxOfficeLocation');
+                                  if (!wrap || !add) return;
+                                  add.addEventListener('click', function(){ const i=wrap.children.length; const row=document.createElement('div'); row.className='row mb-2 box-office-location-row'; row.innerHTML='<div class="col-md-5"><input class="form-control" name="box_office_locations['+i+'][name]" placeholder="Counter name" required></div><div class="col-md-6"><input class="form-control" name="box_office_locations['+i+'][address]" placeholder="Counter address"></div><div class="col-md-1"><button type="button" class="btn btn-danger remove-box-office-location">&times;</button></div>'; wrap.appendChild(row); });
+                                  wrap.addEventListener('click', function(e){ if(e.target.closest('.remove-box-office-location') && wrap.children.length>1) e.target.closest('.box-office-location-row').remove(); });
+                                });
+                                </script>
+                                @endif
                                 <input type="hidden" name="gallery_images" value="0">
                                 <div class="form-group">
                                     <label for="">{{ __('Thumbnail Image') . '*' }}</label>
