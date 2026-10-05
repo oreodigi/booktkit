@@ -9,7 +9,7 @@ var eventType=new URLSearchParams(location.search).get("type"),isOnline=eventTyp
 var $gallery=$("#my-dropzone").closest(".col-lg-12"),children=$(form).children();children.attr("data-btk-step","4");
 $("#accordion").attr("data-btk-step","1");
 $("#single_dates,#multiple_dates,.countDownStatus").attr("data-btk-step","2");$(".eventDateType").closest(".row").attr("data-btk-step","2");
-$gallery.attr("data-btk-step","3");children.filter(".form-group").first().attr("data-btk-step","3");
+$gallery.attr("data-btk-step","3");var $thumb=$(form).find('input[name="thumbnail"]').closest(".form-group");$thumb.attr("data-btk-step","3");
 if(isOnline){
   var onlineNames=["ticket_available_type","ticket_available","max_ticket_buy_type","max_buy_ticket","price","pricing_type","meeting_url","early_bird_discount_type","discount_type","early_bird_discount_amount","early_bird_discount_date","early_bird_discount_time"];
   onlineNames.forEach(function(name){$(form).find('[name="'+name+'"]').each(function(){var $row=$(this).closest(".row");if($row.length&&$row.parent().is(form))$row.attr("data-btk-step","4");else $(this).closest(".col-lg-6,.col-lg-12").attr("data-btk-online-field","1")})});
@@ -21,7 +21,7 @@ if(isOnline){
  var $ticket=$(form).find('[name="ticket_available_type"]').closest(".row");if($ticket.length)$ticket.addClass("btk-online-section").prepend('<div class="col-12 btk-online-section-title"><i class="fas fa-ticket-alt"></i> Tickets & access</div>');
  var $early=$("#early_bird_discount_free");if($early.length)$early.addClass("btk-online-section").prepend('<div class="col-12 btk-online-section-title"><i class="fas fa-tags"></i> Early bird offer</div>');
 }
-var actions=$('<div class="btk-wizard-actions"><button type="button" class="btn btn-light btk-prev">Back</button><span class="btk-autosave">Draft autosaves on this device</span><button type="button" class="btn btn-primary btk-next">Continue</button></div>');$(".card-footer .row").before(actions);var step=1;
+var actions=$('<div class="btk-wizard-actions"><button type="button" class="btn btn-light btk-prev">Back</button><span class="btk-autosave">Draft autosaves on this device</span><button type="button" class="btn btn-primary btk-next">Continue</button></div>');var $footerRow=$(".card-footer .row").first();if($footerRow.length)$footerRow.before(actions);else $(form).append(actions);var step=1;
 function show(n){step=Math.max(1,Math.min(4,n));$("[data-btk-step]").hide();$('[data-btk-step="'+step+'"]').show();nav.find("button").removeClass("active done").each(function(){var s=+this.dataset.step;$(this).toggleClass("active",s===step).toggleClass("done",s<step)});$(".btk-prev").toggle(step>1);$(".btk-next").toggle(step<4);$("#EventSubmit").toggle(step===4);window.scrollTo({top:0,behavior:"smooth"})}
 nav.on("click","button",function(){show(+this.dataset.step)});$(".btk-prev").on("click",function(){show(step-1)});$(".btk-next").on("click",function(){show(step+1)});
 function selectText(sel,text){var el=document.querySelector(sel);if(!el)return false;var opt=[].slice.call(el.options).find(function(o){return o.text.trim().toLowerCase()===text.toLowerCase()});if(opt){el.value=opt.value;$(el).trigger("change");return true}return false}
