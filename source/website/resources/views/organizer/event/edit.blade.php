@@ -640,25 +640,8 @@
                                                                 </div>
                                                             </div>
                                                             <!-- latitude and longitude -->
-                                                            <div
-                                                                class="col-lg-4 {{ $language->is_default == 1 ? '' : 'd-none' }}">
-                                                                <div class="form-group">
-                                                                    <label for="">{{ __('Latitude') }}</label>
-                                                                    <input type="text" name="latitude"
-                                                                        value="{{ @$event->latitude }}"
-                                                                        placeholder="Latitude"
-                                                                        class="form-control latitude">
-                                                                </div>
-                                                            </div>
-                                                            <div
-                                                                class="col-lg-4 {{ $language->is_default == 1 ? '' : 'd-none' }}">
-                                                                <div class="form-group">
-                                                                    <label for="">{{ __('Longitude') }}</label>
-                                                                    <input type="text" placeholder="Longitude"
-                                                                        value="{{ @$event->longitude }}"
-                                                                        name="longitude" class="form-control longitude">
-                                                                </div>
-                                                            </div>
+                                                            <input type="hidden" name="latitude" value="{{ @$event->latitude }}" class="latitude">
+                                                            <input type="hidden" name="longitude" value="{{ @$event->longitude }}" class="longitude">
                                                             @if ($settings->event_country_status == 1)
                                                                 @php
                                                                     $country = \DB::table('event_countries')
