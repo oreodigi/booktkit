@@ -1,6 +1,8 @@
 @extends('backend.layout')
 
 @section('content')
+    <link rel="stylesheet" href="{{ asset('assets/admin/css/event-create-wizard.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/admin/css/event-media-controls.css') }}">
     <div class="page-header">
         <h4 class="page-title">{{ __('Edit Event') }}</h4>
         <ul class="breadcrumbs">
@@ -767,9 +769,9 @@
                                                             <div class="col-lg-4">
                                                                 <div class="form-group">
                                                                     <label
-                                                                        for="">{{ __('Zip/Post Code ') }}</label>
+                                                                        for="">{{ __('PIN Code ') }}</label>
                                                                     <input type="text"
-                                                                        placeholder="Enter Zip/Post Code"
+                                                                        placeholder="Enter PIN Code"
                                                                         name="{{ $language->code }}_zip_code"
                                                                         class="form-control {{ $language->direction == 1 ? 'rtl text-right' : '' }}"
                                                                         value="{{ @$event_content->zip_code }}">
@@ -783,7 +785,7 @@
                                                             <div
                                                                 class="form-group {{ $language->direction == 1 ? 'rtl text-right' : '' }}">
                                                                 <label>{{ __('Description') . '*' }}</label>
-                                                                <textarea id="descriptionTmce{{ $language->id }}" class="form-control summernote"
+                                                                <textarea id="descriptionTmce{{ $language->id }}" class="form-control btk-simple-description"
                                                                     name="{{ $language->code }}_description" placeholder="Enter Event Description" data-height="300">{!! @$event_content->description !!}</textarea>
                                                             </div>
                                                         </div>
@@ -886,6 +888,7 @@
     @endif
     <script type="text/javascript" src="{{ asset('assets/admin/js/admin-partial.js') }}"></script>
     <script src="{{ asset('assets/admin/js/admin_dropzone.js') }}"></script>
+    <script src="{{ asset('assets/admin/js/event-edit-wizard.js') }}"></script>
     <script>
         $(document).ready(function() {
             $('.js-example-basic-single').select2();
