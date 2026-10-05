@@ -1,6 +1,7 @@
 @extends('backend.layout')
 
 @section('content')
+    <link rel="stylesheet" href="{{ asset('assets/admin/css/event-create-wizard.css') }}">
     <div class="page-header">
         <h4 class="page-title">{{ __('Add Event') }}</h4>
         <ul class="breadcrumbs">
@@ -686,6 +687,7 @@
     @endif
     <script type="text/javascript" src="{{ asset('assets/admin/js/admin-partial.js') }}"></script>
     <script src="{{ asset('assets/admin/js/admin_dropzone.js') }}"></script>
+    <script src="{{ asset('assets/admin/js/event-create-wizard.js') }}"></script>
     <script>
         $(document).ready(function() {
             $('.js-example-basic-single').select2();
