@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Event\Ticket;
 use App\Models\Event\Wishlist;
+use App\Models\Event\BoxOfficeLocation;
 
 class Event extends Model
 {
@@ -28,6 +29,9 @@ class Event extends Model
     'end_date_time',
     'is_featured',
     'event_type',
+    'box_office_enabled',
+    'reentry_policy',
+    'max_reentries',
     'latitude',
     'longitude',
     'ticket_image',
@@ -59,6 +63,11 @@ class Event extends Model
   public function wishlists()
   {
     return $this->hasMany(Wishlist::class, 'event_id', 'id');
+  }
+
+  public function boxOfficeLocations()
+  {
+    return $this->hasMany(BoxOfficeLocation::class);
   }
 
   public function organizer()
