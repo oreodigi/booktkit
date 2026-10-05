@@ -82,7 +82,7 @@ class OrganizerScannerController extends Controller
   //check qr-code
   public function check_qrcode(Request $request, TicketAdmissionService $admission)
   {
-    $request->validate(['booking_id' => 'required|string|max:255']);
+    $request->validate(['booking_id' => 'required|string|max:255','direction'=>'nullable|in:entry,exit']);
     $organizer = Auth::guard('organizer_sanctum')->user();
 
     return response()->json($admission->admit(
@@ -90,7 +90,8 @@ class OrganizerScannerController extends Controller
       'organizer',
       (int) $organizer->id,
       $request->header('X-Device-Name'),
-      $request->ip()
+      $request->ip(),
+      $request->input('direction','entry')
     ));
   }
 
@@ -122,7 +123,9 @@ class OrganizerScannerController extends Controller
     if(is_null($request->id)){
       $ids = $this->organizerEvents($organizer_id);
     }else{
-      $ids[]= (int)$request->id;
+      $requested=(int)$request->id;
+      if(!Event::where('organizer_id',$organizer_id)->whereKey($requested)->exists()) return response()->json(['status'=>'error','message'=>'You do not have permission'],403);
+      $ids[]= $requested;
     }
 
     $language = $locale ? Language::where('code', $locale)->first()
@@ -141,7 +144,7 @@ class OrganizerScannerController extends Controller
         return $this->formatEventForApi($event, $language);
       });
 
-      $bookings = Booking::whereIn('event_id',$ids)->get();
+      $bookings = Booking::where('organizer_id',$organizer_id)->whereIn('event_id',$ids)->get();
 
       $information['total_attendees_tickets'] = $bookings->sum('quantity');
       $information['total_scanned_tickets'] = $bookings->map(function($booking){
