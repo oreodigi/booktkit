@@ -20,7 +20,9 @@
           <div class="row">
             <div class="col-lg-3"><div class="form-group"><label>{{ __('Media Type') }} *</label><select name="media_type" class="form-control hero-media-type"><option value="image">{{ __('Image') }}</option><option value="video">{{ __('Video') }}</option></select></div></div>
             <div class="col-lg-3 hero-image-field"><div class="form-group"><label>{{ __('Banner Image') }}</label><input type="file" name="image" class="form-control" accept="image/*"><small class="text-muted">{{ __('Recommended 1920×720. For video, this can be the poster image.') }}</small></div></div>
-            <div class="col-lg-3 hero-video-field" style="display:none"><div class="form-group"><label>{{ __('Background Video') }}</label><input type="file" name="video" class="form-control" accept="video/mp4,video/webm,video/quicktime"><small class="text-muted">{{ __('MP4/WebM/MOV, maximum 50 MB. Video autoplays muted and loops.') }}</small></div></div>
+            <div class="col-lg-3 hero-video-field" style="display:none"><div class="form-group"><label>{{ __('Video Source') }}</label><select name="video_source" class="form-control hero-video-source"><option value="upload">{{ __('Upload Video') }}</option><option value="youtube">{{ __('YouTube Link') }}</option><option value="url">{{ __('Direct Video Link') }}</option></select></div></div>
+            <div class="col-lg-3 hero-video-upload" style="display:none"><div class="form-group"><label>{{ __('Background Video') }}</label><input type="file" name="video" class="form-control" accept="video/mp4,video/webm,video/quicktime"><small class="text-muted">{{ __('MP4/WebM/MOV, maximum 5 MB. Video autoplays muted and loops.') }}</small></div></div>
+            <div class="col-lg-6 hero-video-url" style="display:none"><div class="form-group"><label>{{ __('Video Link') }}</label><input type="url" name="video_url" class="form-control ltr" placeholder="https://www.youtube.com/watch?v=..."><small class="text-muted">{{ __('YouTube controls are hidden for background playback. Direct links should point to a browser-playable video file.') }}</small></div></div>
             <div class="col-lg-3"><div class="form-group"><label>{{ __('Order') }}</label><input type="number" min="0" name="sort_order" value="{{ ($slides->max('sort_order') ?? 0) + 10 }}" class="form-control"></div></div>
             <div class="col-lg-6"><div class="form-group"><label>{{ __('Title') }}</label><input name="title" class="form-control" placeholder="{{ __('Banner headline') }}"></div></div>
             <div class="col-lg-6"><div class="form-group"><label>{{ __('Subtitle') }}</label><input name="subtitle" class="form-control" placeholder="{{ __('Short supporting text') }}"></div></div>
@@ -53,7 +55,9 @@
             <div class="col-lg-9"><div class="row">
               <div class="col-md-3"><div class="form-group"><label>{{ __('Media Type') }}</label><select name="media_type" class="form-control hero-media-type"><option value="image" @selected($slide->media_type==='image')>{{ __('Image') }}</option><option value="video" @selected($slide->media_type==='video')>{{ __('Video') }}</option></select></div></div>
               <div class="col-md-3 hero-image-field"><div class="form-group"><label>{{ __('Replace Image / Poster') }}</label><input type="file" name="image" class="form-control" accept="image/*"></div></div>
-              <div class="col-md-3 hero-video-field" @if($slide->media_type!=='video') style="display:none" @endif><div class="form-group"><label>{{ __('Replace Video') }}</label><input type="file" name="video" class="form-control" accept="video/mp4,video/webm,video/quicktime"></div></div>
+              <div class="col-md-3 hero-video-field" @if($slide->media_type!=='video') style="display:none" @endif><div class="form-group"><label>{{ __('Video Source') }}</label><select name="video_source" class="form-control hero-video-source"><option value="upload" @selected(($slide->video_source ?: 'upload')==='upload')>{{ __('Upload Video') }}</option><option value="youtube" @selected($slide->video_source==='youtube')>{{ __('YouTube Link') }}</option><option value="url" @selected($slide->video_source==='url')>{{ __('Direct Video Link') }}</option></select></div></div>
+              <div class="col-md-3 hero-video-upload"><div class="form-group"><label>{{ __('Replace Video') }}</label><input type="file" name="video" class="form-control" accept="video/mp4,video/webm,video/quicktime"><small class="text-muted">{{ __('Maximum 5 MB') }}</small></div></div>
+              <div class="col-md-6 hero-video-url"><div class="form-group"><label>{{ __('Video Link') }}</label><input type="url" name="video_url" value="{{ $slide->video_url }}" class="form-control ltr" placeholder="https://..."></div></div>
               <div class="col-md-3"><div class="form-group"><label>{{ __('Order') }}</label><input type="number" min="0" name="sort_order" value="{{ $slide->sort_order }}" class="form-control"></div></div>
               <div class="col-md-6"><div class="form-group"><label>{{ __('Title') }}</label><input name="title" value="{{ $slide->title }}" class="form-control"></div></div>
               <div class="col-md-6"><div class="form-group"><label>{{ __('Subtitle') }}</label><input name="subtitle" value="{{ $slide->subtitle }}" class="form-control"></div></div>
@@ -77,9 +81,10 @@
 
 @section('script')
 <script>
-document.querySelectorAll('.hero-media-type').forEach(function(select){
-  function sync(){var form=select.closest('form'),video=form.querySelector('.hero-video-field');if(video)video.style.display=select.value==='video'?'block':'none'}
-  select.addEventListener('change',sync);sync();
+document.querySelectorAll('form').forEach(function(form){
+  var type=form.querySelector('.hero-media-type'),source=form.querySelector('.hero-video-source'); if(!type)return;
+  function sync(){var isVideo=type.value==='video',v=source?source.value:'upload';form.querySelectorAll('.hero-video-field').forEach(function(el){el.style.display=isVideo?'block':'none'});form.querySelectorAll('.hero-video-upload').forEach(function(el){el.style.display=isVideo&&v==='upload'?'block':'none'});form.querySelectorAll('.hero-video-url').forEach(function(el){el.style.display=isVideo&&v!=='upload'?'block':'none'});}
+  type.addEventListener('change',sync);if(source)source.addEventListener('change',sync);sync();
 });
 </script>
 @endsection
