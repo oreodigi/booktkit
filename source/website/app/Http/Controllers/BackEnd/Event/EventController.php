@@ -243,6 +243,95 @@ class EventController extends Controller
     return response()->json(['status' => 'success'], 200);
   }
 
+  public function duplicate($id)
+  {
+    $sourceEvent = Event::with(['dates', 'galleries', 'tickets'])->findOrFail($id);
+    $createdFiles = [];
+
+    try {
+      $duplicatedEvent = DB::transaction(function () use ($sourceEvent, &$createdFiles) {
+        $duplicate = $sourceEvent->replicate();
+        $duplicate->status = 0;
+        $duplicate->is_featured = 'no';
+        $duplicate->thumbnail = $this->duplicateEventAsset($sourceEvent->thumbnail, 'assets/admin/img/event/thumbnail/', $createdFiles);
+        $duplicate->ticket_image = $this->duplicateEventAsset($sourceEvent->ticket_image, 'assets/admin/img/event_ticket/', $createdFiles);
+        $duplicate->ticket_logo = $this->duplicateEventAsset($sourceEvent->ticket_logo, 'assets/admin/img/event_ticket_logo/', $createdFiles);
+        $duplicate->ticket_slot_image = $this->duplicateEventAsset($sourceEvent->ticket_slot_image, 'assets/admin/img/map-image/', $createdFiles);
+        $duplicate->save();
+
+        EventContent::where('event_id', $sourceEvent->id)->get()->each(function ($content) use ($duplicate) {
+          $copy = $content->replicate();
+          $copy->event_id = $duplicate->id;
+          $copy->title = $content->title . ' - Copy';
+          $copy->slug = createSlug($copy->title . '-' . $duplicate->id);
+          $copy->google_calendar_id = null;
+          $copy->save();
+        });
+
+        foreach ($sourceEvent->dates as $date) {
+          $copy = $date->replicate();
+          $copy->event_id = $duplicate->id;
+          $copy->save();
+        }
+
+        foreach ($sourceEvent->galleries as $gallery) {
+          $copy = $gallery->replicate();
+          $copy->event_id = $duplicate->id;
+          $copy->image = $this->duplicateEventAsset($gallery->image, 'assets/admin/img/event-gallery/', $createdFiles);
+          $copy->save();
+        }
+
+        foreach ($sourceEvent->tickets as $ticket) {
+          $copy = $ticket->replicate();
+          $copy->event_id = $duplicate->id;
+          $copy->normal_ticket_slot_enable = 0;
+          $copy->normal_ticket_slot_unique_id = null;
+          $copy->free_tickete_slot_enable = 0;
+          $copy->free_tickete_slot_unique_id = null;
+          $copy->variations = $this->stripSlotIdentifiers($copy->variations);
+          $copy->trans_vars = $this->stripSlotIdentifiers($copy->trans_vars);
+          $copy->save();
+        }
+
+        return $duplicate;
+      });
+
+      return redirect()->route('admin.event_management.edit_event', ['id' => $duplicatedEvent->id])
+        ->with('success', 'Event duplicated as draft. Review it before publishing.');
+    } catch (\Throwable $exception) {
+      foreach ($createdFiles as $path) {
+        @unlink($path);
+      }
+      return redirect()->back()->with('error', 'Event could not be duplicated. Please try again.');
+    }
+  }
+
+  private function duplicateEventAsset(?string $filename, string $relativeDirectory, array &$createdFiles): ?string
+  {
+    if (empty($filename)) return $filename;
+    $directory = public_path($relativeDirectory);
+    $source = $directory . $filename;
+    if (!is_file($source)) return $filename;
+    @mkdir($directory, 0775, true);
+    $extension = pathinfo($filename, PATHINFO_EXTENSION);
+    $copyName = uniqid('event-copy-', true) . ($extension ? '.' . $extension : '');
+    $destination = $directory . $copyName;
+    if (!@copy($source, $destination)) throw new \RuntimeException('Unable to duplicate event media asset.');
+    $createdFiles[] = $destination;
+    return $copyName;
+  }
+
+  private function stripSlotIdentifiers($value)
+  {
+    if (empty($value)) return $value;
+    $decoded = json_decode($value, true);
+    if (!is_array($decoded)) return $value;
+    array_walk_recursive($decoded, function (&$item, $key) {
+      if ($key === 'slot_unique_id') $item = null;
+    });
+    return json_encode($decoded);
+  }
+
   /**
    * delete events dates
    */
