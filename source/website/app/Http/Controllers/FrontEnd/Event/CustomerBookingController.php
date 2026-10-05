@@ -4,6 +4,7 @@ namespace App\Http\Controllers\FrontEnd\Event;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event\Booking;
+use App\Services\Tickets\TicketIssuanceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,6 +22,7 @@ class CustomerBookingController extends Controller
     if (Auth::guard('customer')->user()->id != $booking->customer_id) {
       return back();
     }
-    return view('frontend.customer.dashboard.booking.details', compact('booking'));
+    $issuedTickets = app(TicketIssuanceService::class)->ensureForBooking($booking);
+    return view('frontend.customer.dashboard.booking.details', compact('booking', 'issuedTickets'));
   }
 }
