@@ -43,7 +43,7 @@ class StateController extends Controller
   {
     $rules = [
       'language_id' => 'required',
-      'name' => ['required', Rule::unique('event_states', 'name')->where('language_id', $request->language_id)],
+      'name' => ['required', Rule::unique('event_states', 'name')->where(fn ($query) => $query->where('language_id', $request->language_id)->where('country_id', $request->country_id))],
       'status' => 'required',
       'serial_number' => 'required|numeric|min:0',
     ];
@@ -81,8 +81,10 @@ class StateController extends Controller
 
   public function update(Request $request)
   {
+    $languageId = EventState::whereKey($request->id)->value('language_id');
+
     $rules = [
-      'name' => ['required', Rule::unique('event_states', 'name')->where('language_id', $request->language_id)->ignore($request->id)],
+      'name' => ['required', Rule::unique('event_states', 'name')->where(fn ($query) => $query->where('language_id', $languageId)->where('country_id', $request->country_id))->ignore($request->id)],
       'status' => 'required',
       'serial_number' => 'required|numeric|min:0',
     ];
