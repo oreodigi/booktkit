@@ -35,7 +35,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('api.index');
 Route::get('/get-lang/{code}', [LanguageController::class, 'getLang']);
 Route::get('/get-basic', [HomeController::class, 'getBasic'])->name('getBasic');
-Route::get('/get-currency', [HomeController::class, 'getCurrency'])->name('getBasic');
+Route::get('/get-currency', [HomeController::class, 'getCurrency'])->name('getCurrency');
 Route::post('/push-notification-store-endpoint', [HomeController::class, 'pushNotificationStore']);
 Route::post('/save-fcm-token', [FcmTokenController::class, 'store']);
 Route::get('/get-notifications', [FcmTokenController::class, 'getNotifications']);
