@@ -78,6 +78,12 @@ Route::prefix('/organizer/ai-token-purchase')->group(function () {
 });
 
 Route::prefix('/organizer')->middleware('auth:organizer', 'Deactive:organizer', 'EmailStatus:organizer', 'adminLang')->group(function () {
+  Route::get('/box-office', 'BackEnd\\Organizer\\BoxOfficeController@index')->name('organizer.boxoffice.index');
+  Route::post('/box-office/sales', 'BackEnd\\Organizer\\BoxOfficeController@store')->name('organizer.boxoffice.store');
+  Route::get('/box-office/sales/{id}/print', 'BackEnd\\Organizer\\BoxOfficeController@print')->name('organizer.boxoffice.print');
+  Route::post('/box-office/sales/{id}/reprint', 'BackEnd\\Organizer\\BoxOfficeController@reprint')->name('organizer.boxoffice.reprint');
+  Route::post('/box-office/sales/{id}/void-request', 'BackEnd\\Organizer\\BoxOfficeController@requestVoid')->name('organizer.boxoffice.void.request');
+  Route::post('/box-office/sales/{id}/void-approve', 'BackEnd\\Organizer\\BoxOfficeController@approveVoid')->name('organizer.boxoffice.void.approve');
   Route::get('/team', 'BackEnd\\Organizer\\StaffController@index')->name('organizer.staff.index');
   Route::post('/team', 'BackEnd\\Organizer\\StaffController@store')->name('organizer.staff.store');
   Route::put('/team/{id}', 'BackEnd\\Organizer\\StaffController@update')->name('organizer.staff.update');
