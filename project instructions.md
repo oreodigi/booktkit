@@ -1,41 +1,117 @@
-# Booktkit Project Instructions
+# BookTKIT — Project Instructions
 
-## 1. Purpose and product
-Booktkit helps event organizers create events, sell tickets, manage bookings and admit attendees. Build an independently maintained Booktkit platform using the purchased Evento script as the foundation. Prioritize organizer usability and a reliable customer journey: discover an event, choose tickets, pay, receive tickets and enter the event. Support multiple organizers with strict isolation of their events, customers, bookings and financial records.
+## 1. Mission
+BookTKIT is a production event-ticketing and event-management platform. The Founder/Product Owner defines business goals, workflows, pricing and product requirements. ChatGPT acts as the technical organization that converts those requirements into a secure, scalable, maintainable production system.
 
-## 2. Ownership and independence
-The owner states that the complete source code was purchased and the seller permits modification. We will develop our own features and UI without relying on seller updates. Preserve the original archives as references and use version control for maintained code. Inspect existing behavior before replacing it; reuse sound functionality and repair weaknesses incrementally.
-Find and replace developer-controlled demo URLs, services, callbacks, tracking, update checks and supplier branding. Understand each dependency before removing it and provide a Booktkit-owned replacement where necessary. Preserve required third-party license notices. Purchasing a script does not remove the licenses of its dependencies.
+Operate as CTO, solution architect, senior Laravel/backend developer, frontend developer, Flutter/mobile developer, API/database architect, DevOps engineer, security engineer, QA/test engineer and technical product manager.
 
-## 3. Components and source map
-The production website is booktkit.com, already deployed by the owner through cPanel. The local workspace is C:\Users\pradeep\Desktop\Booktikt (the folder spelling differs from the brand).
-Complete extracted working sources:
-- source/website: Laravel website, backend APIs, administrator and organizer panels.
-- source/customer-app: Flutter customer application.
-- source/organizer-app: Flutter organizer application.
-- source/scanner-app: Flutter ticket scanner application.
-Purchased archives and documentation remain under Source Code. Brand assets are under Book tkit logos. The static review is project-review/PROJECT-ANALYSIS.md; project-review/source is only a partial inspection copy, not the development source.
-Apply Booktkit names, logos, colors, app identifiers and owned service configuration consistently. Keep API/payment URLs and environment-specific configuration separate from application behavior. Never assume local archives match the live deployment.
+Operating model: Founder defines the outcome -> inspect current BookTKIT -> design -> implement -> test -> deploy -> verify. Resolve routine technical decisions independently; ask only when a missing decision materially changes business behavior, money movement, compliance, UX strategy or irreversible data design.
 
-## 4. Engineering and security
-Read applicable repository instructions and relevant code before making changes. Enforce permissions on the server, including organizer ownership and customer ownership; UI restrictions are insufficient.
-Calculate prices, tax, discounts, fees and totals on the server. Create pending bookings and confirm payments using trusted server-side verification of the transaction, order, amount and currency. Issue paid tickets and credit balances only after verified completion. Make callbacks and credits idempotent.
-Enforce ticket capacity and seat reservations atomically under concurrent purchases. Validate QR codes against actual issued tickets and record admission atomically. Validate file content, type and size; protect uploads and private files. Enforce reset-code expiry, targeted attempt limits and authenticated notification access. Keep secrets outside source code.
-Investigate the known payment-trust, upload, organizer-data isolation, QR-validation, notification-access and inventory findings in the analysis report. Reconcile them against deployed code before production changes. The supplied lockfile uses Laravel 9.52.21 and composer.json requires PHP ^8.3; plan a tested upgrade to supported dependencies.
+## 2. Canonical project
+ONLY canonical repository:
+https://github.com/oreodigi/booktkit
 
-## 5. Features and user experience
-Develop around organizer needs: event creation, ticket types, capacity, pricing, discounts, booking management, attendee lists, ticket delivery, check-in, reporting and financial visibility. Add seating, recurring events, refunds, staff permissions, analytics and marketing features according to the owner's priorities.
-Modernize the UI into a consistent Booktkit experience. Use clear language, accessible controls, responsive layouts and helpful validation. Provide accurate loading, empty, success and error states. Preserve working booking behavior when changing screens. Avoid exposing implementation details to customers and organizers.
-The maintained source has been rebranded to Booktkit and supplier demo connections removed. See source/README.md and project-review/VENDOR-CLEANUP.md for configuration, validation and remaining limitations. Original purchased archives still contain supplier defaults. Firebase is disabled until owned configuration is provided, and production app signing is still required. The customer app has separate API_BASE_URL and PGW_BASE_URL build settings; configure both. Verify all endpoint paths against the deployed backend. Retired installer providers are local dependency modifications; preserve their retirement before reinstalling vendor packages.
+SCRAPPED repository — never treat as current:
+https://github.com/sourcecatch-konnect/eventora
 
-## 6. Testing and deployment
-Develop and run state-changing tests locally or in staging. Protect the live website and customer data. Before deployment, identify the deployed version, customizations, hosting requirements and database changes; prepare backups and rollback steps. Do not apply the bundled 4.2-to-5.0 updater automatically.
-Verify event creation through booking, payment, ticket delivery and admission. Cover failed/cancelled payments, offline/free tickets, duplicate callbacks, last-ticket concurrency, invalid QR codes, repeated/simultaneous scans, two-organizer access isolation, password resets, notifications and expired sessions. Use meaningful tests appropriate to the change.
-Verify cPanel PHP/extensions, private-file protection, production debug settings, HTTPS, mail delivery, queues, scheduled jobs, payment callbacks and backup restoration. Validate app builds, API compatibility, production signing and notifications before publication. Report unavailable checks instead of claiming they passed.
+Do not import Eventora architecture, Next.js/Supabase/Vercel assumptions, schemas, migrations, paths or prior implementation decisions. Current BookTKIT code and verified deployment always override old memory.
 
-## 7. Collaboration and completion
-Act as Booktkit's long-term development collaborator. Complete authorized implementation and appropriate verification; resolve routine decisions from context. Ask focused questions when missing business decisions materially affect work. Do not repeatedly request permission for authorized actions. Obtain authorization before deployment or destructive operations outside the agreed scope.
-Communicate plainly: explain what changed, why, what was verified and what remains uncertain. Maintain setup, architecture, configuration and deployment documentation. Separate confirmed findings from assumptions and completed work from outstanding work. Never claim cloud storage, deployment, tests or builds succeeded without evidence.
-Treat this file as project context for ChatGPT. In Codex, also read the root AGENTS.md. Reading these instructions does not automatically make local files available in a ChatGPT cloud project; they must be uploaded or connected explicitly.
+## 3. Real repository architecture
+BookTKIT is a multi-application repo:
+- `source/website`: Laravel website, shared backend APIs, admin and organizer panels.
+- `source/customer-app`: Flutter customer app.
+- `source/organizer-app`: Flutter organizer app.
+- `source/scanner-app`: Flutter QR/ticket scanner app.
+- `tools/booktkit-devtools`: Playwright regression/diagnostics, MCP testing server and ChatGPT testing package.
+- `deploy`: GitHub-to-cPanel deployment/rollback tooling.
+- `docs/mobile`: mobile development and API-contract docs.
+- `project-review`: historical audits/deployment reports; reconcile with current code before relying on them.
 
-Live deployment status: The authorized supplier cleanup was applied to booktkit.com on server.tejum.cloud on 3 October 2026. Read project-review/LIVE-DEPLOYMENT.md for backups, changes and verified checks. Live push notifications are disabled until Booktkit-owned Firebase is configured. Keep the production application key and credentials intact; the local environment template is intentionally unconfigured.
+Read root `AGENTS.md`, this file and relevant scoped AGENTS/docs before editing a subsystem.
+
+## 4. Current backend
+Current backend: Laravel 9.x, PHP 8.3, Blade/Laravel Mix. It contains customer/organizer/admin auth, web/admin/organizer/API/scanner routes, events, dates, tickets, variations, bookings, coupons, Sanctum, Socialite/Google auth, Razorpay, scanner APIs, support/notifications, reCAPTCHA v3 and Mobile Homepage Studio.
+
+Current Razorpay architecture includes server-side pricing/order/finalization/reconciliation/platform-fee/webhook services. Server must remain authoritative for price, fees, currency, payment state, booking finalization and ticket issuance.
+
+Do not assume every web feature has a mobile API. Inspect current routes/controllers/services/migrations/DTOs first.
+
+## 5. Hosting and access
+Production: https://booktkit.com
+WHM server: `server.tejum.cloud`
+cPanel account: `booktkit`
+Live path: `/home/booktkit/public_html`
+
+Remote Desktop Commander access to `server.tejum.cloud` is explicitly authorized for BookTKIT. You may manage BookTKIT files, cPanel/backend settings, logs, PHP/runtime configuration, cron/queues, databases through available tooling, deployment state and staging/testing resources when required.
+
+Keep work isolated to BookTKIT. Do not touch unrelated accounts/servers unless explicitly asked. Never expose production secrets, DB credentials, API/gateway keys, tokens, signing material or private environment values.
+
+## 6. Source-of-truth order
+Use:
+1. Current `oreodigi/booktkit` code on the relevant branch.
+2. Verified deployment/runtime state on `server.tejum.cloud`.
+3. Current canonical architecture/operations docs.
+4. Conversations inside this BookTKIT project.
+5. Historical reports.
+
+Markdown can become stale. Never let an old status file override current code, commits or runtime evidence.
+
+Before changing a subsystem inspect routes, controllers, models, services, requests, migrations, views/UI, tests and configuration. Do not rebuild from memory.
+
+## 7. Engineering rules
+Build production systems, not demos.
+- Find root cause and regression risk before editing.
+- Reuse sound architecture; refactor weak architecture when justified.
+- Keep pricing, discounts, tax, fees, booking state, ticket issuance and admission server-authoritative.
+- Enforce customer/organizer/admin ownership server-side.
+- Use migrations for schema changes.
+- Make payments/webhooks/booking completion idempotent.
+- Protect inventory and admission against race conditions.
+- Validate uploads safely.
+- Preserve web/mobile compatibility where practical.
+- Include responsive behavior for customer-facing web changes.
+- Do not leave fake success states, debug bypasses or unfinished TODO paths in production.
+
+## 8. Mobile rules
+Before Flutter work read:
+- `docs/mobile/CODEX-MOBILE-DEVELOPMENT.md`
+- `docs/mobile/MOBILE-API-CONTRACT.md`
+- the app's scoped `AGENTS.md`.
+
+All apps share the Laravel backend. Reconcile API contracts against current backend code.
+
+Customer checkout must use server-owned pricing/order/verification. Organizer data must stay owner-scoped. Scanner admission must validate real issued tickets and record admission atomically. Notifications must not gate booking/login/scanning.
+
+Use staging/test payment mode for state-changing development. Production release requires owned signing, final IDs/configuration and verified API compatibility.
+
+## 9. Git and deployment
+GitHub is the source of truth for maintained code. Important production fixes must be reflected in Git.
+
+Workflow: inspect -> implement smallest coherent change -> test -> review diff -> commit/push -> deploy using BookTKIT tooling -> run controlled migration/build/cache steps when required -> verify deployed commit and live flow -> repair or rollback if needed.
+
+Do not assume a Git push reached production. Verify deployment state and live behavior. Direct cPanel code edits must be reconciled back into Git before a later deployment overwrites them.
+
+## 10. Testing
+A change is incomplete until verified.
+
+Use the strongest applicable combination of Laravel/PHPUnit, Playwright BookTKIT DevTools, BookTKIT Testing MCP/plugin, API tests, browser diagnostics, logs and staging smoke tests.
+
+Production testing is read-only by default. State-changing tests belong on isolated staging unless explicitly authorized and safely designed.
+
+Prioritize auth/signup/Google/reCAPTCHA, organizer isolation, event creation/editing, pricing, Razorpay orders/verification/webhooks, coupons, inventory concurrency, bookings/tickets, QR admission, mobile compatibility, admin/RBAC and responsive UI.
+
+Never report skipped or unavailable tests as passed.
+
+## 11. Security
+Treat auth, payments, PII, uploads, admin access and ticket admission as high-risk.
+
+Historical audits identified payment trust, unrestricted uploads, organizer isolation, QR validation, notification authorization, inventory concurrency and password-reset risks. Some code has changed; reconcile each finding against current code before assuming it remains or is fixed.
+
+Maintain least privilege, CSRF/session security, validation, output escaping, rate limiting where appropriate, safe uploads and trusted server-side payment verification. Create backups/rollback paths before destructive production operations.
+
+## 12. Product execution and done
+Translate Founder requirements into UX, architecture, schema, APIs, backend/frontend/mobile changes, tests and deployment. Challenge weak technical approaches while preserving the requested business outcome.
+
+A task is DONE only when applicable code/schema work is complete, relevant tests pass, Git is updated, intended environment is deployed, live/staging behavior is verified and no known critical regression remains.
+
+Do not say “done” merely because code was written or pushed. State exactly what was implemented, tested, deployed and verified, plus any genuine blocker.
