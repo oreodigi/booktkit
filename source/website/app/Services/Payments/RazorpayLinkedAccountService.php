@@ -6,13 +6,13 @@ use Illuminate\Support\Facades\Http;
 class RazorpayLinkedAccountService {
  private function http(){
   $g=OnlineGateway::whereKeyword('razorpay')->firstOrFail(); $v=json_decode($g->information,true);
-  return Http::withBasicAuth((string)$v['key'],(string)$v['secret'])->acceptJson()->asJson()->timeout(30)->retry(2,300);
+  return Http::withBasicAuth((string)$v['key'],(string)$v['secret'])->acceptJson()->asJson()->timeout(30);
  }
  public function onboard(OrganizerPaymentProfile $p,string $bankAccount,bool $accepted): OrganizerPaymentProfile {
   if(!$accepted) throw new \InvalidArgumentException('Route terms must be accepted.');
   if(!$p->razorpay_account_id){
    $r=$this->http()->post('https://api.razorpay.com/v2/accounts',[
-    'email'=>$p->contact_email,'phone'=>$p->contact_phone,'legal_business_name'=>$p->legal_business_name,'business_type'=>'route','type'=>'route',
+    'email'=>$p->contact_email,'phone'=>$p->contact_phone,'legal_business_name'=>$p->legal_business_name,'business_type'=>$p->business_type,'type'=>'route',
     'profile'=>['category'=>$p->business_category,'subcategory'=>$p->business_subcategory],
     'legal_info'=>array_filter(['pan'=>$p->pan,'gst'=>$p->gstin]),'notes'=>['reference_id'=>'organizer_'.$p->organizer_id]
    ])->throw()->json(); $p->razorpay_account_id=$r['id']; $this->remember($p,'account',$r); $p->save();
