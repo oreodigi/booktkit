@@ -211,6 +211,15 @@
                                   {{ __('Ticket Settings') }}
                                 </a>
 
+                                <form class="d-block"
+                                  action="{{ route('organizer.event_management.duplicate_event', ['id' => $event->id]) }}"
+                                  method="post">
+                                  @csrf
+                                  <button type="submit" class="btn btn-sm">
+                                    {{ __('Duplicate') }}
+                                  </button>
+                                </form>
+
                                 <form class="deleteForm d-block"
                                   action="{{ route('organizer.event_management.delete_event', ['id' => $event->id]) }}"
                                   method="post">
