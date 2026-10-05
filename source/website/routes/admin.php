@@ -205,6 +205,16 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
   });
 
 
+  Route::prefix('/organizer-payouts')->middleware('permission:Organizer Mangement')->group(function () {
+    Route::get('/', 'BackEnd\\Payments\\OrganizerPayoutController@index')->name('admin.organizer_payouts.index');
+    Route::post('/hold-days', 'BackEnd\\Payments\\OrganizerPayoutController@holdDays')->name('admin.organizer_payouts.hold_days');
+    Route::post('/{id}/sync', 'BackEnd\\Payments\\OrganizerPayoutController@sync')->name('admin.organizer_payouts.sync');
+    Route::post('/{id}/settings', 'BackEnd\\Payments\\OrganizerPayoutController@update')->name('admin.organizer_payouts.update');
+    Route::get('/transfers/list', 'BackEnd\\Payments\\OrganizerPayoutController@transfers')->name('admin.organizer_payouts.transfers');
+    Route::get('/transfers/export', 'BackEnd\\Payments\\OrganizerPayoutController@export')->name('admin.organizer_payouts.transfers.export');
+    Route::post('/transfers/{id}/retry', 'BackEnd\\Payments\\OrganizerPayoutController@retryTransfer')->name('admin.organizer_payouts.transfers.retry');
+  });
+
   // Mobile Homepage Studio
   Route::get('/mobile-home', 'BackEnd\\HomePage\\MobileHomeStudioController@index')->name('admin.mobile_home.index');
   Route::post('/mobile-home/templates', 'BackEnd\\HomePage\\MobileHomeStudioController@storeTemplate')->name('admin.mobile_home.template.store');

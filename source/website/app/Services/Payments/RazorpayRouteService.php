@@ -5,6 +5,7 @@ use App\Models\PaymentGateway\OnlineGateway;
 use App\Models\Payments\PaymentOrder;
 use App\Models\Payments\PaymentTransfer;
 use App\Models\Payments\PaymentRefund;
+use Illuminate\Support\Facades\DB;
 class RazorpayRouteService {
  private Api $api;
  public function __construct(){
@@ -37,19 +38,46 @@ class RazorpayRouteService {
    'status'=>$data['status']??'processed','reason'=>$reason,'gateway_payload'=>$data,'processed_at'=>now()]);
   $order->increment('refunded_amount',$amountPaise); $order->refresh();
   $order->refund_status=$order->refunded_amount >= $order->customer_total ? 'full' : 'partial'; $order->save();
-  return $refund;
+  $transfer=$order->transfers()->whereNotNull('gateway_transfer_id')->first();
+  if($transfer && $transfer->amount > $transfer->reversed_amount){
+   $target=(int) round($amountPaise * ((int)$order->organizer_amount / max(1,(int)$order->customer_total)));
+   $reverseAmount=min($target,(int)$transfer->amount-(int)$transfer->reversed_amount);
+   if($reverseAmount>0){
+    $reversal=$this->api->transfer->fetch($transfer->gateway_transfer_id)->reverse(['amount'=>$reverseAmount,'notes'=>['payment_order_uuid'=>$order->uuid,'refund_id'=>$refund->gateway_refund_id]]);
+    $rd=$reversal->toArray();
+    $refund->update(['gateway_reversal_id'=>$rd['id']??null,'reversal_amount'=>$reverseAmount,'reversal_status'=>$rd['status']??'created']);
+    $transfer->increment('reversed_amount',$reverseAmount);
+    if($transfer->fresh()->reversed_amount >= $transfer->amount) $transfer->update(['status'=>'reversed']);
+   }
+  }
+  return $refund->fresh();
  }
  public function transferToOrganizer(PaymentOrder $order,string $accountId): ?PaymentTransfer {
   if($order->organizer_amount<=0) return null;
-  if($existing=$order->transfers()->whereNotIn('status',['failed','reversed'])->first()) return $existing;
-  $row=PaymentTransfer::create(['payment_order_id'=>$order->id,'organizer_id'=>$order->organizer_id,'linked_account_id'=>$accountId,
-   'amount'=>$order->organizer_amount,'currency'=>$order->currency,'status'=>'pending','attempts'=>1]);
+  if($existing=$order->transfers()->first()) {
+   if(!in_array($existing->status,['failed'],true)) return $existing;
+   $row=$existing; $row->update(['status'=>'pending','last_error'=>null,'attempts'=>$row->attempts+1]);
+  } else {
+   $row=PaymentTransfer::create(['payment_order_id'=>$order->id,'organizer_id'=>$order->organizer_id,'linked_account_id'=>$accountId,
+    'amount'=>$order->organizer_amount,'currency'=>$order->currency,'status'=>'pending','attempts'=>1]);
+  }
   try {
+   $holdDays=max(0,(int)(DB::table('payment_settings')->where('key','transfer_hold_days')->value('value') ?? 2));
+   $eventEnd=DB::table('events')->where('id',$order->event_id)->value('end_date_time');
+   $releaseAt=\Carbon\Carbon::parse($eventEnd ?: now())->addDays($holdDays);
    $payment=$this->api->payment->fetch($order->gateway_payment_id);
-   $result=$payment->transfer(['transfers'=>[['account'=>$accountId,'amount'=>$order->organizer_amount,'currency'=>$order->currency,'notes'=>['payment_order_uuid'=>$order->uuid]]]]);
+   $result=$payment->transfer(['transfers'=>[['account'=>$accountId,'amount'=>$order->organizer_amount,'currency'=>$order->currency,
+    'on_hold'=>true,'on_hold_until'=>$releaseAt->timestamp,'notes'=>['payment_order_uuid'=>$order->uuid]]]]);
    $data=$result->toArray(); $first=$data['items'][0] ?? $data[0] ?? null;
-   $row->update(['gateway_transfer_id'=>$first['id']??null,'status'=>$first['status']??'created','gateway_payload'=>$data,'processed_at'=>now()]);
+   $row->update(['gateway_transfer_id'=>$first['id']??null,'status'=>$first['status']??'created','gateway_payload'=>$data,
+    'on_hold'=>true,'hold_release_at'=>$releaseAt,'processed_at'=>now()]);
   } catch(\Throwable $e) { $row->update(['status'=>'failed','last_error'=>$e->getMessage(),'processed_at'=>now()]); throw $e; }
   return $row;
+ }
+ public function releaseHold(PaymentTransfer $transfer): PaymentTransfer {
+  if(!$transfer->gateway_transfer_id||!$transfer->on_hold)return $transfer;
+  $r=$this->api->transfer->fetch($transfer->gateway_transfer_id)->edit(['on_hold'=>false]);
+  $transfer->update(['on_hold'=>false,'released_at'=>now(),'status'=>$r->status??$transfer->status,'gateway_payload'=>$r->toArray()]);
+  return $transfer->fresh();
  }
 }
