@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use App\Services\Payments\RazorpayLinkedAccountService;
 
 class OrganizerPayoutKycController extends Controller
 {
@@ -19,7 +20,7 @@ class OrganizerPayoutKycController extends Controller
         return view('organizer.payments.kyc', compact('profile'));
     }
 
-    public function save(Request $request)
+    public function save(Request $request, RazorpayLinkedAccountService $route)
     {
         $organizerId = Auth::guard('organizer')->id();
         $profile = OrganizerPaymentProfile::firstOrCreate(['organizer_id' => $organizerId]);
@@ -51,6 +52,7 @@ class OrganizerPayoutKycController extends Controller
             'bank_ifsc' => ['required','regex:/^[A-Z]{4}0[A-Z0-9]{6}$/'],
             'bank_account_number' => ['nullable','string','regex:/^[0-9]{6,20}$/'],
             'submit_kyc' => 'nullable|boolean',
+            'route_terms_accepted' => 'nullable|accepted',
         ]);
 
         if (!empty($data['pan'])) $data['pan'] = strtoupper($data['pan']); else unset($data['pan']);
