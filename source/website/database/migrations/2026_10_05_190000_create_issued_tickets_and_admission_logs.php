@@ -29,7 +29,7 @@ return new class extends Migration
             $table->unique(['booking_id', 'legacy_unique_id']);
             $table->index(['event_id', 'status']);
             $table->index(['organizer_id', 'event_id']);
-            $table->foreign('booking_id')->references('id')->on('event_bookings')->cascadeOnDelete();
+            $table->foreign('booking_id')->references('id')->on('bookings')->cascadeOnDelete();
         });
 
         Schema::create('ticket_admission_logs', function (Blueprint $table) {
