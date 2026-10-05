@@ -46,7 +46,7 @@ return new class extends Migration
 
             $table->index(['issued_ticket_id', 'created_at']);
             $table->foreign('issued_ticket_id')->references('id')->on('issued_tickets')->cascadeOnDelete();
-            $table->foreign('booking_id')->references('id')->on('event_bookings')->cascadeOnDelete();
+            $table->foreign('booking_id')->references('id')->on('bookings')->cascadeOnDelete();
         });
     }
 
