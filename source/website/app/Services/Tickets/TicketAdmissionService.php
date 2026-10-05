@@ -47,6 +47,14 @@ class TicketAdmissionService
             $ticket->checked_in_by_type = $actorType;
             $ticket->checked_in_by_id = $actorId;
             $ticket->save();
+
+            $legacyScanned = json_decode((string) $booking->scanned_tickets, true) ?: [];
+            if ($ticket->legacy_unique_id !== null && !in_array((string) $ticket->legacy_unique_id, array_map('strval', $legacyScanned), true)) {
+                $legacyScanned[] = $ticket->legacy_unique_id;
+                $booking->scanned_tickets = json_encode(array_values($legacyScanned));
+                $booking->save();
+            }
+
             $this->log($ticket, $actorType, $actorId, 'admitted', $deviceName, $ip);
 
             return [
