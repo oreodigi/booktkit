@@ -11,8 +11,8 @@ class RazorpayWebhookService {
   if(!$signature || !hash_equals($expected,$signature)) throw new \RuntimeException('Invalid Razorpay webhook signature.');
   $data=json_decode($payload,true,512,JSON_THROW_ON_ERROR); return $data;
  }
- public function remember(array $payload): PaymentWebhookEvent {
-  $id=$payload['event'].'-'.($payload['payload']['payment']['entity']['id'] ?? $payload['payload']['transfer']['entity']['id'] ?? sha1(json_encode($payload)));
+ public function remember(array $payload, ?string $deliveryId=null): PaymentWebhookEvent {
+  $id=$deliveryId ?: $payload['event'].'-'.($payload['payload']['payment']['entity']['id'] ?? $payload['payload']['transfer']['entity']['id'] ?? sha1(json_encode($payload)));
   return PaymentWebhookEvent::firstOrCreate(['event_id'=>$id],['gateway'=>'razorpay','event_type'=>$payload['event']??'unknown','payload'=>$payload,'status'=>'received']);
  }
 }
