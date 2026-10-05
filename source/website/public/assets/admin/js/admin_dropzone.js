@@ -9,7 +9,7 @@
   // Dropzone initialization
   Dropzone.options.myDropzone = {
     acceptedFiles: '.png, .jpg, .jpeg',
-    maxFilesize: 0.5,
+    maxFilesize: 12,
     transformFile: function (file, done) {
       if (typeof window.booktkitProcessEventImage === 'function') {
         window.booktkitProcessEventImage(file, 1170, 570, function (processed) { done(processed); });
