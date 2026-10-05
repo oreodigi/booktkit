@@ -20,10 +20,12 @@ use App\Models\Event\EventCountry;
 use Illuminate\Support\Facades\DB;
 use Mews\Purifier\Facades\Purifier;
 use App\Http\Controllers\Controller;
+use App\Services\Events\EventFormService;
+use App\Services\Events\EventActor;
 use Illuminate\Support\Facades\Session;
-use App\Http\Requests\Event\StoreRequest;
+use App\Http\Requests\Event\EventFormRequest;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Requests\Event\UpdateRequest;
+
 use App\Http\Requests\TicketSettingRequest;
 
 class EventController extends Controller
@@ -136,202 +138,25 @@ class EventController extends Controller
     return $pi->id;
   }
 
-  public function store(StoreRequest $request)
+  public function store(EventFormRequest $request, EventFormService $service)
   {
-
-    //calculate duration
-    if ($request->date_type == 'single') {
-      $start = Carbon::parse($request->start_date . $request->start_time);
-      $end =  Carbon::parse($request->end_date . $request->end_time);
-      $diffent = DurationCalulate($start, $end);
-    }
-    //calculate duration end
-
-    $in = $request->all();
-    $in['duration'] = $request->date_type == 'single' ? $diffent : '';
-
-    $img = $request->file('thumbnail');
-
-    $in['organizer_id'] = $request->organizer_id;
-    if ($request->hasFile('thumbnail')) {
-      $filename = time() . '.' . $img->getClientOriginalExtension();
-      $directory = public_path('assets/admin/img/event/thumbnail/');
-      @mkdir($directory, 0775, true);
-      $request->file('thumbnail')->move($directory, $filename);
-      $in['thumbnail'] = $filename;
-    }
-    $in['f_price'] = $request->price;
-    $in['end_date_time'] = $request->date_type == 'single'
-      ? Carbon::parse($request->end_date . ' ' . $request->end_time)
-      : null;
-    $event = Event::create($in);
-
-    if ($request->date_type == 'multiple') {
-      $i = 1;
-      foreach ($request->m_start_date as $key => $date) {
-        $start = Carbon::parse($date . $request->m_start_time[$key]);
-        $end =  Carbon::parse($request->m_end_date[$key] . $request->m_end_time[$key]);
-        $diffent = DurationCalulate($start, $end);
-
-        EventDates::create([
-          'event_id' => $event->id,
-          'start_date' => $date,
-          'start_time' => $request->m_start_time[$key],
-          'end_date' => $request->m_end_date[$key],
-          'end_time' => $request->m_end_time[$key],
-          'duration' => $diffent,
-          'start_date_time' => $start,
-          'end_date_time' => $end,
-        ]);
-        if ($i == 1) {
-          $event->update([
-            'duration' => $diffent
-          ]);
-        }
-        $i++;
-      }
-      //update event date time
-      $event_date = EventDates::where('event_id', $event->id)->orderBy('end_date_time', 'desc')->first();
-
-      $event->end_date_time = $event_date->end_date_time;
-      $event->save();
-    }
-
-
-    $in['event_id'] = $event->id;
-    if ($request->event_type == 'online') {
-      if (!$request->pricing_type) {
-        $in['pricing_type'] = 'normal';
-      }
-      $in['early_bird_discount'] = $request->early_bird_discount_type;
-      $in['early_bird_discount_type'] = $request->discount_type;
-      Ticket::create($in);
-    }
-
-    //event slider-images
-    $slders = $request->slider_images ?? [];
-    foreach ($slders as $key => $id) {
-      $event_image = EventImage::where('id', $id)->first();
-      if ($event_image) {
-        $event_image->event_id = $event->id;
-        $event_image->save();
-      }
-    }
-
-    //event content
-    $languages = Language::all();
-    foreach ($languages as $language) {
-      $event_content = new EventContent();
-      $event_content->language_id = $language->id;
-      $event_content->event_category_id = $request[$language->code . '_category_id'];
-      $event_content->event_id = $event->id;
-      $event_content->title = $request[$language->code . '_title'];
-      if ($request->event_type == 'venue') {
-        $event_content->address = $request[$language->code . '_address'];
-        $event_content->country_id = $request[$language->code . '_country'];
-        $event_content->city_id = $request[$language->code . '_city'];
-        $event_content->state_id = $request[$language->code . '_state'];
-        $event_content->zip_code = $request[$language->code . '_zip_code'];
-      }
-      $event_content->slug = createSlug($request[$language->code . '_title']);
-      $event_content->description = Purifier::clean($request[$language->code . '_description'], 'youtube');
-      $event_content->refund_policy = $request[$language->code . '_refund_policy'];
-      $event_content->meta_keywords = $request[$language->code . '_meta_keywords'];
-      $event_content->meta_description = $request[$language->code . '_meta_description'];
-      $event_content->save();
-    }
-
+    $event = $service->createEvent($request->validated(), EventActor::admin());
     Session::flash('success', 'Added Successfully');
-    return response()->json(['status' => 'success'], 200);
+    return response()->json(['status' => 'success', 'redirect' => route('admin.event_management.ticket_setting', ['id' => $event->id])], 200);
   }
 
-  public function duplicate($id)
+  public function duplicate($id, EventFormService $service)
   {
-    $sourceEvent = Event::with(['dates', 'galleries', 'tickets'])->findOrFail($id);
-    $createdFiles = [];
-
     try {
-      $duplicatedEvent = DB::transaction(function () use ($sourceEvent, &$createdFiles) {
-        $duplicate = $sourceEvent->replicate();
-        $duplicate->status = 0;
-        $duplicate->is_featured = 'no';
-        $duplicate->thumbnail = $this->duplicateEventAsset($sourceEvent->thumbnail, 'assets/admin/img/event/thumbnail/', $createdFiles);
-        $duplicate->ticket_image = $this->duplicateEventAsset($sourceEvent->ticket_image, 'assets/admin/img/event_ticket/', $createdFiles);
-        $duplicate->ticket_logo = $this->duplicateEventAsset($sourceEvent->ticket_logo, 'assets/admin/img/event_ticket_logo/', $createdFiles);
-        $duplicate->ticket_slot_image = $this->duplicateEventAsset($sourceEvent->ticket_slot_image, 'assets/admin/img/map-image/', $createdFiles);
-        $duplicate->save();
-
-        EventContent::where('event_id', $sourceEvent->id)->get()->each(function ($content) use ($duplicate) {
-          $copy = $content->replicate();
-          $copy->event_id = $duplicate->id;
-          $copy->title = $content->title . ' - Copy';
-          $copy->slug = createSlug($copy->title . '-' . $duplicate->id);
-          $copy->google_calendar_id = null;
-          $copy->save();
-        });
-
-        foreach ($sourceEvent->dates as $date) {
-          $copy = $date->replicate();
-          $copy->event_id = $duplicate->id;
-          $copy->save();
-        }
-
-        foreach ($sourceEvent->galleries as $gallery) {
-          $copy = $gallery->replicate();
-          $copy->event_id = $duplicate->id;
-          $copy->image = $this->duplicateEventAsset($gallery->image, 'assets/admin/img/event-gallery/', $createdFiles);
-          $copy->save();
-        }
-
-        foreach ($sourceEvent->tickets as $ticket) {
-          $copy = $ticket->replicate();
-          $copy->event_id = $duplicate->id;
-          $copy->normal_ticket_slot_enable = 0;
-          $copy->normal_ticket_slot_unique_id = null;
-          $copy->free_tickete_slot_enable = 0;
-          $copy->free_tickete_slot_unique_id = null;
-          $copy->variations = $this->stripSlotIdentifiers($copy->variations);
-          $copy->trans_vars = $this->stripSlotIdentifiers($copy->trans_vars);
-          $copy->save();
-        }
-
-        return $duplicate;
-      });
-
-      return redirect()->route('admin.event_management.edit_event', ['id' => $duplicatedEvent->id])
-        ->with('success', 'Event duplicated as draft. Review it before publishing.');
-    } catch (\Throwable $exception) {
-      foreach ($createdFiles as $path) {
-        @unlink($path);
-      }
+      $source = Event::findOrFail($id);
+      $duplicate = $service->duplicateEvent($source, EventActor::admin());
+      return redirect()->route('admin.event_management.edit_event', ['id' => $duplicate->id, 'mode' => 'duplicate'])
+        ->with('success', 'Duplicated — review dates before publishing');
+    } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+      throw $e;
+    } catch (\Throwable $e) {
       return redirect()->back()->with('error', 'Event could not be duplicated. Please try again.');
     }
-  }
-
-  private function duplicateEventAsset(?string $filename, string $relativeDirectory, array &$createdFiles): ?string
-  {
-    if (empty($filename)) return $filename;
-    $directory = public_path($relativeDirectory);
-    $source = $directory . $filename;
-    if (!is_file($source)) return $filename;
-    @mkdir($directory, 0775, true);
-    $extension = pathinfo($filename, PATHINFO_EXTENSION);
-    $copyName = uniqid('event-copy-', true) . ($extension ? '.' . $extension : '');
-    $destination = $directory . $copyName;
-    if (!@copy($source, $destination)) throw new \RuntimeException('Unable to duplicate event media asset.');
-    $createdFiles[] = $destination;
-    return $copyName;
-  }
-
-  private function stripSlotIdentifiers($value)
-  {
-    if (empty($value)) return $value;
-    $decoded = json_decode($value, true);
-    if (!is_array($decoded)) return $value;
-    array_walk_recursive($decoded, function (&$item, $key) {
-      if ($key === 'slot_unique_id') $item = null;
-    });
-    return json_encode($decoded);
   }
 
   /**
@@ -387,23 +212,17 @@ class EventController extends Controller
     return redirect()->back();
   }
 
-  public function edit($id)
+  public function edit($id, EventFormService $service)
   {
     $event = Event::with('ticket')->findOrFail($id);
-    $information['event'] = $event;
-
+    $information = $service->formData($event, EventActor::admin());
+    $information['mode'] = request('mode') === 'duplicate' ? 'duplicate' : 'edit';
     $mapStatus = DB::table('basic_settings')->pluck('google_map_status')->first();
     $defaultLang = Language::where('is_default', 1)->first();
-    if ($mapStatus == 1) {
-      $information['event_address'] = EventContent::select('address')
-        ->where(['event_id' => $id, 'language_id' => $defaultLang->id])
-        ->first();
+    if ($mapStatus == 1 && $defaultLang) {
+      $information['event_address'] = EventContent::select('address')->where(['event_id'=>$id,'language_id'=>$defaultLang->id])->first();
     }
-
-    $information['languages'] = Language::all();
-    $organizers = Organizer::get();
-    $information['organizers'] = $organizers;
-
+    
     return view('backend.event.edit', $information);
   }
   public function imagedbrmv(Request $request)
