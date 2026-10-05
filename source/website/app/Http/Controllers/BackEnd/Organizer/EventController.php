@@ -20,11 +20,13 @@ use App\Models\Event\EventCountry;
 use Illuminate\Support\Facades\DB;
 use Mews\Purifier\Facades\Purifier;
 use App\Http\Controllers\Controller;
+use App\Services\Events\EventFormService;
+use App\Services\Events\EventActor;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
-use App\Http\Requests\Event\StoreRequest;
+use App\Http\Requests\Event\EventFormRequest;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Requests\Event\UpdateRequest;
+
 use App\Http\Requests\TicketSettingRequest;
 use App\Models\OrganizerAiBalance;
 use Illuminate\Support\Facades\Log;
@@ -315,220 +317,23 @@ class EventController extends Controller
     return $filename;
   }
 
-  public function store(StoreRequest $request)
+  public function store(EventFormRequest $request, EventFormService $service)
   {
-    //calculate duration
-    if ($request->date_type == 'single') {
-      $start = Carbon::parse($request->start_date . $request->start_time);
-      $end =  Carbon::parse($request->end_date . $request->end_time);
-      $diffent = DurationCalulate($start, $end);
-    }
-    //calculate duration end
-
-    $in = $request->all();
-    $in['duration'] = $request->date_type == 'single' ? $diffent : '';
-
-    $img = $request->file('thumbnail');
-    $generatedThumbnailUrl = trim((string) $request->input('thumbnail_image_url', ''));
-
-    $in['organizer_id'] = Auth::guard('organizer')->user()->id;
-    if ($request->hasFile('thumbnail')) {
-      $filename = time() . '.' . $img->getClientOriginalExtension();
-      $directory = public_path('assets/admin/img/event/thumbnail/');
-      @mkdir($directory, 0775, true);
-      $request->file('thumbnail')->move($directory, $filename);
-      $in['thumbnail'] = $filename;
-    } elseif ($generatedThumbnailUrl !== '') {
-      $filename = $this->storeGeneratedThumbnail($generatedThumbnailUrl);
-
-      if (!$filename) {
-        return response()->json([
-          'status' => 'error',
-          'message' => 'The generated thumbnail image could not be processed. Please try again.',
-          'errors' => [
-            'thumbnail_image_url' => ['The generated thumbnail image could not be processed. Please try again.']
-          ]
-        ], 422);
-      }
-
-      $in['thumbnail'] = $filename;
-    }
-    $in['f_price'] = $request->price;
-    $in['end_date_time'] = Carbon::parse($request->end_date . ' ' . $request->end_time);
-    $event = Event::create($in);
-
-    if ($request->date_type == 'multiple') {
-      $i = 1;
-      foreach ($request->m_start_date as $key => $date) {
-        $start = Carbon::parse($date . $request->m_start_time[$key]);
-        $end =  Carbon::parse($request->m_end_date[$key] . $request->m_end_time[$key]);
-        $diffent = DurationCalulate($start, $end);
-
-        EventDates::create([
-          'event_id' => $event->id,
-          'start_date' => $date,
-          'start_time' => $request->m_start_time[$key],
-          'end_date' => $request->m_end_date[$key],
-          'end_time' => $request->m_end_time[$key],
-          'duration' => $diffent,
-          'start_date_time' => $start,
-          'end_date_time' => $end,
-        ]);
-        if ($i == 1) {
-          $event->update([
-            'duration' => $diffent
-          ]);
-        }
-        $i++;
-      }
-
-      //update event date time
-      $event_date = EventDates::where('event_id', $event->id)->orderBy('end_date_time', 'desc')->first();
-
-      $event->end_date_time = $event_date->end_date_time;
-      $event->save();
-    }
-
-
-    $in['event_id'] = $event->id;
-    if ($request->event_type == 'online') {
-      if (!$request->pricing_type) {
-        $in['pricing_type'] = 'normal';
-      }
-      $in['early_bird_discount'] = $request->early_bird_discount_type;
-      $in['early_bird_discount_type'] = $request->discount_type;
-      $ticket = Ticket::create($in);
-    }
-
-    $slders = $request->slider_images;
-
-    foreach ($slders as $key => $id) {
-      $event_image = EventImage::where('id', $id)->first();
-      if ($event_image) {
-        $event_image->event_id = $event->id;
-        $event_image->save();
-      }
-    }
-    $languages = Language::all();
-
-    foreach ($languages as $language) {
-      $event_content = new EventContent();
-      $event_content->language_id = $language->id;
-      $event_content->event_category_id = $request[$language->code . '_category_id'];
-      $event_content->event_id = $event->id;
-      $event_content->title = $request[$language->code . '_title'];
-      if ($request->event_type == 'venue') {
-        $event_content->address = $request[$language->code . '_address'];
-        $event_content->country_id = $request[$language->code . '_country'];
-        $event_content->city_id = $request[$language->code . '_city'];
-        $event_content->state_id = $request[$language->code . '_state'];
-        $event_content->zip_code = $request[$language->code . '_zip_code'];
-      }
-      $event_content->slug = createSlug($request[$language->code . '_title']);
-      $event_content->description = Purifier::clean($request[$language->code . '_description'], 'youtube');
-      $event_content->refund_policy = $request[$language->code . '_refund_policy'];
-      $event_content->meta_keywords = $request[$language->code . '_meta_keywords'];
-      $event_content->meta_description = $request[$language->code . '_meta_description'];
-      $event_content->save();
-    }
-
+    $event = $service->createEvent($request->validated(), EventActor::organizer(Auth::guard('organizer')->user()));
     Session::flash('success', 'Added Successfully');
-    return response()->json(['status' => 'success'], 200);
+    return response()->json(['status' => 'success', 'redirect' => route('organizer.event_management.ticket_setting', ['id' => $event->id])], 200);
   }
-  public function duplicate($id)
+
+  public function duplicate($id, EventFormService $service)
   {
-    $organizerId = Auth::guard('organizer')->id();
-
-    $sourceEvent = Event::with(['dates', 'galleries', 'tickets'])
-      ->where('organizer_id', $organizerId)
-      ->findOrFail($id);
-
-    $createdFiles = [];
-
     try {
-      $duplicatedEvent = DB::transaction(function () use ($sourceEvent, &$createdFiles) {
-        $duplicate = $sourceEvent->replicate();
-        $duplicate->status = 0;
-        $duplicate->is_featured = 'no';
-        $duplicate->thumbnail = $this->duplicateEventAsset(
-          $sourceEvent->thumbnail,
-          'assets/admin/img/event/thumbnail/',
-          $createdFiles
-        );
-        $duplicate->ticket_image = $this->duplicateEventAsset(
-          $sourceEvent->ticket_image,
-          'assets/admin/img/event_ticket/',
-          $createdFiles
-        );
-        $duplicate->ticket_logo = $this->duplicateEventAsset(
-          $sourceEvent->ticket_logo,
-          'assets/admin/img/event_ticket_logo/',
-          $createdFiles
-        );
-        $duplicate->ticket_slot_image = $this->duplicateEventAsset(
-          $sourceEvent->ticket_slot_image,
-          'assets/admin/img/map-image/',
-          $createdFiles
-        );
-        $duplicate->save();
-
-        EventContent::where('event_id', $sourceEvent->id)->get()->each(function ($content) use ($duplicate) {
-          $copy = $content->replicate();
-          $copy->event_id = $duplicate->id;
-          $copy->title = $content->title . ' - Copy';
-          $copy->slug = createSlug($copy->title . '-' . $duplicate->id);
-          $copy->google_calendar_id = null;
-          $copy->save();
-        });
-
-        foreach ($sourceEvent->dates as $date) {
-          $copy = $date->replicate();
-          $copy->event_id = $duplicate->id;
-          $copy->save();
-        }
-
-        foreach ($sourceEvent->galleries as $gallery) {
-          $copy = $gallery->replicate();
-          $copy->event_id = $duplicate->id;
-          $copy->image = $this->duplicateEventAsset(
-            $gallery->image,
-            'assets/admin/img/event-gallery/',
-            $createdFiles
-          );
-          $copy->save();
-        }
-
-        foreach ($sourceEvent->tickets as $ticket) {
-          $copy = $ticket->replicate();
-          $copy->event_id = $duplicate->id;
-
-          // Seat-map identifiers represent live admission inventory and must not be shared.
-          $copy->normal_ticket_slot_enable = 0;
-          $copy->normal_ticket_slot_unique_id = null;
-          $copy->free_tickete_slot_enable = 0;
-          $copy->free_tickete_slot_unique_id = null;
-          $copy->variations = $this->stripSlotIdentifiers($copy->variations);
-          $copy->trans_vars = $this->stripSlotIdentifiers($copy->trans_vars);
-          $copy->save();
-        }
-
-        return $duplicate;
-      });
-
-      return redirect()
-        ->route('organizer.event_management.edit_event', ['id' => $duplicatedEvent->id])
-        ->with('success', 'Event duplicated as draft. Review it before publishing.');
-    } catch (\Throwable $exception) {
-      foreach ($createdFiles as $path) {
-        @unlink($path);
-      }
-
-      Log::error('Organizer event duplication failed', [
-        'event_id' => $id,
-        'organizer_id' => $organizerId,
-        'message' => $exception->getMessage(),
-      ]);
-
+      $source = Event::findOrFail($id);
+      $duplicate = $service->duplicateEvent($source, EventActor::organizer(Auth::guard('organizer')->user()));
+      return redirect()->route('organizer.event_management.edit_event', ['id' => $duplicate->id, 'mode' => 'duplicate'])
+        ->with('success', 'Duplicated — review dates before publishing');
+    } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+      throw $e;
+    } catch (\Throwable $e) {
       return redirect()->back()->with('error', 'Event could not be duplicated. Please try again.');
     }
   }
@@ -632,29 +437,17 @@ class EventController extends Controller
     return redirect()->back();
   }
 
-  public function edit($id)
+  public function edit($id, EventFormService $service)
   {
-    $event = Event::with('ticket')->where('id', $id)->firstOrFail();
-    if (Auth::guard('organizer')->user()->id != $event->organizer_id) {
-      return back();
-    }
-
-    if ($event->organizer_id != Auth::guard('organizer')->user()->id) {
-      return redirect()->route('organizer.dashboard');
-    }
-
-    $information['event'] = $event;
+    $event = Event::with('ticket')->findOrFail($id);
+    $information = $service->formData($event, EventActor::organizer(Auth::guard('organizer')->user()));
+    $information['mode'] = request('mode') === 'duplicate' ? 'duplicate' : 'edit';
     $mapStatus = DB::table('basic_settings')->pluck('google_map_status')->first();
     $defaultLang = Language::where('is_default', 1)->first();
-    if ($mapStatus == 1) {
-      $information['event_address'] = EventContent::select('address')
-        ->where(['event_id' => $id, 'language_id' => $defaultLang->id])
-        ->first();
+    if ($mapStatus == 1 && $defaultLang) {
+      $information['event_address'] = EventContent::select('address')->where(['event_id'=>$id,'language_id'=>$defaultLang->id])->first();
     }
-
-    $information['getCurrencyInfo']  = $this->getCurrencyInfo();
-    $information['languages'] = Language::all();
-
+    $information['getCurrencyInfo'] = $this->getCurrencyInfo();
     return view('organizer.event.edit', $information);
   }
   public function imagedbrmv(Request $request)
@@ -830,9 +623,8 @@ class EventController extends Controller
   public function destroy($id)
   {
     $event = Event::find($id);
-    if (Auth::guard('organizer')->user()->id != $event->organizer_id) {
-      return back();
-    }
+    if (!$event) abort(404);
+    if ((int) Auth::guard('organizer')->id() !== (int) $event->organizer_id) abort(403);
 
     @unlink(public_path('assets/admin/img/event/thumbnail/') . $event->thumbnail);
 
