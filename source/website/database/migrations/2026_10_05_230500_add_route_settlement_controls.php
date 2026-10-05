@@ -10,6 +10,7 @@ return new class extends Migration {
    $t->timestamp('route_terms_accepted_at')->nullable();
   });
   Schema::table('payment_transfers',function(Blueprint $t){
+   $t->unique('payment_order_id');
    $t->boolean('on_hold')->default(false);
    $t->timestamp('hold_release_at')->nullable()->index();
    $t->unsignedBigInteger('reversed_amount')->default(0);
@@ -22,7 +23,7 @@ return new class extends Migration {
  }
  public function down(): void {
   Schema::dropIfExists('payment_settings');
-  Schema::table('payment_transfers',function(Blueprint $t){$t->dropColumn(['on_hold','hold_release_at','reversed_amount','released_at']);});
+  Schema::table('payment_transfers',function(Blueprint $t){$t->dropUnique(['payment_order_id']); $t->dropColumn(['on_hold','hold_release_at','reversed_amount','released_at']);});
   Schema::table('organizer_payment_profiles',function(Blueprint $t){$t->dropColumn(['split_suspended','route_terms_accepted_at']);});
  }
 };
