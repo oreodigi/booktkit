@@ -9,6 +9,9 @@ Route::prefix('staff')->group(function () {
   });
   Route::middleware(['auth:staff','staff.assignment'])->group(function () {
     Route::get('/','StaffAuthController@home')->name('staff.home');
+    Route::get('shifts','StaffShiftController@index')->middleware('staff.assignment:box_office.sell')->name('staff.shifts.index');
+    Route::post('shifts/open','StaffShiftController@open')->middleware('staff.assignment:box_office.sell')->name('staff.shifts.open');
+    Route::post('shifts/{id}/close','StaffShiftController@close')->middleware('staff.assignment:box_office.sell')->name('staff.shifts.close');
     Route::get('box-office','StaffBoxOfficeController@index')->middleware('staff.assignment:box_office.sell')->name('staff.boxoffice.index');
     Route::post('box-office/sales','StaffBoxOfficeController@store')->middleware('staff.assignment:box_office.sell')->name('staff.boxoffice.store');
     Route::get('box-office/sales/{id}/print','StaffBoxOfficeController@print')->middleware('staff.assignment:box_office.sell')->name('staff.boxoffice.print');
@@ -78,6 +81,8 @@ Route::prefix('/organizer/ai-token-purchase')->group(function () {
 });
 
 Route::prefix('/organizer')->middleware('auth:organizer', 'Deactive:organizer', 'EmailStatus:organizer', 'adminLang')->group(function () {
+  Route::get('/box-office/shifts', 'BackEnd\\Organizer\\BoxOfficeShiftController@index')->name('organizer.boxoffice.shifts.index');
+  Route::post('/box-office/shifts/{id}/verify', 'BackEnd\\Organizer\\BoxOfficeShiftController@verify')->name('organizer.boxoffice.shifts.verify');
   Route::get('/box-office', 'BackEnd\\Organizer\\BoxOfficeController@index')->name('organizer.boxoffice.index');
   Route::post('/box-office/sales', 'BackEnd\\Organizer\\BoxOfficeController@store')->name('organizer.boxoffice.store');
   Route::get('/box-office/sales/{id}/print', 'BackEnd\\Organizer\\BoxOfficeController@print')->name('organizer.boxoffice.print');
