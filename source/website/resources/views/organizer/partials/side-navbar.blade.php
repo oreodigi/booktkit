@@ -242,6 +242,12 @@
             <p>{{ __('Payments & Settlements') }}</p>
           </a>
         </li>
+        <li class="nav-item @if (request()->routeIs('organizer.payouts.kyc*')) active @endif">
+          <a href="{{ route('organizer.payouts.kyc') }}">
+            <i class="fal fa-id-card"></i>
+            <p>{{ __('Payouts & KYC') }}</p>
+          </a>
+        </li>
         <li class="nav-item">
           <a href="{{ route('organizer.pwa') }}" target="_blank">
             <i class="fas fa-scanner"></i>
