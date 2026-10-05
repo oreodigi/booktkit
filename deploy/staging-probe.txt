@@ -1,0 +1,2 @@
+Staging polling deployment verification — 2026-10-05 UTC / 2026-10-06 IST.
+The served /__deployment.json must match the commit recorded in staging state.json.
