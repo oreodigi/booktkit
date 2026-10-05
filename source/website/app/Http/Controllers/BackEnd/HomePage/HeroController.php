@@ -124,6 +124,7 @@ class HeroController extends Controller
             'event_id' => $request->event_id,
             'custom_url' => $request->custom_url,
             'open_new_tab' => $request->boolean('open_new_tab'),
+            'show_overlay' => $request->boolean('show_overlay'),
             'sort_order' => $request->integer('sort_order', 0),
             'status' => $request->boolean('status', true),
         ]);
@@ -154,6 +155,7 @@ class HeroController extends Controller
         $data['video_source'] = $request->media_type === 'video' ? $request->video_source : null;
         $data['video_url'] = $request->media_type === 'video' && $request->video_source !== 'upload' ? trim($request->video_url) : null;
         $data['open_new_tab'] = $request->boolean('open_new_tab');
+        $data['show_overlay'] = $request->boolean('show_overlay');
         $data['status'] = $request->boolean('status');
         if ($request->hasFile('image')) { $this->remove($slide->image); $data['image'] = $this->upload($request->file('image')); }
         if ($request->hasFile('video')) { $this->remove($slide->video); $data['video'] = $this->upload($request->file('video')); }
