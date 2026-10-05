@@ -226,34 +226,8 @@ class BookingController extends Controller
         $bookingInfo = $this->storeData($arrData);
 
 
-        $ticket = DB::table('basic_settings')->select('how_ticket_will_be_send')->first();
-
-
-        if ($ticket->how_ticket_will_be_send == 'instant') {
-          // generate an invoice in pdf format
-          $invoice = $this->generateInvoice($bookingInfo, $bookingInfo->event_id);
-
-          //unlink qr code
-          if ($bookingInfo->variation != null) {
-            //generate qr code for without wise ticket
-            $variations = json_decode($bookingInfo->variation, true);
-            foreach ($variations as $variation) {
-              @unlink(public_path('assets/admin/qrcodes/') . $bookingInfo->booking_id . '__' . $variation['unique_id'] . '.svg');
-            }
-          } else {
-            //generate qr code for without wise ticket
-            for ($i = 1; $i <= $bookingInfo->quantity; $i++) {
-              @unlink(public_path('assets/admin/qrcodes/') . $bookingInfo->booking_id . '__' . $i .  '.svg');
-            }
-          }
-          // then, update the invoice field info in database
-          $bookingInfo->invoice = $invoice;
-          $bookingInfo->save();
-          // send a mail to the customer with the invoice
-          $this->sendMail($bookingInfo);
-        } else {
-          BookingInvoiceJob::dispatch($bookingInfo->id)->delay(now()->addSeconds(10));
-        }
+        // Deliver the same secure one-time QR credentials used by the scanner.
+        app(\\App\\Services\\Tickets\\TicketDeliveryService::class)->deliver($bookingInfo);
 
         $request->session()->forget('event_id');
         $request->session()->forget('selTickets');
