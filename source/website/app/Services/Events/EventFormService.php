@@ -10,6 +10,7 @@ use App\Models\Event\EventContent;
 use App\Models\Event\EventDates;
 use App\Models\Event\EventImage;
 use App\Models\Event\Ticket;
+use App\Models\Event\BoxOfficeLocation;
 use Carbon\Carbon;
 use Mews\Purifier\Facades\Purifier;
 
@@ -25,6 +26,7 @@ class EventFormService
             $this->syncDates($event, $data, false);
             $this->syncContents($event, $data);
             $this->syncOnlineTicket($event, $data);
+            $this->syncBoxOfficeLocations($event, $data);
             $this->attachGallery($event, $data['slider_images'] ?? []);
             return $event->fresh(['dates','galleries','tickets']);
         });
@@ -41,6 +43,7 @@ class EventFormService
             $this->syncDates($event, $data, true);
             $this->syncContents($event, $data);
             $this->syncOnlineTicket($event, $data);
+            $this->syncBoxOfficeLocations($event, $data);
             return $event->fresh(['dates','galleries','tickets']);
         });
     }
@@ -121,7 +124,10 @@ class EventFormService
             $end=Carbon::parse($data['end_date'].' '.$data['end_time']);
             $data['duration']=DurationCalulate($start,$end); $data['end_date_time']=$end;
         } else { $data['start_date']=$data['start_time']=$data['end_date']=$data['end_time']=null; }
-        if (($data['event_type'] ?? null)==='online') { $data['latitude']=null; $data['longitude']=null; }
+        $data['box_office_enabled'] = (bool)($data['box_office_enabled'] ?? false);
+        $data['reentry_policy'] = $data['box_office_enabled'] ? ($data['reentry_policy'] ?? 'none') : 'none';
+        $data['max_reentries'] = $data['box_office_enabled'] && $data['reentry_policy'] === 'limited' ? ($data['max_reentries'] ?? null) : null;
+        if (($data['event_type'] ?? null)==='online') { $data['latitude']=null; $data['longitude']=null; $data['box_office_enabled']=false; $data['reentry_policy']='none'; $data['max_reentries']=null; }
         return $data;
     }
 
@@ -166,6 +172,17 @@ class EventFormService
         foreach (['price','ticket_available_type','ticket_available','max_ticket_buy_type','max_buy_ticket','early_bird_discount_amount','early_bird_discount_date','early_bird_discount_time'] as $f) $ticket->{$f}=$data[$f]??null;
         $ticket->f_price=$data['price']??null; $ticket->pricing_type=$data['pricing_type']??'normal';
         $ticket->early_bird_discount=$data['early_bird_discount_type']??'disable'; $ticket->early_bird_discount_type=$data['discount_type']??null; $ticket->save();
+    }
+
+    private function syncBoxOfficeLocations(Event $event, array $data): void
+    {
+        if (!$event->box_office_enabled) { BoxOfficeLocation::where('event_id',$event->id)->delete(); return; }
+        $names=[];
+        foreach (($data['box_office_locations'] ?? []) as $location) {
+            $name=trim((string)($location['name'] ?? '')); if ($name==='') continue; $names[]=$name;
+            BoxOfficeLocation::updateOrCreate(['event_id'=>$event->id,'name'=>$name],['address'=>$location['address']??null,'active'=>(bool)($location['active']??true)]);
+        }
+        BoxOfficeLocation::where('event_id',$event->id)->whereNotIn('name',$names)->delete();
     }
 
     private function attachGallery(Event $event, array $ids): void { EventImage::whereIn('id',$ids)->whereNull('event_id')->update(['event_id'=>$event->id]); }
