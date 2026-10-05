@@ -11,7 +11,7 @@ class RazorpayWebhookController extends Controller {
  public function handle(Request $r,RazorpayWebhookService $webhooks,PaymentReconciliationService $reconcile){
   try { $payload=$webhooks->verify($r->getContent(),$r->header('X-Razorpay-Signature')); }
   catch(\Throwable $e){ return response()->json(['success'=>false],400); }
-  $event=$webhooks->remember($payload); if($event->status==='processed') return response()->json(['success'=>true,'idempotent'=>true]);
+  $event=$webhooks->remember($payload,$r->header('X-Razorpay-Event-Id')); if($event->status==='processed') return response()->json(['success'=>true,'idempotent'=>true]);
   $type=$payload['event']??''; $payment=$payload['payload']['payment']['entity']??null; $transfer=$payload['payload']['transfer']['entity']??null;
   if($payment && !empty($payment['id'])){
    $o=PaymentOrder::where('gateway_payment_id',$payment['id'])->orWhere('gateway_order_id',$payment['order_id']??'')->first();
