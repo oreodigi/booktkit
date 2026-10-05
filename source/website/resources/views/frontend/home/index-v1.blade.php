@@ -17,7 +17,9 @@
 @endsection
 @section('hero-section')
     @if(isset($heroSlides) && $heroSlides->count())
-      @php($mobileHero = false)
+      @php
+        $mobileHero = false;
+      @endphp
       @include('frontend.home.hero-slider')
     @else
       <!-- Legacy single-banner fallback -->
