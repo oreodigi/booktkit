@@ -39,6 +39,7 @@ class StoreRequest extends FormRequest
       'slider_images' => 'required',
       'thumbnail' => $hasUploadedThumbnail ? [
         new ImageMimeTypeRule(),
+        'max:500',
         function ($attribute, $value, $fail) {
           if ($value && is_file($value->getPathname())) {
             [$width, $height] = getimagesize($value->getPathname());
@@ -147,11 +148,11 @@ class StoreRequest extends FormRequest
       $totalState = EventState::where('language_id', $language->id)->count();
 
       if ($bs->event_state_status == 1 && $totalState > 0) {
-        $rules[$language->code . '_state'] = 'required_if:event_type,venue';
+        $ruleArray[$language->code . '_state'] = 'required_if:event_type,venue';
       }
 
       $ruleArray[$language->code . '_category_id'] = 'required';
-      $ruleArray[$language->code . '_description'] = 'min:30';
+      $ruleArray[$language->code . '_description'] = 'required|min:30';
       $ruleArray[$language->code . '_address'] = 'required_if:event_type,venue';
       $ruleArray[$language->code . '_city'] = 'required_if:event_type,venue';
     }
@@ -179,6 +180,7 @@ class StoreRequest extends FormRequest
       $messageArray[$code . '_state.required_if'] = 'The state field is required for ' . $langNameText;
 
       $messageArray[$code . '_category_id.required'] = 'The category field is required for ' . $langNameText;
+      $messageArray[$code . '_description.required'] = 'The description field is required for ' . $langNameText;
       $messageArray[$code . '_description.min'] = 'The description must be at least 30 characters for ' . $langNameText;
     }
 
