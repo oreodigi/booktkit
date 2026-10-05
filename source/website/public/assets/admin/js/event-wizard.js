@@ -7,7 +7,11 @@ function restore(){if(mode!=="create")return;try{var raw=localStorage.getItem(ke
 var timer;if(mode==="create")$(form).on("input change","input,select,textarea",function(){clearTimeout(timer);timer=setTimeout(save,250)});
 var eventType=initialType,isOnline=eventType==="online";
 var $gallery=$("#my-dropzone").closest(".col-lg-12"),children=$(form).children();children.attr("data-btk-step","6");
-if(!$(form).find('[name="event_type"]').is(':radio,select')){$('<div class="btk-type-summary alert alert-light"><strong>Event type:</strong> '+(initialType==="online"?"Online":"Venue")+'</div>').attr("data-btk-step","1").prependTo(form);}
+if(!$(form).find('[name="event_type"]').is(':radio,select')){
+ var typeHtml='<section class="btk-type-step" data-btk-step="1" data-step-key="type"><h4>Choose event type</h4><p class="text-muted">Select how attendees will join this event.</p><div class="selectgroup w-100"><label class="selectgroup-item"><input type="radio" class="selectgroup-input btk-event-type-choice" value="venue" '+(initialType==="venue"?"checked":"")+'><span class="selectgroup-button">Venue event</span></label><label class="selectgroup-item"><input type="radio" class="selectgroup-input btk-event-type-choice" value="online" '+(initialType==="online"?"checked":"")+'><span class="selectgroup-button">Online event</span></label></div></section>';
+ $(form).prepend(typeHtml);
+ $(form).on("change",".btk-event-type-choice",function(){var next=this.value,hidden=$(form).find('input[name="event_type"]');hidden.val(next);if(mode==="create"&&next!==initialType){var u=new URL(location.href);u.searchParams.set("type",next);location.assign(u.toString())}});
+}
 $("#accordion").attr("data-btk-step","2");$("#accordion .form-group").attr("data-btk-step","2");
 $("#single_dates,.countDownStatus").attr("data-btk-step","3");$("#multiple_dates").closest(".row").attr("data-btk-step","3");$(".eventDateType").closest(".row").attr("data-btk-step","3");
 $gallery.attr("data-btk-step","5");var $thumb=$(form).find('input[name="thumbnail"]').closest(".form-group");$thumb.attr("data-btk-step","5");
