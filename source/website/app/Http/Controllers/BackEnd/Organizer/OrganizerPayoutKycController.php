@@ -44,7 +44,7 @@ class OrganizerPayoutKycController extends Controller
             'address_country' => ['required','size:2'],
             'business_category' => 'required|string|max:120',
             'business_subcategory' => 'required|string|max:120',
-            'pan' => ['required','regex:/^[A-Z]{5}[0-9]{4}[A-Z]$/'],
+            'pan' => ['nullable','regex:/^[A-Z]{5}[0-9]{4}[A-Z]$/'],
             'stakeholder_pan' => ['nullable','regex:/^[A-Z]{5}[0-9]{4}[A-Z]$/'],
             'gstin' => ['nullable','size:15','regex:/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/'],
             'bank_account_holder' => 'required|string|max:255',
@@ -53,16 +53,22 @@ class OrganizerPayoutKycController extends Controller
             'submit_kyc' => 'nullable|boolean',
         ]);
 
-        $data['pan'] = strtoupper($data['pan']);
-        $data['stakeholder_pan'] = isset($data['stakeholder_pan']) ? strtoupper($data['stakeholder_pan']) : null;
-        $data['gstin'] = isset($data['gstin']) ? strtoupper($data['gstin']) : null;
+        if (!empty($data['pan'])) $data['pan'] = strtoupper($data['pan']); else unset($data['pan']);
+        if (!empty($data['stakeholder_pan'])) $data['stakeholder_pan'] = strtoupper($data['stakeholder_pan']); else unset($data['stakeholder_pan']);
+        if (!empty($data['gstin'])) $data['gstin'] = strtoupper($data['gstin']); else unset($data['gstin']);
         $data['bank_ifsc'] = strtoupper($data['bank_ifsc']);
         $data['address_country'] = strtoupper($data['address_country']);
 
-        if (in_array($data['business_type'], self::ENTITY_TYPES, true) && empty($data['stakeholder_pan'])) {
+        $effectivePan = $data['pan'] ?? $profile->pan;
+        $effectiveStakeholderPan = $data['stakeholder_pan'] ?? $profile->stakeholder_pan;
+        $effectiveGstin = $data['gstin'] ?? $profile->gstin;
+        if (empty($effectivePan)) {
+            throw ValidationException::withMessages(['pan' => 'Business PAN is required.']);
+        }
+        if (in_array($data['business_type'], self::ENTITY_TYPES, true) && empty($effectiveStakeholderPan)) {
             throw ValidationException::withMessages(['stakeholder_pan' => 'A stakeholder/person PAN is required for this business type.']);
         }
-        if (!empty($data['gstin']) && substr($data['gstin'], 2, 10) !== $data['pan']) {
+        if (!empty($effectiveGstin) && substr($effectiveGstin, 2, 10) !== $effectivePan) {
             throw ValidationException::withMessages(['gstin' => 'GSTIN characters 3-12 must match the business PAN.']);
         }
         if (empty($data['bank_account_number']) && empty($profile->bank_account_last4)) {
