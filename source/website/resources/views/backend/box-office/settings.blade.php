@@ -1,0 +1,10 @@
+@extends('backend.layout')
+@section('content')
+<div class="page-header"><h4 class="page-title">Box Office / POS Settings</h4><p class="text-muted">Platform defaults for organizer POS operations</p></div>
+@if(session('success'))<div class="alert alert-success">{{session('success')}}</div>@endif
+<div class="card"><div class="card-body"><form method="post" action="{{route('admin.boxoffice.settings.update')}}">@csrf @method('PUT')
+<div class="row"><div class="col-md-4 form-group"><label>Default hold expiry</label><div class="input-group"><input class="form-control" type="number" min="1" max="120" name="hold_minutes" value="{{$setting->hold_minutes}}"><div class="input-group-append"><span class="input-group-text">minutes</span></div></div></div><div class="col-md-4 form-group"><label>Default thermal receipt</label><select class="form-control" name="receipt_width_mm"><option value="58" {{$setting->receipt_width_mm==58?'selected':''}}>58 mm</option><option value="80" {{$setting->receipt_width_mm==80?'selected':''}}>80 mm</option></select></div></div>
+<h5>Payment methods</h5><div class="row">@foreach(['allow_cash'=>'Cash','allow_upi'=>'UPI','allow_card'=>'Card','allow_other'=>'Other'] as $key=>$label)<div class="col-md-3 mb-2"><label><input type="checkbox" name="{{$key}}" value="1" {{$setting->$key?'checked':''}}> {{$label}}</label></div>@endforeach</div><hr>
+<h5>Customer & delivery defaults</h5><div class="row">@foreach(['require_customer_name'=>'Require customer name','require_customer_phone'=>'Require phone','allow_aadhaar'=>'Allow Aadhaar capture','allow_customer_photo'=>'Allow customer photo','auto_email_ticket'=>'Auto-email ticket'] as $key=>$label)<div class="col-md-4 mb-2"><label><input type="checkbox" name="{{$key}}" value="1" {{$setting->$key?'checked':''}}> {{$label}}</label></div>@endforeach</div>
+<div class="alert alert-info mt-3">Organizer-specific POS settings can override these platform defaults. Aadhaar should remain disabled unless identity verification is required for the event.</div><button class="btn btn-primary">Save platform POS defaults</button></form></div></div>
+@endsection
