@@ -196,8 +196,7 @@
                           <td>
                             <form action="{{ route('organizer.event_management.duplicate_event', ['id' => $event->id]) }}" method="post" class="d-inline">
                               @csrf
-                              <button type="submit" class="btn btn-outline-primary btn-sm" title="{{ __('Duplicate Event') }}">
-                                <i class="far fa-copy"></i> {{ __('Duplicate') }}
+                              <button type="submit" class="btn btn-warning btn-sm text-white" title="{{ __('Duplicate Event') }}">{{ __('Duplicate') }}
                               </button>
                             </form>
                           </td>
