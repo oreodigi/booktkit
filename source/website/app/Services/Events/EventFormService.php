@@ -4,13 +4,13 @@ namespace App\Services\Events;
 
 use App\Models\Event;
 use App\Models\Language;
+use Illuminate\Support\Facades\DB;
 use App\Models\Organizer;
 use App\Models\Event\EventContent;
 use App\Models\Event\EventDates;
 use App\Models\Event\EventImage;
 use App\Models\Event\Ticket;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use Mews\Purifier\Facades\Purifier;
 
 class EventFormService
