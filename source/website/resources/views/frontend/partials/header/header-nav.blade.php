@@ -66,10 +66,7 @@
               </ul>
 
               <div class="menu-right">
-                <button type="button" id="booktkit-force-refresh" class="menu-btn mr-1" title="{{ __('Refresh latest version') }}" aria-label="{{ __('Refresh latest version') }}">
-                  <i class="fa fa-refresh"></i><span class="d-none d-xl-inline ml-1">{{ __('Refresh') }}</span>
-                </button>
-                <form class="language-switcher" action="{{ route('change_language') }}" method="get">
+<form class="language-switcher" action="{{ route('change_language') }}" method="get">
                   <select name="lang_code" id="language" class="form-control" onchange="this.form.submit()">
                     @foreach ($allLanguageInfos as $item)
                       <option value="{{ $item->code }}"
@@ -129,5 +126,5 @@
 </header>
 <div class="mobile-menu-backdrop"></div>
 <script>
-document.addEventListener("DOMContentLoaded",function(){var t=document.querySelector(".navbar-toggle"),c=document.querySelector(".mobile-menu-close"),b=document.querySelector(".mobile-menu-backdrop"),m=document.getElementById("main-menu");function closeMenu(){if(m){m.classList.remove("show");document.body.classList.remove("mobile-menu-open")}}function openMenu(){document.body.classList.add("mobile-menu-open")}if(t)t.addEventListener("click",function(){setTimeout(function(){m&&m.classList.contains("show")?openMenu():closeMenu()},10)});if(c)c.addEventListener("click",closeMenu);if(b)b.addEventListener("click",closeMenu);document.querySelectorAll("#main-menu a").forEach(function(a){a.addEventListener("click",function(){if(!a.closest("li.dropdown")||a.closest(".dropdown-menu"))closeMenu()})});var r=document.getElementById("booktkit-force-refresh");if(r)r.addEventListener("click",async function(){r.disabled=true;try{if("caches" in window){var names=await caches.keys();await Promise.all(names.map(function(n){return caches.delete(n)}))}if("serviceWorker" in navigator){var regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(function(reg){return reg.unregister()}))}try{localStorage.clear()}catch(e){}try{sessionStorage.clear()}catch(e){}var u=new URL(window.location.href);u.searchParams.set("_refresh",Date.now().toString());window.location.replace(u.toString())}catch(e){window.location.reload()}})});
+document.addEventListener("DOMContentLoaded",function(){var t=document.querySelector(".navbar-toggle"),c=document.querySelector(".mobile-menu-close"),b=document.querySelector(".mobile-menu-backdrop"),m=document.getElementById("main-menu");function closeMenu(){if(m){m.classList.remove("show");document.body.classList.remove("mobile-menu-open")}}function openMenu(){document.body.classList.add("mobile-menu-open")}if(t)t.addEventListener("click",function(){setTimeout(function(){m&&m.classList.contains("show")?openMenu():closeMenu()},10)});if(c)c.addEventListener("click",closeMenu);if(b)b.addEventListener("click",closeMenu);document.querySelectorAll("#main-menu a").forEach(function(a){a.addEventListener("click",function(){if(!a.closest("li.dropdown")||a.closest(".dropdown-menu"))closeMenu()})});});
 </script>
