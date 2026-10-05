@@ -1,65 +1,43 @@
 # BookTKIT DevTools
 
-Repository-level QA and ChatGPT/MCP testing layer for BookTKIT.
+Verified 2026-10-05 UTC (6 October IST). Canonical repository: oreodigi/booktkit.
 
-## Phase 1
-- Playwright desktop/mobile smoke testing.
-- Failure screenshots, traces, videos and HTML reports.
-- MCP tools: `booktkit_health_check` and `booktkit_run_tests`.
-- Production-safe default: public/read-only flows only.
+## Run suites
 
-## Local setup
-Requires Node.js 20+.
+Use Node 22. Install with `npm ci` and `npx playwright install chromium`. The default target is https://test.booktkit.com; staging requires private HTTP Basic credentials. Full/mobile suites also need Firefox and WebKit installed.
 
-```bash
-cd tools/booktkit-devtools
-npm ci
-npx playwright install chromium firefox webkit
-npm run test:smoke
-npm run mcp
+```sh
+node src/cli.js smoke
+node src/cli.js auth
+node src/cli.js organizer
+node src/cli.js event-creation
+npm run test:mobile
+node src/cli.js all
+node --test unit/runner.test.js
 ```
 
-Set `BOOKTKIT_BASE_URL` to staging when tests may mutate data. Never commit credentials.
+Production must be explicitly selected via BOOKTKIT_BASE_URL=https://booktkit.com and permits only the dedicated smoke suite. The Playwright configuration independently restricts production to that file. Browser smoke blocks non-GET/HEAD/OPTIONS requests and makes no login, signup, payment or event changes.
 
-## MCP client
-Run `npm run mcp` for local stdio tools or `npm run mcp:http` for the protected HTTPS control plane. The remote tools dispatch approved GitHub Actions suites on `main` and list their results; see `REMOTE-MCP.md` for secrets and hosting.
+Default browser: desktop-chromium. Auth suites additionally create organizer/customer/admin Chromium projects using fresh role storage states from src/auth.js. All/mobile explicitly select the other engines/devices. Retries: one; per-test timeout: 45 seconds; Playwright global timeout: 20 minutes; runner hard timeout: 15 minutes, configurable with BOOKTKIT_RUN_TIMEOUT_MINUTES (maximum 20). The runner kills the entire process group and streams redacted output to private per-run logs.
 
-## Verification
-CI runs the complete read-only suite across desktop Chromium, Firefox and WebKit plus mobile Chromium and mobile WebKit. All three browser engines must be installed. Dependencies are pinned by `package-lock.json` and installed with `npm ci`.
+Local MCP `start_suite` returns a run_id immediately. `get_run_status(run_id)` returns state/counts and `get_run_log(run_id, tail)` returns a bounded log tail. Existing named tools also start asynchronously. The remote MCP dispatches GitHub staging workflows with a correlation ID and provides the same polling tools; HTTP calls have 20–25 second deadlines. GitHub logs become downloadable after a job completes, not while it runs.
 
-API probes request JSON and verify real HTTP rejection statuses rather than accepting redirected login pages. Maps regression coverage forces immediate callback execution to catch loading-order races. Runtime checks wait for page load so deferred errors are observed.
+Artifacts are under artifacts/runs/RUN_ID. Auth files are private and must never be uploaded. CI uploads only sanitized summaries/status/logs for three days; staging traces/video are disabled. Skips, flaky tests, failures and passes are counted separately. A setup failure is a failed run even if no test cases started.
 
-Production runs explicitly skip staging-only event/payment checks and authenticated organizer checks when credentials are absent. The mutation guard itself is still tested. These skips do not verify booking, payment execution, event creation or admission; those require a separate approved staging environment and disposable accounts.
+## GitHub
 
-## Extended coverage
-Authentication, Google sign-in, organizer onboarding, current online/venue event creation, customer booking and checkout, Razorpay order/verification/webhooks, admin/RBAC, organizer data isolation, ticket inventory, scanner/QR admission, mobile API compatibility, notifications, mobile navigation, accessibility, console/network diagnostics, and post-deploy regression.
+- booktkit-devtools.yml: production read-only Chromium smoke on main push, 5-minute job limit.
+- booktkit-e2e.yml: staging-only workflow_dispatch or nightly at 20:30 UTC; multi-browser only for all/mobile.
+- booktkit-phpunit.yml: PHP 8.3, isolated MySQL 8 service and schema-backed PHPUnit, 10-minute job limit.
 
-## Source-of-truth rule
-DevTools tests must be derived from the current `oreodigi/booktkit` repository and its live-compatible routes, not from older BookTKIT/Eventora implementations or prior product ideas. A feature is added to the test matrix only after it is present in the current source or explicitly introduced on this repository branch.
+Fourteen credential secrets were written securely: HTTP Basic username/password and username/email/password for customer, organizer, admin and scanner. Values are never committed. BOOKTKIT_ALLOW_MUTATIONS=true is only allowed on the exact test.booktkit.com origin. Payment execution remains separately disabled by default; no live charges are part of these runs.
 
-## Current architecture covered
-- Laravel website/shared backend: customer, organizer and admin panels plus API/payment endpoints.
-- Flutter customer app.
-- Flutter organizer app.
-- Flutter scanner app.
-- BookTKIT Razorpay v1 orchestration under `/api/v1/payments/*` and webhook handling.
-- Existing online and venue event modes.
+## Current verified coverage
 
-## Priority regression areas from the repository audit
-- server-side payment/order verification and idempotency
-- organizer/customer ownership isolation
-- ticket/event ownership and inventory concurrency
-- QR issuance/admission validation and repeated/simultaneous scans
-- attachment validation/private storage
-- notification authentication
-- password-reset expiry and rate limiting
-- mobile API endpoint compatibility across all three apps
+Server-run staging evidence after repairs: smoke 5 passed, auth 3 passed, organizer 1 passed, actual venue/online event saves for both admin and organizer 4 passed. Each has zero failures, flaky cases and skips. The runner timeout/asynchronous regression passed. PHPUnit on the isolated local MySQL test DB passed 5 tests / 12 assertions. Final CI/deployment evidence is maintained in deploy/SETUP-STATUS.md.
 
-## Hosting note
-BookTKIT production is cPanel-hosted. DevTools does not assume or require Vercel. The remote MCP is a separate QA control plane and can be hosted on any suitable HTTPS Node runtime; see `REMOTE-MCP.md`.
+Event tests navigate each wizard step, exercise multiple-date visibility, select locations through the real AJAX controls, upload/crop thumbnail and gallery images, and submit the event. Helpers cover auth, wizard navigation and fixed fixture lookup. They create disposable staging events, not production events.
 
+PHPUnit is restricted to APP_ENV=testing and DB_DATABASE=booktkit_test before application bootstrap, rejects cached config, and validates the resolved connection after bootstrap. The schema-only database/schema/mysql-schema.sql contains no application data. mysql-baseline.json records migration names already represented by the dump; RefreshLegacyDatabase loads the schema, registers that baseline, applies later migrations, and wraps each test in a transaction. Never run these tests against production credentials or a production database.
 
-## ChatGPT plugin package
-The ChatGPT-facing package is under `plugin/`. It maps BookTKIT testing intent to allow-listed MCP tools. The remote MCP dispatches GitHub Actions rather than exposing shell access.
-
-Granular commands cover login, signup, organizer flow, event creation, checkout, mobile QA, runtime diagnostics and complete regression. Production remains read-only; state-changing verification requires an approved staging target.
+Limitations: the complete multi-browser/payment/scanner regression is broader than the verified core suites. A pass in smoke/auth/event creation does not establish payment settlement, real CAPTCHA scoring or QR admission correctness. Manual rollback has not been exercised against production.

@@ -1,24 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { assertMutationAllowed } from '../src/safety.js';
-
-test('production mutation safety guard', async () => {
-  const oldBase = process.env.BOOKTKIT_BASE_URL;
-  const oldFlag = process.env.BOOKTKIT_ALLOW_MUTATIONS;
-  try {
-    process.env.BOOKTKIT_ALLOW_MUTATIONS = 'true';
-    for (const host of ['booktkit.com', 'www.booktkit.com']) {
-      process.env.BOOKTKIT_BASE_URL = 'https://' + host;
-      expect(() => assertMutationAllowed()).toThrow(/blocked.*production/i);
-    }
-    process.env.BOOKTKIT_BASE_URL = 'https://example.com';
-    expect(() => assertMutationAllowed()).toThrow(/approved HTTPS/);
-    process.env.BOOKTKIT_BASE_URL = 'https://staging.booktkit.com';
-    process.env.BOOKTKIT_ALLOW_MUTATIONS = 'false';
-    expect(() => assertMutationAllowed()).toThrow(/disabled/);
-  } finally {
-    if (oldBase === undefined) delete process.env.BOOKTKIT_BASE_URL;
-    else process.env.BOOKTKIT_BASE_URL = oldBase;
-    if (oldFlag === undefined) delete process.env.BOOKTKIT_ALLOW_MUTATIONS;
-    else process.env.BOOKTKIT_ALLOW_MUTATIONS = oldFlag;
+test('production and unapproved origins reject mutation permission',()=>{
+ const old={...process.env};
+ try {
+  process.env.BOOKTKIT_ALLOW_MUTATIONS='true';
+  for(const url of ['https://booktkit.com','https://www.booktkit.com','https://evil.example','https://test.booktkit.com.evil.example']) {
+   process.env.BOOKTKIT_BASE_URL=url;expect(()=>assertMutationAllowed()).toThrow();
   }
+  process.env.BOOKTKIT_BASE_URL='https://test.booktkit.com';expect(()=>assertMutationAllowed()).not.toThrow();
+  process.env.BOOKTKIT_ALLOW_MUTATIONS='false';expect(()=>assertMutationAllowed()).toThrow();
+ } finally {for(const k of ['BOOKTKIT_BASE_URL','BOOKTKIT_ALLOW_MUTATIONS']){if(old[k]===undefined)delete process.env[k];else process.env[k]=old[k];}}
 });

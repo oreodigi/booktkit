@@ -4,6 +4,7 @@ namespace Config;
 
 use App\Models\PaymentGateway\OnlineGateway;
 
+if (!class_exists(__NAMESPACE__.'\\Iyzipay', false)) {
 class Iyzipay
 {
   public static function options()
@@ -21,4 +22,6 @@ class Iyzipay
     }
     return $options;
   }
+}
+
 }

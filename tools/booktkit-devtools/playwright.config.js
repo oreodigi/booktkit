@@ -7,7 +7,7 @@ const suite = process.env.BOOKTKIT_SUITE || 'smoke';
 const runDir = process.env.BOOKTKIT_RUN_DIR || path.resolve('artifacts/local');
 const authDir = path.join(runDir, '.auth');
 const authenticatedFiles = /(?:authenticated-role|organizer-authenticated|staging-event)\.spec\.js/;
-const publicProject = (name, device) => ({ name, testIgnore: authenticatedFiles, use: { ...devices[device] } });
+const publicProject = (name, device) => ({ name, testIgnore: authenticatedFiles, ...(target.production ? {testMatch:/readonly-smoke\.spec\.js/} : {}), use: { ...devices[device] } });
 const projects = [publicProject('desktop-chromium', 'Desktop Chrome')];
 if (['all','mobile'].includes(suite)) projects.push(
   publicProject('desktop-firefox', 'Desktop Firefox'), publicProject('desktop-webkit', 'Desktop Safari'),

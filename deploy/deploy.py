@@ -186,8 +186,10 @@ class Deployment:
             if self.args.adopt:
                 if changed or removed:raise RuntimeError('Cannot adopt: live files differ from commit')
                 write_json(self.state,{'target':self.args.target,'commit':commit,'files':files,'adopted_at':datetime.datetime.utcnow().isoformat()+'Z'})
+                failure=self.control/'failure.json'
+                if failure.exists():failure.unlink()
                 print('Adopted verified baseline '+commit);return
-            for name in files:
+            for name in changed:
                 if name.endswith('.php') and not name.endswith('.blade.php'):run([PHP,'-l',str(stage/name)])
             if self.args.check:
                 print(json.dumps({'target':self.args.target,'commit':commit,'changed':len(changed),'removed':len(removed),'php_lint':'passed'}));return

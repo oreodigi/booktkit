@@ -39,3 +39,7 @@ Remote Desktop Commander access to `server.tejum.cloud` is authorized for BookTK
 Whenever a status document conflicts with current GitHub code/commits, current server deployment state/logs, or current live behavior, verified current evidence wins.
 
 Update status documentation when major deployment architecture or environment facts change.
+
+## QA isolation update (2026-10-06 IST)
+
+Staging is now `/home/booktkit/staging` with database `booktkit_stage`, protected by Basic auth and noindex. The owner approved directory isolation within the existing account. Production remains `/home/booktkit/public_html` / `booktkit_ems`. The documented private runner is now installed and scheduled as booktkit; the previously active root `git-deploy/deploy.sh` cron is retired. Staging has separate `booktkit-staging-deploy` state/log/failure/pause files. Refer to `deploy/SETUP-STATUS.md` for dated commits, backups and real test counts. Staging migrates after DB backup; production needs the explicit `--migrate` flag.

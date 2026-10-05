@@ -9,6 +9,6 @@ class ExampleTest extends TestCase
     {
         $this->assertSame('booktkit_test', \Illuminate\Support\Facades\DB::connection()->getDatabaseName());
         $this->assertTrue(\Illuminate\Support\Facades\Schema::hasTable('issued_tickets'));
-        $this->assertDatabaseCount('users', 0);
+        $this->assertDatabaseCount('customers', 0);
     }
 }

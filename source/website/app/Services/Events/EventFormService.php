@@ -74,7 +74,7 @@ class EventFormService
                     $new->normal_ticket_slot_enable=0; $new->normal_ticket_slot_unique_id=null;
                     $new->free_tickete_slot_enable=0; $new->free_tickete_slot_unique_id=null;
                     $new->variations=$this->stripSlotIdentifiers($new->variations);
-                    $new->trans_vars=$this->stripSlotIdentifiers($new->trans_vars); $new->save();
+                    if (array_key_exists('trans_vars',$new->getAttributes())) $new->trans_vars=$this->stripSlotIdentifiers($new->trans_vars); $new->save();
                 }
                 return $copy->fresh(['dates','galleries','tickets']);
             });
@@ -145,6 +145,7 @@ class EventFormService
     {
         foreach (Language::all() as $language) {
             $content=EventContent::firstOrNew(['event_id'=>$event->id,'language_id'=>$language->id]);
+            $content->language_id=$language->id;
             $content->event_category_id=$data[$language->code.'_category_id']??null;
             $content->title=$data[$language->code.'_title']??''; $content->slug=createSlug($content->title);
             $content->description=Purifier::clean($data[$language->code.'_description']??'','youtube');
@@ -164,7 +165,7 @@ class EventFormService
         $ticket=Ticket::firstOrNew(['event_id'=>$event->id]);
         foreach (['price','ticket_available_type','ticket_available','max_ticket_buy_type','max_buy_ticket','early_bird_discount_amount','early_bird_discount_date','early_bird_discount_time'] as $f) $ticket->{$f}=$data[$f]??null;
         $ticket->f_price=$data['price']??null; $ticket->pricing_type=$data['pricing_type']??'normal';
-        $ticket->early_bird_discount=$data['early_bird_discount_type']??null; $ticket->early_bird_discount_type=$data['discount_type']??null; $ticket->save();
+        $ticket->early_bird_discount=$data['early_bird_discount_type']??'disable'; $ticket->early_bird_discount_type=$data['discount_type']??null; $ticket->save();
     }
 
     private function attachGallery(Event $event, array $ids): void { EventImage::whereIn('id',$ids)->whereNull('event_id')->update(['event_id'=>$event->id]); }

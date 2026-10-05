@@ -49,7 +49,8 @@ export function startSuite(suite='smoke') {
   if (!Number.isFinite(minutes) || minutes<=0 || minutes>20) throw new Error('Run timeout must be between 0 and 20 minutes');
   const id=randomUUID(), dir=directory(id);
   fs.mkdirSync(dir,{recursive:true,mode:0o700});
-  const log=fs.createWriteStream(path.join(dir,'run.log'),{mode:0o600});
+  const logFd=fs.openSync(path.join(dir,'run.log'),'w',0o600);
+  const log={write:value=>fs.writeSync(logFd,value),end:()=>fs.closeSync(logFd)};
   const status={ok:true,run_id:id,suite,baseURL:target.baseURL,status:'running',startedAt:new Date().toISOString()};
   const save=()=>{const file=path.join(dir,'status.json');fs.writeFileSync(file+'.tmp',JSON.stringify(status,null,2),{mode:0o600});fs.renameSync(file+'.tmp',file);};
   save();
