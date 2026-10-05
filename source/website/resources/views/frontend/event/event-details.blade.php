@@ -229,8 +229,16 @@
                             @endphp
                             <h3 class="inner-title mb-25">{{ __('Description') }}</h3>
 
-                            <div class="summernote-content">
-                                {!! $content->description !!}
+                            <div class="summernote-content btk-event-description">
+                                @php
+                                    $eventDescription = (string) ($content->description ?? '');
+                                    $descriptionHasHtml = $eventDescription !== strip_tags($eventDescription);
+                                @endphp
+                                @if ($descriptionHasHtml)
+                                    {!! $eventDescription !!}
+                                @else
+                                    {!! nl2br(e($eventDescription)) !!}
+                                @endif
                             </div>
 
                             @if ($content->event_type != 'online')
