@@ -242,6 +242,12 @@
             <p>{{ __('Payments & Settlements') }}</p>
           </a>
         </li>
+        <li class="nav-item {{ request()->routeIs('organizer.boxoffice.*') ? 'active' : '' }}">
+          <a href="{{ route('organizer.boxoffice.index') }}">
+            <i class="fal fa-cash-register"></i>
+            <p>{{ __('Box Office') }}</p>
+          </a>
+        </li>
         <li class="nav-item {{ request()->routeIs('organizer.staff.*') ? 'active' : '' }}">
           <a href="{{ route('organizer.staff.index') }}">
             <i class="fal fa-user-friends"></i>
