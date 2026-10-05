@@ -230,65 +230,95 @@ function applyEventAddress(place) {
   if (!place || !place.address_components) return;
   var parts = {};
   place.address_components.forEach(function (component) {
-    (component.types || []).forEach(function (type) {
-      parts[type] = component.long_name;
-    });
+    (component.types || []).forEach(function (type) { parts[type] = component.long_name; });
   });
+
   var country = parts.country || '';
   var state = parts.administrative_area_level_1 || '';
-  var city = parts.locality || parts.administrative_area_level_2 || parts.sublocality_level_1 || parts.sublocality || '';
+  var city = parts.locality || parts.postal_town || parts.administrative_area_level_2 || parts.sublocality_level_1 || parts.sublocality || '';
   var pin = parts.postal_code || '';
   var formatted = place.formatted_address || (document.getElementById('search-address') || {}).value || '';
 
-  // Keep the visible address in sync with the Google selection.
   document.querySelectorAll('[name$="_address"]').forEach(function (input) {
     if (formatted) input.value = formatted;
   });
   document.querySelectorAll('[name$="_zip_code"]').forEach(function (input) {
     input.value = pin;
-    $(input).trigger('change');
+    $(input).trigger('input').trigger('change');
   });
 
-  function choose($select, label) {
-    if (!$select.length || !label) return false;
-    var wanted = label.trim().toLowerCase();
-    var found = false;
-    $select.find('option').each(function () {
-      var text = ($(this).text() || '').trim().toLowerCase();
-      if (text === wanted || text.indexOf(wanted) !== -1 || wanted.indexOf(text) !== -1) {
-        $select.val($(this).val());
-        found = true;
-        return false;
-      }
-    });
-    if (found) $select.trigger('change');
-    return found;
+  function normalized(value) {
+    return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
   }
 
-  $('.countryDropdown').each(function () {
-    var $country = $(this);
-    if (!choose($country, country)) return;
-    var $scope = $country.closest('.version-body');
+  function findResult(results, label) {
+    var wanted = normalized(label);
+    if (!wanted) return null;
+    var exact = null, partial = null;
+    (results || []).forEach(function (item) {
+      var text = normalized(item.name || item.text);
+      if (!exact && text === wanted) exact = item;
+      if (!partial && (text.indexOf(wanted) !== -1 || wanted.indexOf(text) !== -1)) partial = item;
+    });
+    return exact || partial;
+  }
+
+  function selectRemote($select, label, extra) {
+    return new Promise(function (resolve) {
+      if (!$select.length || !label) return resolve(false);
+
+      var wanted = normalized(label), existing = null;
+      $select.find('option').each(function () {
+        if (normalized($(this).text()) === wanted) { existing = { id: this.value, name: $(this).text() }; return false; }
+      });
+      if (existing) {
+        $select.val(existing.id).trigger('change');
+        return resolve(true);
+      }
+
+      var select2 = $select.data('select2');
+      var ajax = select2 && select2.options && select2.options.options && select2.options.options.ajax;
+      if (!ajax || !ajax.url) return resolve(false);
+
+      var data = { search: label, page: 1, lang: $select.attr('data-lang') };
+      Object.keys(extra || {}).forEach(function (key) { data[key] = extra[key]; });
+
+      $.ajax({ url: ajax.url, dataType: 'json', data: data })
+        .done(function (response) {
+          var item = findResult((response && response.results) || [], label);
+          if (!item) return resolve(false);
+          var option = new Option(item.name || item.text, item.id, true, true);
+          $select.append(option).trigger('change');
+          resolve(true);
+        })
+        .fail(function () { resolve(false); });
+    });
+  }
+
+  function fillScope($scope) {
+    var $country = $scope.find('.countryDropdown').first();
     var $state = $scope.find('.stateDropdown').first();
     var $city = $scope.find('.cityDropdown').first();
-    var triesState = 0;
-    var stateTimer = setInterval(function () {
-      triesState++;
-      if (choose($state, state) || triesState >= 30) {
-        clearInterval(stateTimer);
-        if (!$state.length) {
-          choose($city, city);
-          return;
-        }
-        var triesCity = 0;
-        var cityTimer = setInterval(function () {
-          triesCity++;
-          if (choose($city, city) || triesCity >= 30) clearInterval(cityTimer);
-        }, 150);
-      }
-    }, 150);
-  });
 
-  // Notify autosave/other form integrations after Google fills the venue.
+    selectRemote($country, country, {}).then(function () {
+      var countryId = $country.val() || '';
+      window.setTimeout(function () {
+        selectRemote($state, state, { country: countryId }).then(function () {
+          var stateId = $state.val() || '';
+          window.setTimeout(function () {
+            selectRemote($city, city, { state: stateId });
+          }, 250);
+        });
+      }, 250);
+    });
+  }
+
+  var scopes = [];
+  $('.countryDropdown').each(function () {
+    var $scope = $(this).closest('.version-body');
+    if ($scope.length && scopes.indexOf($scope[0]) === -1) scopes.push($scope[0]);
+  });
+  scopes.forEach(function (scope) { fillScope($(scope)); });
+
   $('#eventForm').trigger('change');
 }
