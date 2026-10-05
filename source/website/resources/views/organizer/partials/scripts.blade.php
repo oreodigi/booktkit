@@ -143,6 +143,8 @@
 
 {{-- admin-main js --}}
 <script type="text/javascript" src="{{ asset('assets/admin/js/admin-main.js') }}"></script>
+<link rel="stylesheet" href="{{ asset('assets/admin/css/booktkit-image-editor.css') }}">
+<script type="text/javascript" src="{{ asset('assets/admin/js/booktkit-image-editor.js') }}"></script>
 
 @yield('variables')
 
