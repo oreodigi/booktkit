@@ -484,25 +484,10 @@
                                                                 </div>
                                                             </div>
 
-                                                            <!-- latitude and longitude -->
+                                                            <!-- Coordinates are maintained by the map/address integration but hidden from event creators. -->
                                                             @if($language->is_default == 1)
-                                                            <div
-                                                                class="col-lg-4">
-                                                                <div class="form-group">
-                                                                    <label for="">{{ __('Latitude') }}</label>
-                                                                    <input type="text" name="latitude"
-                                                                        placeholder="Latitude"
-                                                                        class="form-control latitude">
-                                                                </div>
-                                                            </div>
-                                                            <div
-                                                                class="col-lg-4">
-                                                                <div class="form-group">
-                                                                    <label for="">{{ __('Longitude') }}</label>
-                                                                    <input type="text" placeholder="Longitude"
-                                                                        name="longitude" class="form-control longitude">
-                                                                </div>
-                                                            </div>
+                                                                <input type="hidden" name="latitude" class="latitude">
+                                                                <input type="hidden" name="longitude" class="longitude">
                                                             @endif
 
                                                             @if ($settings->event_country_status == 1)
@@ -573,9 +558,9 @@
                                                             <div class="col-lg-4">
                                                                 <div class="form-group">
                                                                     <label
-                                                                        for="">{{ __('Zip/Post Code ') }}</label>
+                                                                        for="">{{ __('PIN Code') }}</label>
                                                                     <input type="text"
-                                                                        placeholder="Enter Zip/Post Code"
+                                                                        placeholder="Enter PIN Code"
                                                                         name="{{ $language->code }}_zip_code"
                                                                         class="form-control {{ $language->direction == 1 ? 'rtl text-right' : '' }}">
                                                                 </div>
@@ -588,8 +573,7 @@
                                                             <div
                                                                 class="form-group {{ $language->direction == 1 ? 'rtl text-right' : '' }}">
                                                                 <label>{{ __('Description') . '*' }}</label>
-                                                                <textarea id="descriptionTmce{{ $language->id }}" class="form-control summernote"
-                                                                    name="{{ $language->code }}_description" data-height="300"></textarea>
+                                                                <textarea id="descriptionTmce{{ $language->id }}" class="form-control btk-simple-description"\n                                                                    name="{{ $language->code }}_description" data-height="300" maxlength="1200" rows="8"></textarea>
                                                             </div>
                                                         </div>
                                                     </div>
