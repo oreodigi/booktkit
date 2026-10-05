@@ -161,7 +161,9 @@ class EventController extends Controller
       $in['thumbnail'] = $filename;
     }
     $in['f_price'] = $request->price;
-    $in['end_date_time'] = Carbon::parse($request->end_date . ' ' . $request->end_time);
+    $in['end_date_time'] = $request->date_type == 'single'
+      ? Carbon::parse($request->end_date . ' ' . $request->end_time)
+      : null;
     $event = Event::create($in);
 
     if ($request->date_type == 'multiple') {
@@ -207,7 +209,7 @@ class EventController extends Controller
     }
 
     //event slider-images
-    $slders = $request->slider_images;
+    $slders = $request->slider_images ?? [];
     foreach ($slders as $key => $id) {
       $event_image = EventImage::where('id', $id)->first();
       if ($event_image) {
