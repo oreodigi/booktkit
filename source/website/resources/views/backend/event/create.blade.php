@@ -90,7 +90,9 @@
                                     </div>
                                     <label><strong>{{ __('Box Office Locations') }} *</strong></label>
                                     <div id="boxOfficeLocations">
-                                      @php\n                                        $boxLocations = collect([null]);\n                                      @endphp
+                                      @php
+                                        $boxLocations = collect([null]);
+                                      @endphp
                                       @foreach ($boxLocations as $i => $location)
                                       <div class="row mb-2 box-office-location-row">
                                         <div class="col-md-5"><input class="form-control" name="box_office_locations[{{ $i }}][name]" value="{{ optional($location)->name }}" placeholder="{{ __('Counter name') }}" required></div>
