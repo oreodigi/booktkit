@@ -21,6 +21,7 @@ use App\Models\HomePage\AboutUsSection;
 use App\Models\HomePage\EventFeature;
 use App\Models\HomePage\EventFeatureSection;
 use App\Models\HomePage\HeroSection;
+use App\Models\HomePage\HeroSlide;
 use App\Models\HomePage\HowWork;
 use App\Models\HomePage\HowWorkItem;
 use App\Models\HomePage\Partner;
@@ -60,6 +61,10 @@ class HomeController extends Controller
     $queryResult['secInfo'] = $sectionInfo;
 
     $queryResult['heroInfo'] = $language->heroSec()->first();
+
+    $queryResult['heroSlides'] = HeroSlide::with(['event.information' => function ($query) use ($language) {
+      $query->where('language_id', $language->id);
+    }])->where('language_id', $language->id)->where('status', 1)->orderBy('sort_order')->orderBy('id')->get();
 
     $queryResult['secTitleInfo'] = $language->sectionTitle()->first();
 

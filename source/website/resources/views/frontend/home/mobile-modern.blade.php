@@ -9,8 +9,12 @@ $mhEvents=DB::table('event_contents')->join('events','events.id','=','event_cont
 @endphp
 <div class="bkm-app bkm-template-{{ $mhTemplate }}" style="--bkm-accent:{{ $mhAccent }};--bkm-surface:{{ $mhSurface }};--bkm-radius:{{ $mhRadius }}px">
 <header class="bkm-header"><a href="{{ route('index') }}" class="bkm-brand"><img src="{{ asset('assets/admin/img/' . $websiteInfo->logo) }}" alt="{{ $websiteInfo->website_title }}"></a><div class="bkm-actions"><a href="{{ route('contact') }}" aria-label="{{ __('Support') }}"><i class="fas fa-headphones"></i></a><a href="{{ Auth::guard('customer')->check()?route('customer.dashboard'):route('customer.login') }}" aria-label="{{ __('Account') }}"><i class="fas fa-user-circle"></i></a></div></header>
+@if(isset($heroSlides) && $heroSlides->count())
+  @php($mobileHero = true)
+  @include('frontend.home.hero-slider')
+@endif
 @foreach($mhSections as $section)
-@if($section->type==='hero')
+@if($section->type==='hero' && (!isset($heroSlides) || !$heroSlides->count()))
 <section class="bkm-hero"><div class="bkm-hero-copy"><span class="bkm-kicker">{{ data_get($section->settings,'kicker',__('Discover. Book. Enjoy.')) }}</span><h1>{{ $section->title ?: __('Find your next experience') }}</h1><p>{{ data_get($section->settings,'subtitle',__('Concerts, festivals, sports and experiences — all in one place.')) }}</p></div><form class="bkm-search" action="{{ route('events') }}"><i class="far fa-search"></i><input name="search-input" placeholder="{{ data_get($section->settings,'search_placeholder',__('Search events, artists or venues')) }}"><button>{{ __('Search') }}</button></form></section>
 @elseif($section->type==='quick_categories')
 <section class="bkm-section"><div class="bkm-title"><h2>{{ $section->title }}</h2><a href="{{ route('events') }}">{{ __('See all') }}</a></div><div class="bkm-category-row">@php $ids=collect(explode(',',data_get($section->settings,'category_ids','')))->map(fn($v)=>(int)trim($v))->filter(); $sectionCategories=$ids->isNotEmpty()?$categories->whereIn('id',$ids)->sortBy(fn($c)=>$ids->search($c->id)):$categories->take(8); @endphp @foreach($sectionCategories as $category)<a href="{{ route('events',['category'=>$category->slug]) }}"><span><img src="{{ asset('assets/admin/img/event-category/'.$category->image) }}" alt="{{ $category->name }}"></span><strong>{{ $category->name }}</strong></a>@endforeach</div></section>

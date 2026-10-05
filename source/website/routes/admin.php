@@ -626,6 +626,10 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
 
     Route::post('/update-hero-section', 'BackEnd\HomePage\HeroController@update')->name('admin.home_page.update_hero_section');
 
+    Route::post('/hero-slides', 'BackEnd\HomePage\HeroController@storeSlide')->name('admin.home_page.hero_slides.store');
+    Route::post('/hero-slides/{slide}', 'BackEnd\HomePage\HeroController@updateSlide')->name('admin.home_page.hero_slides.update');
+    Route::post('/hero-slides/{slide}/delete', 'BackEnd\HomePage\HeroController@destroySlide')->name('admin.home_page.hero_slides.destroy');
+
     // section title
     Route::get('/section-titles', 'BackEnd\HomePage\SectionTitleController@index')->name('admin.home_page.section_titles');
 

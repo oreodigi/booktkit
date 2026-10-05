@@ -13,49 +13,30 @@
 @section('body-class', 'booktkit-home-page booktkit-mobile-v2')
 @section('custom-style')
 <link rel="stylesheet" href="{{ asset('assets/front/css/booktkit-mobile-home-v2.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/front/css/booktkit-hero-slider.css') }}">
 @endsection
 @section('hero-section')
-    <!-- Hero Section Start -->
-    @if ($heroSection)
-        <section class="hero-section overlay pt-105 pb-120 lazy"
-            data-bg="{{ asset('assets/admin/img/hero-section/' . $heroSection->background_image) }}">
-        @else
-            <section class="hero-section overlay pt-105 pb-120 lazy" data-bg="{{ asset('assets/front/images/hero-bg.jpg') }}">
+    @if(isset($heroSlides) && $heroSlides->count())
+      @php($mobileHero = false)
+      @include('frontend.home.hero-slider')
+    @else
+      <!-- Legacy single-banner fallback -->
+      @if ($heroSection)
+        <section class="hero-section overlay pt-105 pb-120 lazy" data-bg="{{ asset('assets/admin/img/hero-section/' . $heroSection->background_image) }}">
+      @else
+        <section class="hero-section overlay pt-105 pb-120 lazy" data-bg="{{ asset('assets/front/images/hero-bg.jpg') }}">
+      @endif
+        <div class="container"><div class="hero-content">
+          <h1>{{ $heroSection ? $heroSection->first_title : __('Event Ticketing and Booking System') }}</h1>
+          <p>{{ $heroSection ? $heroSection->second_title : __('Discover and book events with BookTKIT.') }}</p>
+          <form id="event-search" class="event-search mt-35" name="event-search" action="{{ route('events') }}" method="get">
+            <div class="search-item"><label for="borwseby"><i class="fas fa-list"></i></label><select name="category" id="borwseby"><option value="">{{ __('All Category') }}</option>@foreach ($categories as $category)<option value="{{ $category->slug }}">{{ $category->name }}</option>@endforeach</select></div>
+            <div class="search-item"><label for="search"><i class="fas fa-search"></i></label><input type="search" id="search" name="search-input" placeholder="{{ __('Search Anything') }}"></div>
+            <button type="submit" class="theme-btn">{{ $heroSection ? $heroSection->first_button : __('Search') }}</button>
+          </form>
+        </div></div>
+      </section>
     @endif
-    <div class="container">
-        <div class="hero-content">
-            <h1>
-                {{ $heroSection ? $heroSection->first_title : __('Event Ticketing and Booking System') }}
-            </h1>
-            <p>
-                {{ $heroSection
-                    ? $heroSection->second_title
-                    : __(
-                        'This is an affordable and powerful event ticketing platform for event organisers, promoters, and managers. Easily create, promote and sell tickets to your events of every type and size.',
-                    ) }}
-            </p>
-            <form id="event-search" class="event-search mt-35" name="event-search" action="{{ route('events') }}"
-                method="get">
-                <div class="search-item">
-                    <label for="borwseby"><i class="fas fa-list"></i></label>
-                    <select name="category" id="borwseby">
-                        <option value="">{{ __('All Category') }}</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->slug }}">{{ $category->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="search-item">
-                    <label for="search"><i class="fas fa-search"></i></label>
-                    <input type="search" id="search" name="search-input" placeholder="{{ __('Search Anything') }}">
-                </div>
-                <button type="submit"
-                    class="theme-btn">{{ $heroSection ? $heroSection->first_button : __('Search') }}</button>
-            </form>
-        </div>
-    </div>
-    </section>
-    <!-- Hero Section End -->
 @endsection
 @section('content')
     <div class="booktkit-mobile-v2-renderer">
@@ -1153,4 +1134,8 @@
     @endif
     <!-- Client Logo End -->
     </div>
+@endsection
+
+@section('custom-script')
+<script src="{{ asset('assets/front/js/booktkit-hero-slider.js') }}"></script>
 @endsection
