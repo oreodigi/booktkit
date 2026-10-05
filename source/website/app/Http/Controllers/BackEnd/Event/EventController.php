@@ -84,7 +84,7 @@ class EventController extends Controller
   {
 
     $rules = [
-      'file' => 'required|image|mimes:jpg,jpeg,png'
+      'file' => 'required|image|mimes:jpg,jpeg,png|max:500'
     ];
     $messages = [
       'file.required' => 'Please upload an image file.',
@@ -122,7 +122,8 @@ class EventController extends Controller
 
     return response()->json([
       'status'  => 'success',
-      'file_id' => $pi->id
+      'file_id' => $pi->id,
+      'preview_url' => asset('assets/admin/img/event-gallery/' . $filename)
     ]);
   }
 
