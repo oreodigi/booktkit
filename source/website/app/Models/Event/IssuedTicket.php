@@ -8,7 +8,7 @@ class IssuedTicket extends Model
 {
     protected $fillable = [
         'uuid', 'booking_id', 'event_id', 'organizer_id', 'customer_id',
-        'ticket_type_id', 'legacy_unique_id', 'ticket_name', 'token_hash',
+        'ticket_type_id', 'legacy_unique_id', 'ticket_name', 'token_hash', 'token_ciphertext',
         'status', 'issued_at', 'checked_in_at', 'checked_in_by_type',
         'checked_in_by_id',
     ];
@@ -18,7 +18,7 @@ class IssuedTicket extends Model
         'checked_in_at' => 'datetime',
     ];
 
-    protected $hidden = ['token_hash'];
+    protected $hidden = ['token_hash', 'token_ciphertext'];
 
     public function booking()
     {
