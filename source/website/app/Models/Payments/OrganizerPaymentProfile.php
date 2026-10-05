@@ -12,7 +12,9 @@ class OrganizerPaymentProfile extends Model
     protected $casts = [
         'gst_verified' => 'boolean',
         'split_enabled' => 'boolean',
-        'metadata' => 'array',
+        'metadata' => 'encrypted:array',
+        'split_suspended' => 'boolean',
+        'route_terms_accepted_at' => 'datetime',
         'kyc_remarks' => 'array',
         'pan' => 'encrypted',
         'stakeholder_pan' => 'encrypted',
@@ -30,8 +32,11 @@ class OrganizerPaymentProfile extends Model
     {
         return $this->settlement_mode === 'razorpay_split'
             && $this->split_enabled
-            && $this->razorpay_status === 'active'
-            && !empty($this->razorpay_account_id);
+            && in_array($this->razorpay_status, ['active','activated'], true)
+            && $this->kyc_status === 'activated'
+            && !$this->split_suspended
+            && !empty($this->razorpay_account_id)
+            && !empty($this->razorpay_product_id);
     }
 
     public function maskedPan(): ?string
