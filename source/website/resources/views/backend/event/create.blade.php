@@ -65,7 +65,7 @@
                                 <div class=" mb-0" id="errpreimg">
 
                                 </div>
-                                <p class="text-warning">{{ __('Image Size : 1170 x 570') }}</p>
+                                <p class="text-warning">{{ __('Required: 1170×570. Maximum 500 KB. You can crop/resize before upload.') }}</p>
                             </div>
                             <form id="eventForm" action="{{ route('admin.event_management.store_event') }}" method="POST"
                                 enctype="multipart/form-data">
@@ -85,7 +85,7 @@
                                             <input type="file" class="img-input" name="thumbnail">
                                         </div>
                                     </div>
-                                    <p class="text-warning">{{ __('Image Size : 320x230') }}</p>
+                                    <p class="text-warning">{{ __('Required: 320×230. Maximum 500 KB. You can crop/resize before upload.') }}</p>
                                 </div>
 
                                 <div class="row">
