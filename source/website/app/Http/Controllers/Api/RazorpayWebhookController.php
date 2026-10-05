@@ -4,6 +4,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Payments\PaymentOrder;
 use App\Models\Payments\PaymentTransfer;
+use App\Models\Payments\OrganizerPaymentProfile;
 use App\Services\Payments\RazorpayWebhookService;
 use App\Services\Payments\PaymentReconciliationService;
 class RazorpayWebhookController extends Controller {
@@ -19,6 +20,22 @@ class RazorpayWebhookController extends Controller {
     $reconcile->reconcile($o); }
   }
   if($transfer && !empty($transfer['id'])) PaymentTransfer::where('gateway_transfer_id',$transfer['id'])->update(['status'=>$transfer['status']??$type,'gateway_payload'=>$transfer,'processed_at'=>now()]);
+  if(str_starts_with($type,'product.route.') || str_starts_with($type,'account.')){
+   $product=$payload['payload']['merchant_product']['entity']??[];
+   $accountId=$product['merchant_id']??$payload['account_id']??null;
+   $profile=$accountId ? OrganizerPaymentProfile::where('razorpay_account_id',$accountId)->first() : null;
+   if($profile){
+    $status=$product['activation_status']??str_replace(['product.route.','account.'],'',$type);
+    $map=['activated'=>'activated','active'=>'activated','under_review'=>'under_review','needs_clarification'=>'needs_clarification','rejected'=>'rejected','suspended'=>'suspended'];
+    if(isset($map[$status])) $profile->kyc_status=$map[$status];
+    $profile->razorpay_status=$status;
+    $profile->split_enabled=$profile->kyc_status==='activated';
+    if($profile->split_enabled&&!$profile->activated_at)$profile->activated_at=now();
+    $requirements=$payload['payload']['merchant_product']['data']['requirements']??null;
+    if($requirements!==null)$profile->kyc_remarks=$requirements;
+    $profile->save();
+   }
+  }
   $event->update(['status'=>'processed','processed_at'=>now()]); return response()->json(['success'=>true]);
  }
 }
