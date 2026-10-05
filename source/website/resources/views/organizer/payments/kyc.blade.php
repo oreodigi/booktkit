@@ -61,6 +61,7 @@
 
 <div class="card"><div class="card-header"><div class="card-title">4. Review & submit</div></div><div class="card-body">
 <p class="mb-3">Confirm the legal, tax and settlement details above are accurate. Sensitive identifiers are encrypted or stored only as masked references.</p>
+<div class="form-check mb-3"><input class="form-check-input" type="checkbox" value="1" name="route_terms_accepted" id="route_terms_accepted"><label class="form-check-label" for="route_terms_accepted">I consent to BookTKIT sharing these KYC and settlement details with Razorpay for Route onboarding and split settlements, and I accept the applicable Razorpay terms.</label></div>
 @if(!$locked)
 <button class="btn btn-outline-primary mr-2" name="submit_kyc" value="0">Save draft</button>
 <button class="btn btn-primary" name="submit_kyc" value="1">Submit payout setup</button>
