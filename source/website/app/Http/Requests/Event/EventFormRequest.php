@@ -11,6 +11,14 @@ class EventFormRequest extends FormRequest
 {
     public function authorize(): bool { return true; }
 
+    protected function prepareForValidation(): void
+    {
+        $routeType = $this->query('type');
+        if (!$this->input('event_id') && in_array($routeType, ['venue', 'online'], true)) {
+            $this->merge(['event_type' => $routeType]);
+        }
+    }
+
     public function rules(): array
     {
         $eventId = (int) ($this->input('event_id') ?: 0);
