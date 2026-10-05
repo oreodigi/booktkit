@@ -1,6 +1,6 @@
 (function($){
 "use strict";
-var form=document.getElementById("eventForm");if(!form)return;
+var form=document.getElementById("eventForm");if(!form)return;var initialType=new URLSearchParams(location.search).get("type");form.setAttribute("data-event-type",initialType||"");
 var key="booktkit:event-draft:"+location.pathname+":"+new URLSearchParams(location.search).get("type"),thumbKey=key+":thumb";
 function save(){var o={};$(form).find(":input[name]").each(function(){var n=this.name;if(!n||n==="_token"||this.type==="file")return;if((this.type==="checkbox"||this.type==="radio")&&!this.checked)return;o[n]=this.value});try{localStorage.setItem(key,JSON.stringify(o))}catch(e){}}
 function restore(){try{var o=JSON.parse(localStorage.getItem(key)||"{}");Object.keys(o).forEach(function(n){var $e=$(form).find('[name="'+CSS.escape(n)+'"]');if(!$e.length)return;if($e.first().is(":radio,:checkbox"))$e.filter('[value="'+CSS.escape(String(o[n]))+'"]').prop("checked",true).trigger("change");else $e.val(o[n]).trigger("change")})}catch(e){}}
@@ -16,6 +16,11 @@ if(isOnline){
 }
 var nav=$('<div class="btk-wizard-nav"><button type="button" data-step="1">1 <span>Event Details</span></button><button type="button" data-step="2">2 <span>Schedule</span></button><button type="button" data-step="3">3 <span>Media</span></button><button type="button" data-step="4">4 <span>'+(isOnline?'Tickets & Online':'Publishing')+'</span></button></div>');
 $(".card-body .col-lg-8.mx-auto").first().prepend(nav);
+if(isOnline){
+ var $meeting=$(form).find('[name="meeting_url"]').closest(".col-lg-6");if($meeting.length)$meeting.prepend('<div class="btk-online-section-title"><i class="fas fa-video"></i> Online access</div>');
+ var $ticket=$(form).find('[name="ticket_available_type"]').closest(".row");if($ticket.length)$ticket.addClass("btk-online-section").prepend('<div class="col-12 btk-online-section-title"><i class="fas fa-ticket-alt"></i> Tickets & access</div>');
+ var $early=$("#early_bird_discount_free");if($early.length)$early.addClass("btk-online-section").prepend('<div class="col-12 btk-online-section-title"><i class="fas fa-tags"></i> Early bird offer</div>');
+}
 var actions=$('<div class="btk-wizard-actions"><button type="button" class="btn btn-light btk-prev">Back</button><span class="btk-autosave">Draft autosaves on this device</span><button type="button" class="btn btn-primary btk-next">Continue</button></div>');$(".card-footer .row").before(actions);var step=1;
 function show(n){step=Math.max(1,Math.min(4,n));$("[data-btk-step]").hide();$('[data-btk-step="'+step+'"]').show();nav.find("button").removeClass("active done").each(function(){var s=+this.dataset.step;$(this).toggleClass("active",s===step).toggleClass("done",s<step)});$(".btk-prev").toggle(step>1);$(".btk-next").toggle(step<4);$("#EventSubmit").toggle(step===4);window.scrollTo({top:0,behavior:"smooth"})}
 nav.on("click","button",function(){show(+this.dataset.step)});$(".btk-prev").on("click",function(){show(step-1)});$(".btk-next").on("click",function(){show(step+1)});
