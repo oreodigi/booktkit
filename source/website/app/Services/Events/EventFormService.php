@@ -20,6 +20,7 @@ class EventFormService
         return DB::transaction(function () use ($data, $actor) {
             $data['organizer_id'] = $actor->isOrganizer() ? $actor->organizerId() : ($data['organizer_id'] ?? null);
             $data = $this->normalizeEventData($data);
+            $data = $this->processThumbnail($data);
             $event = Event::create($data);
             $this->syncDates($event, $data, false);
             $this->syncContents($event, $data);
@@ -35,6 +36,7 @@ class EventFormService
         return DB::transaction(function () use ($event, $data, $actor) {
             if ($actor->isOrganizer()) $data['organizer_id'] = $actor->organizerId();
             $data = $this->normalizeEventData($data);
+            $data = $this->processThumbnail($data, $event->thumbnail);
             $event->update($data);
             $this->syncDates($event, $data, true);
             $this->syncContents($event, $data);
@@ -86,6 +88,30 @@ class EventFormService
     {
         if ($event) { $actor->assertOwns($event); $event->load(['dates','galleries','tickets']); }
         return ['event'=>$event,'languages'=>Language::all(),'organizers'=>$actor->isAdmin()?Organizer::all():collect()];
+    }
+
+    private function processThumbnail(array $data, ?string $oldFile = null): array
+    {
+        $file = $data['thumbnail'] ?? null;
+        if ($file instanceof \Illuminate\Http\UploadedFile) {
+            $directory=public_path('assets/admin/img/event/thumbnail/'); @mkdir($directory,0775,true);
+            $filename=uniqid('event-',true).'.'.$file->getClientOriginalExtension(); $file->move($directory,$filename);
+            if ($oldFile) @unlink($directory.$oldFile); $data['thumbnail']=$filename; return $data;
+        }
+        $url=trim((string)($data['thumbnail_image_url'] ?? ''));
+        if ($url !== '') {
+            $source=UploadFile::resolveLocalSourcePath($url);
+            if (!$source || !is_file($source)) throw \Illuminate\Validation\ValidationException::withMessages(['thumbnail_image_url'=>'Generated thumbnail could not be prepared.']);
+            $directory=public_path('assets/admin/img/event/thumbnail/'); @mkdir($directory,0775,true);
+            $filename=uniqid('event-',true).'.jpg'; $binary=@file_get_contents($source); $image=$binary!==false?@imagecreatefromstring($binary):false;
+            if (!$image) throw \Illuminate\Validation\ValidationException::withMessages(['thumbnail_image_url'=>'Generated thumbnail could not be processed.']);
+            $canvas=imagecreatetruecolor(320,230); imagecopyresampled($canvas,$image,0,0,0,0,320,230,imagesx($image),imagesy($image));
+            $saved=imagejpeg($canvas,$directory.$filename,90); imagedestroy($canvas); imagedestroy($image);
+            if (!$saved) throw \Illuminate\Validation\ValidationException::withMessages(['thumbnail_image_url'=>'Generated thumbnail could not be saved.']);
+            if ($oldFile) @unlink($directory.$oldFile); $data['thumbnail']=$filename;
+        } else { unset($data['thumbnail']); }
+        unset($data['thumbnail_image_url']);
+        return $data;
     }
 
     private function normalizeEventData(array $data): array
