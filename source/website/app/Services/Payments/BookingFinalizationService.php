@@ -4,6 +4,7 @@ use App\Models\BasicSettings\Basic;
 use App\Models\Event\Booking;
 use App\Models\Event\Ticket;
 use App\Models\Payments\PaymentOrder;
+use App\Services\Tickets\TicketIssuanceService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 class BookingFinalizationService {
@@ -46,6 +47,7 @@ class BookingFinalizationService {
    'paymentStatus'=>'completed','event_date'=>$customer['event_date']??now()->toDateString(),'fcm_token'=>$customer['fcm_token']??null
   ]);
   $order->booking_id=$booking->id; $order->save();
+  app(TicketIssuanceService::class)->ensureForBooking($booking);
   return $booking;
  }
 }
