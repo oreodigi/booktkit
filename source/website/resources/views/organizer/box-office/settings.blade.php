@@ -1,0 +1,11 @@
+@extends('organizer.layout')
+@section('content')
+<div class="page-header"><h4 class="page-title">POS Settings</h4></div>
+@if(session('success'))<div class="alert alert-success">{{session('success')}}</div>@endif
+<div class="card"><div class="card-body"><form method="post" action="{{route('organizer.boxoffice.settings.update')}}">@csrf @method('PUT')
+<div class="row"><div class="col-md-4 form-group"><label>Hold cart expiry</label><div class="input-group"><input class="form-control" type="number" min="1" max="120" name="hold_minutes" value="{{$setting->hold_minutes}}"><div class="input-group-append"><span class="input-group-text">minutes</span></div></div></div><div class="col-md-4 form-group"><label>Thermal receipt width</label><select class="form-control" name="receipt_width_mm"><option value="58" {{$setting->receipt_width_mm==58?'selected':''}}>58 mm</option><option value="80" {{$setting->receipt_width_mm==80?'selected':''}}>80 mm</option></select></div></div>
+<h5 class="mt-3">Accepted counter payments</h5><div class="row">@foreach(['allow_cash'=>'Cash','allow_upi'=>'UPI','allow_card'=>'Card','allow_other'=>'Other'] as $key=>$label)<div class="col-md-3"><label><input type="checkbox" name="{{$key}}" value="1" {{$setting->$key?'checked':''}}> {{$label}}</label></div>@endforeach</div>
+<hr><h5>Customer & ticket options</h5><div class="row">@foreach(['require_customer_name'=>'Require customer name','require_customer_phone'=>'Require phone','allow_aadhaar'=>'Allow Aadhaar capture','allow_customer_photo'=>'Allow customer photo','auto_email_ticket'=>'Auto-email ticket when email exists'] as $key=>$label)<div class="col-md-4 mb-2"><label><input type="checkbox" name="{{$key}}" value="1" {{$setting->$key?'checked':''}}> {{$label}}</label></div>@endforeach</div>
+<div class="alert alert-warning mt-3"><strong>Aadhaar:</strong> keep disabled unless the event genuinely requires identity verification. When enabled, BookTKIT stores the number encrypted and only exposes the last four digits in normal workflows.</div>
+<button class="btn btn-primary">Save POS Settings</button> <a href="{{route('organizer.boxoffice.index')}}" class="btn btn-outline-secondary">Back to POS</a></form></div></div>
+@endsection
