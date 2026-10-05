@@ -34,7 +34,7 @@ Fourteen credential secrets were written securely: HTTP Basic username/password 
 
 ## Current verified coverage
 
-Server-run staging evidence after repairs: smoke 5 passed, auth 3 passed, organizer 1 passed, actual venue/online event saves for both admin and organizer 4 passed. Each has zero failures, flaky cases and skips. The runner timeout/asynchronous regression passed. PHPUnit on the isolated local MySQL test DB passed 5 tests / 12 assertions. Final CI/deployment evidence is maintained in deploy/SETUP-STATUS.md.
+Server-run staging evidence after repairs: smoke 5 passed, auth 3 passed, organizer 1 passed, actual venue/online event saves for both admin and organizer 4 passed. Each has zero failures, flaky cases and skips. The runner timeout/asynchronous regression passed. PHPUnit on the isolated local MySQL test DB passed 5 tests / 12 assertions. GitHub PHPUnit run 37365095836 also passed 5 tests / 12 assertions. Post-deployment production smoke passed 5 tests with zero failures/skips/flaky cases. Implementation commit: 5f2a3c7720420bab7e79f9c8f11f1f62936f8f74; automatically deployed probe commit: 5d81a834094c16dc4b8e0851d67bf226069a0904. Final CI/deployment evidence is maintained in deploy/SETUP-STATUS.md.
 
 Event tests navigate each wizard step, exercise multiple-date visibility, select locations through the real AJAX controls, upload/crop thumbnail and gallery images, and submit the event. Helpers cover auth, wizard navigation and fixed fixture lookup. They create disposable staging events, not production events.
 

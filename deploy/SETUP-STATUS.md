@@ -43,4 +43,15 @@ Evidence date: 2026-10-05 UTC / 2026-10-06 IST. This replaces the stale claim th
 | Local isolated PHPUnit | 5 tests, 12 assertions, passed |
 | First new PHPUnit CI | Run 37363352293 reached PHPUnit after successful MySQL, PHP and Composer setup; failed on earlier test harness, subsequently fixed locally |
 
-Final commit promotion, final CI result, production smoke and trivial staging deployment proof are pending the completion record below. Full multi-browser/payment/scanner execution and production rollback drills are not represented as verified.
+## Completion record — 2026-10-05 19:48 UTC / 2026-10-06 01:18 IST
+
+- Implementation commit: 5f2a3c7720420bab7e79f9c8f11f1f62936f8f74.
+- Trivial probe commit: 5d81a834094c16dc4b8e0851d67bf226069a0904. The scheduled staging poll deployed it at 20261005T194445Z with changed=0, successful migration check and DB backup. Both staging state.json and the authenticated live /__deployment.json returned this exact commit.
+- main was fast-forwarded to the probe commit. Production's scheduled runner deployed the same commit and its live marker matched. Both targets had no PAUSED or failure.json; production migration status was not_requested.
+- PHPUnit CI run https://github.com/oreodigi/booktkit/actions/runs/37365095836 completed SUCCESS: 5 tests, 12 assertions. MySQL initialization, Composer install, provider setup and PHPUnit all succeeded. This also verifies that the owner’s billing change restored GitHub runner access.
+- Post-deployment production read-only smoke: 5 passed, 0 failed/skipped/flaky, run 2c42bd47-ae1f-444b-8184-c120ca3d57b1.
+- The private MCP github-actions.js and remote-mcp-server.js were backed up and updated, and booktkit-mcp.service restarted successfully. Runtime tools/list exposed start_suite, get_run_status and get_run_log. Status returned the successful PHPUnit run in 0.41 seconds; log retrieval returned the actual 5-test / 12-assertion result in 2.39 seconds.
+- Both production and staging scheduled targets now default to main. Installed deploy.py and rollback.py were refreshed from reviewed source, with backups.
+- Extra staging-auth and main CI runs were queued at this checkpoint; those are not counted as passed. The core staging counts above are actual server-run Playwright results. The complete multi-browser/payment/scanner suite and production rollback drills remain unverified and are outside these core pass counts.
+
+Later documentation-only commits may advance the deployed marker without changing the verified implementation. Read current state.json and the live marker for the latest exact SHA.
