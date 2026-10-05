@@ -741,7 +741,7 @@
     @endif
     <script type="text/javascript" src="{{ asset('assets/admin/js/admin-partial.js') }}"></script>
     <script src="{{ asset('assets/admin/js/admin_dropzone.js') }}"></script>
-    <script src="{{ asset('assets/admin/js/event-create-wizard.js') }}"></script>
+    <script src="{{ asset('assets/admin/js/event-create-wizard.js') }}?v={{ @filemtime(public_path('assets/admin/js/event-create-wizard.js')) }}"></script>
     <script>
         $(document).ready(function() {
             $('.js-example-basic-single').select2();
