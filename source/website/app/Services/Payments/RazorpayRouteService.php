@@ -42,9 +42,13 @@ class RazorpayRouteService {
  }
  public function transferToOrganizer(PaymentOrder $order,string $accountId): ?PaymentTransfer {
   if($order->organizer_amount<=0) return null;
-  if($existing=$order->transfers()->whereNotIn('status',['failed','reversed'])->first()) return $existing;
-  $row=PaymentTransfer::create(['payment_order_id'=>$order->id,'organizer_id'=>$order->organizer_id,'linked_account_id'=>$accountId,
-   'amount'=>$order->organizer_amount,'currency'=>$order->currency,'status'=>'pending','attempts'=>1]);
+  if($existing=$order->transfers()->first()) {
+   if(!in_array($existing->status,['failed'],true)) return $existing;
+   $row=$existing; $row->update(['status'=>'pending','last_error'=>null,'attempts'=>$row->attempts+1]);
+  } else {
+   $row=PaymentTransfer::create(['payment_order_id'=>$order->id,'organizer_id'=>$order->organizer_id,'linked_account_id'=>$accountId,
+    'amount'=>$order->organizer_amount,'currency'=>$order->currency,'status'=>'pending','attempts'=>1]);
+  }
   try {
    $holdDays=max(0,(int)(DB::table('payment_settings')->where('key','transfer_hold_days')->value('value') ?? 2));
    $eventEnd=DB::table('events')->where('id',$order->event_id)->value('end_date_time');
