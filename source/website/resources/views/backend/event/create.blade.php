@@ -573,7 +573,8 @@
                                                             <div
                                                                 class="form-group {{ $language->direction == 1 ? 'rtl text-right' : '' }}">
                                                                 <label>{{ __('Description') . '*' }}</label>
-                                                                <textarea id="descriptionTmce{{ $language->id }}" class="form-control btk-simple-description"\n                                                                    name="{{ $language->code }}_description" data-height="300" maxlength="1200" rows="8"></textarea>
+                                                                <textarea id="descriptionTmce{{ $language->id }}" class="form-control btk-simple-description"
+                                                                    name="{{ $language->code }}_description" data-height="300" maxlength="1200" rows="8"></textarea>
                                                             </div>
                                                         </div>
                                                     </div>
