@@ -338,53 +338,9 @@ class EventController extends Controller
     }
   }
 
-  private function duplicateEventAsset(?string $filename, string $relativeDirectory, array &$createdFiles): ?string
-  {
-    if (empty($filename)) {
-      return $filename;
-    }
 
-    $directory = public_path($relativeDirectory);
-    $source = $directory . $filename;
 
-    if (!is_file($source)) {
-      return $filename;
-    }
 
-    @mkdir($directory, 0775, true);
-
-    $extension = pathinfo($filename, PATHINFO_EXTENSION);
-    $copyName = uniqid('event-copy-', true) . ($extension ? '.' . $extension : '');
-    $destination = $directory . $copyName;
-
-    if (!@copy($source, $destination)) {
-      throw new \RuntimeException('Unable to duplicate event media asset.');
-    }
-
-    $createdFiles[] = $destination;
-
-    return $copyName;
-  }
-
-  private function stripSlotIdentifiers($value)
-  {
-    if (empty($value)) {
-      return $value;
-    }
-
-    $decoded = json_decode($value, true);
-    if (!is_array($decoded)) {
-      return $value;
-    }
-
-    array_walk_recursive($decoded, function (&$item, $key) {
-      if ($key === 'slot_unique_id') {
-        $item = null;
-      }
-    });
-
-    return json_encode($decoded);
-  }
 
   /**
    * Update status (active/DeActive) of a specified resource.
@@ -472,146 +428,12 @@ class EventController extends Controller
     return $images;
   }
 
-  public function update(UpdateRequest $request)
+  public function update(EventFormRequest $request, EventFormService $service)
   {
-    Log::info($request->all());
-    //calculate duration
-    if ($request->date_type == 'single') {
-      $start = Carbon::parse($request->start_date . $request->start_time);
-      $end =  Carbon::parse($request->end_date . $request->end_time);
-      $diffent = DurationCalulate($start, $end);
-    }
-    //calculate duration end
-    $img = $request->file('thumbnail');
-    $generatedThumbnailUrl = trim((string) $request->input('thumbnail_image_url', ''));
-
-    $in = $request->all();
-
-    $event = Event::where('id', $request->event_id)->first();
-    if ($request->hasFile('thumbnail')) {
-      @unlink(public_path('assets/admin/img/event/thumbnail/') . $event->thumbnail);
-      $filename = time() . '.' . $img->getClientOriginalExtension();
-      @mkdir(public_path('assets/admin/img/event/thumbnail/'), 0775, true);
-      $request->file('thumbnail')->move(public_path('assets/admin/img/event/thumbnail/'), $filename);
-      $in['thumbnail'] = $filename;
-    } elseif ($generatedThumbnailUrl !== '') {
-      $filename = $this->storeGeneratedThumbnail($generatedThumbnailUrl, $event->thumbnail);
-
-      if (!$filename) {
-        return response()->json([
-          'status' => 'error',
-          'message' => 'The generated thumbnail image could not be processed. Please try again.',
-          'errors' => [
-            'thumbnail_image_url' => ['The generated thumbnail image could not be processed. Please try again.']
-          ]
-        ], 422);
-      }
-
-      $in['thumbnail'] = $filename;
-    }
-
-    $languages = Language::all();
-
-    $i = 1;
-    foreach ($languages as $language) {
-      $event_content = EventContent::where('event_id', $event->id)->where('language_id', $language->id)->first();
-      if (!$event_content) {
-        $event_content = new EventContent();
-      }
-      $event_content->language_id = $language->id;
-      $event_content->event_category_id = $request[$language->code . '_category_id'];
-      $event_content->event_id = $event->id;
-      $event_content->title = $request[$language->code . '_title'];
-      if ($request->event_type == 'venue') {
-        $event_content->address = $request[$language->code . '_address'];
-        $event_content->country_id = $request[$language->code . '_country'];
-        $event_content->city_id = $request[$language->code . '_city'];
-        $event_content->state_id = $request[$language->code . '_state'];
-        $event_content->zip_code = $request[$language->code . '_zip_code'];
-      }
-      $event_content->slug = createSlug($request[$language->code . '_title']);
-      $event_content->description = Purifier::clean($request[$language->code . '_description'], 'youtube');
-      $event_content->refund_policy = $request[$language->code . '_refund_policy'];
-      $event_content->meta_keywords = $request[$language->code . '_meta_keywords'];
-      $event_content->meta_description = $request[$language->code . '_meta_description'];
-      $event_content->save();
-    }
-    if ($request->event_type == 'online') {
-      if (!$request->pricing_type) {
-        $pricing_type = 'normal';
-      } else {
-        $pricing_type = $request->pricing_type;
-      }
-      Ticket::where('event_id', $request->event_id)->update([
-        'price' => $request->price,
-        'f_price' => $request->price,
-        'pricing_type' => $pricing_type,
-        'ticket_available_type' => $request->ticket_available_type,
-        'ticket_available' => $request->ticket_available,
-        'max_ticket_buy_type' => $request->max_ticket_buy_type,
-        'max_buy_ticket' => $request->max_buy_ticket,
-        'early_bird_discount' => $request->early_bird_discount_type,
-        'early_bird_discount_type' => $request->discount_type,
-        'early_bird_discount_amount' => $request->early_bird_discount_amount,
-        'early_bird_discount_date' => $request->early_bird_discount_date,
-        'early_bird_discount_time' => $request->early_bird_discount_time,
-      ]);
-    }
-
-    $event = Event::where('id', $event->id)->first();
-
-    if ($request->date_type == 'multiple') {
-      $i = 1;
-      foreach ($request->m_start_date as $key => $date) {
-        $start = Carbon::parse($date . $request->m_start_time[$key]);
-        $end =  Carbon::parse($request->m_end_date[$key] . $request->m_end_time[$key]);
-        $diffent = DurationCalulate($start, $end);
-
-        if (!empty($request->date_ids[$key])) {
-          $event_date = EventDates::where('id', $request->date_ids[$key])->first();
-          $event_date->start_date = $date;
-          $event_date->start_time = $request->m_start_time[$key];
-          $event_date->end_date = $request->m_end_date[$key];
-          $event_date->end_time = $request->m_end_time[$key];
-          $event_date->duration = $diffent;
-          $event_date->start_date_time = $start;
-          $event_date->end_date_time = $end;
-          $event_date->save();
-        } else {
-          EventDates::create([
-            'event_id' => $event->id,
-            'start_date' => $date,
-            'start_time' => $request->m_start_time[$key],
-            'end_date' => $request->m_end_date[$key],
-            'end_time' => $request->m_end_time[$key],
-            'duration' => $diffent,
-            'start_date_time' => $start,
-            'end_date_time' => $end,
-          ]);
-        }
-        if ($i == 1) {
-          $event->update([
-            'duration' => $diffent
-          ]);
-        }
-        $i++;
-      }
-    }
-
-    if ($request->date_type == 'single') {
-      $in['end_date_time'] = Carbon::parse($request->end_date . ' ' . $request->end_time);
-      $in['duration'] = $diffent;
-    } else {
-      //update event date time
-      $event_date = EventDates::where('event_id', $event->id)->orderBy('end_date_time', 'desc')->first();
-
-      $in['end_date_time'] = $event_date->end_date_time;
-    }
-
-    $event->update($in);
-
+    $event = Event::findOrFail($request->event_id);
+    $event = $service->updateEvent($event, $request->validated(), EventActor::organizer(Auth::guard('organizer')->user()));
     Session::flash('success', 'Updated Successfully');
-    return response()->json(['status' => 'success'], 200);
+    return response()->json(['status'=>'success','redirect'=>route('organizer.event_management.ticket_setting', ['id'=>$event->id])], 200);
   }
 
   /**
