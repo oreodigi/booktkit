@@ -43,7 +43,8 @@ function initMap() {
 
       var latitude = place.geometry.location.lat();
       var longitude = place.geometry.location.lng();
-      setLatLng(latitude, longitude)
+      setLatLng(latitude, longitude);
+      applyEventAddress(place);
 
       var icon = {
         url: place.icon,
@@ -94,6 +95,7 @@ function geocodeLatLng(geocoder, map, latLng) {
         var placeName = getPlaceName(results);
         if (placeName) {
           $('#search-address').val(results[0].formatted_address);
+          applyEventAddress(results[0]);
           setMarker(latLng, placeName);
         } else {
           console.log('No place name found');
@@ -217,4 +219,76 @@ function setLatLng(latitude, longitude) {
   document.querySelectorAll('.longitude').forEach(function (input) {
     input.value = longitude;
   });
+}
+
+/**
+ * Populate the event venue fields from a Google Place/Geocoder result.
+ * Country/state/city selects are dependent AJAX dropdowns, so each level
+ * waits for the next dropdown to finish loading before selecting its value.
+ */
+function applyEventAddress(place) {
+  if (!place || !place.address_components) return;
+  var parts = {};
+  place.address_components.forEach(function (component) {
+    (component.types || []).forEach(function (type) {
+      parts[type] = component.long_name;
+    });
+  });
+  var country = parts.country || '';
+  var state = parts.administrative_area_level_1 || '';
+  var city = parts.locality || parts.administrative_area_level_2 || parts.sublocality_level_1 || parts.sublocality || '';
+  var pin = parts.postal_code || '';
+  var formatted = place.formatted_address || (document.getElementById('search-address') || {}).value || '';
+
+  // Keep the visible address in sync with the Google selection.
+  document.querySelectorAll('[name$="_address"]').forEach(function (input) {
+    if (formatted) input.value = formatted;
+  });
+  document.querySelectorAll('[name$="_zip_code"]').forEach(function (input) {
+    input.value = pin;
+    $(input).trigger('change');
+  });
+
+  function choose($select, label) {
+    if (!$select.length || !label) return false;
+    var wanted = label.trim().toLowerCase();
+    var found = false;
+    $select.find('option').each(function () {
+      var text = ($(this).text() || '').trim().toLowerCase();
+      if (text === wanted || text.indexOf(wanted) !== -1 || wanted.indexOf(text) !== -1) {
+        $select.val($(this).val());
+        found = true;
+        return false;
+      }
+    });
+    if (found) $select.trigger('change');
+    return found;
+  }
+
+  $('.countryDropdown').each(function () {
+    var $country = $(this);
+    if (!choose($country, country)) return;
+    var $scope = $country.closest('.version-body');
+    var $state = $scope.find('.stateDropdown').first();
+    var $city = $scope.find('.cityDropdown').first();
+    var triesState = 0;
+    var stateTimer = setInterval(function () {
+      triesState++;
+      if (choose($state, state) || triesState >= 30) {
+        clearInterval(stateTimer);
+        if (!$state.length) {
+          choose($city, city);
+          return;
+        }
+        var triesCity = 0;
+        var cityTimer = setInterval(function () {
+          triesCity++;
+          if (choose($city, city) || triesCity >= 30) clearInterval(cityTimer);
+        }, 150);
+      }
+    }, 150);
+  });
+
+  // Notify autosave/other form integrations after Google fills the venue.
+  $('#eventForm').trigger('change');
 }
