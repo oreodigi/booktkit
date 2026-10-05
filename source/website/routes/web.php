@@ -114,7 +114,7 @@ Route::middleware('change.lang')->group(function () {
 
 Route::prefix('event-booking')->group(function () {
   Route::get('/paypal/notify', 'FrontEnd\PaymentGateway\PayPalController@notify')->name('event_booking.paypal.notify');
-  Route::get('/paypal/cancel', 'FrontEnd\PaymentGateway\PayPalController@cancel')->name('event_booking.cancel');
+  Route::get('/paypal/cancel', 'FrontEnd\PaymentGateway\PayPalController@cancel')->name('event_booking.paypal.cancel');
 
   Route::post('/apply-coupon', 'FrontEnd\EventController@applyCoupon')->name('apply-coupon');
 
