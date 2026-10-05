@@ -86,6 +86,12 @@ Route::prefix('/organizer')->middleware('auth:organizer', 'Deactive:organizer', 
   Route::get('/box-office/shifts', 'BackEnd\\Organizer\\BoxOfficeShiftController@index')->name('organizer.boxoffice.shifts.index');
   Route::post('/box-office/shifts/{id}/verify', 'BackEnd\\Organizer\\BoxOfficeShiftController@verify')->name('organizer.boxoffice.shifts.verify');
   Route::get('/box-office', 'BackEnd\\Organizer\\BoxOfficeController@index')->name('organizer.boxoffice.index');
+  Route::get('/box-office/holds', 'BackEnd\\Organizer\\BoxOfficeOperationsController@holds')->name('organizer.boxoffice.holds.index');
+  Route::post('/box-office/holds', 'BackEnd\\Organizer\\BoxOfficeOperationsController@hold')->name('organizer.boxoffice.holds.store');
+  Route::post('/box-office/holds/{id}/resume', 'BackEnd\\Organizer\\BoxOfficeOperationsController@resume')->name('organizer.boxoffice.holds.resume');
+  Route::delete('/box-office/holds/{id}', 'BackEnd\\Organizer\\BoxOfficeOperationsController@destroy')->name('organizer.boxoffice.holds.destroy');
+  Route::get('/box-office/settings', 'BackEnd\\Organizer\\BoxOfficeOperationsController@settings')->name('organizer.boxoffice.settings');
+  Route::put('/box-office/settings', 'BackEnd\\Organizer\\BoxOfficeOperationsController@updateSettings')->name('organizer.boxoffice.settings.update');
   Route::post('/box-office/sales', 'BackEnd\\Organizer\\BoxOfficeController@store')->name('organizer.boxoffice.store');
   Route::get('/box-office/sales/{id}/print', 'BackEnd\\Organizer\\BoxOfficeController@print')->name('organizer.boxoffice.print');
   Route::post('/box-office/sales/{id}/reprint', 'BackEnd\\Organizer\\BoxOfficeController@reprint')->name('organizer.boxoffice.reprint');
@@ -94,6 +100,8 @@ Route::prefix('/organizer')->middleware('auth:organizer', 'Deactive:organizer', 
   Route::get('/team', 'BackEnd\\Organizer\\StaffController@index')->name('organizer.staff.index');
   Route::post('/team', 'BackEnd\\Organizer\\StaffController@store')->name('organizer.staff.store');
   Route::put('/team/{id}', 'BackEnd\\Organizer\\StaffController@update')->name('organizer.staff.update');
+  Route::post('/team/{id}/reset-password', 'BackEnd\\Organizer\\StaffController@resetPassword')->name('organizer.staff.reset_password');
+  Route::delete('/team/{id}', 'BackEnd\\Organizer\\StaffController@destroy')->name('organizer.staff.destroy');
   Route::get('/dashboard', 'BackEnd\Organizer\OrganizerController@index')->name('organizer.dashboard');
   Route::get('/payouts-kyc', [OrganizerPayoutKycController::class, 'edit'])->name('organizer.payouts.kyc');
   Route::post('/payouts-kyc', [OrganizerPayoutKycController::class, 'save'])->name('organizer.payouts.kyc.save');
