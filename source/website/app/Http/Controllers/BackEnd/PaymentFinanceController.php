@@ -4,29 +4,21 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Organizer;
 use App\Models\Payments\OrganizerPaymentProfile;
+use App\Models\Payments\PaymentFeeRule;
 use App\Models\Payments\PaymentOrder;
 class PaymentFinanceController extends Controller {
  public function index(Request $r){
-  $q=PaymentOrder::with(['transfers','refunds'])->latest();
-  if($r->filled('status')) $q->where('status',$r->status);
-  if($r->filled('organizer_id')) $q->where('organizer_id',$r->organizer_id);
+  $q=PaymentOrder::with(['transfers','refunds','feeLines'])->latest();
+  if($r->filled('status'))$q->where('status',$r->status);if($r->filled('organizer_id'))$q->where('organizer_id',$r->organizer_id);if($r->filled('sales_channel'))$q->where('sales_channel',$r->sales_channel);
   $orders=$q->paginate(25)->withQueryString();
-  $summary=['paid'=>(int)PaymentOrder::where('status','paid')->sum('customer_total'),'platform'=>(int)PaymentOrder::where('status','paid')->sum('platform_fee'),
-   'organizer'=>(int)PaymentOrder::where('status','paid')->sum('organizer_amount'),'refunded'=>(int)PaymentOrder::sum('refunded_amount')];
-  return view('backend.payments.finance',compact('orders','summary'));
+  $summary=['paid'=>(int)PaymentOrder::where('status','paid')->sum('customer_total'),'platform'=>(int)PaymentOrder::where('status','paid')->sum('booktkit_revenue'),'organizer'=>(int)PaymentOrder::where('status','paid')->sum('organizer_amount'),'refunded'=>(int)PaymentOrder::sum('refunded_amount')];
+  $feeRules=PaymentFeeRule::orderByDesc('priority')->orderByDesc('id')->get();$organizers=Organizer::orderBy('id')->get(['id','username','email']);
+  return view('backend.payments.finance',compact('orders','summary','feeRules','organizers'));
  }
- public function organizers(){
-  $profiles=OrganizerPaymentProfile::with('organizer')->latest()->paginate(25);
-  return view('backend.payments.organizers',compact('profiles'));
- }
- public function updateOrganizer(Request $r,$id){
-  $p=OrganizerPaymentProfile::firstOrCreate(['organizer_id'=>$id]);
-  $d=$r->validate(['settlement_mode'=>'required|in:booktkit_managed,razorpay_split','razorpay_account_id'=>'nullable|string|max:100',
-   'razorpay_status'=>'required|in:not_started,details_submitted,razorpay_pending,kyc_pending,bank_verification_pending,active,restricted,suspended,rejected',
-   'gst_verified'=>'nullable|boolean','gstin'=>'nullable|string|max:20','fee_type'=>'required|in:percentage,fixed,hybrid','fee_value'=>'required|numeric|min:0|max:100',
-   'fee_fixed'=>'required|numeric|min:0','fee_bearer'=>'required|in:included,additional','split_enabled'=>'nullable|boolean']);
-  $d['gst_verified']=$r->boolean('gst_verified'); $d['split_enabled']=$r->boolean('split_enabled');
-  if($d['split_enabled'] && ($d['razorpay_status']!=='active' || empty($d['razorpay_account_id']))) return back()->with('error','Split settlement requires an active Razorpay linked account.');
-  $p->update($d); return back()->with('success','Organizer payment settings updated.');
- }
+ public function storeFeeRule(Request $r){$d=$this->validateFeeRule($r);$d['fixed_amount']=(int)round(((float)$d['fixed_amount_rupees'])*100);unset($d['fixed_amount_rupees']);$d['enabled']=$r->boolean('enabled');PaymentFeeRule::create($d);return back()->with('success','Payment fee rule created.');}
+ public function updateFeeRule(Request $r,$id){$rule=PaymentFeeRule::findOrFail($id);$d=$this->validateFeeRule($r);$d['fixed_amount']=(int)round(((float)$d['fixed_amount_rupees'])*100);unset($d['fixed_amount_rupees']);$d['enabled']=$r->boolean('enabled');$d['version']=$rule->version+1;$rule->update($d);return back()->with('success','Payment fee rule updated. New orders will snapshot version '.$d['version'].'.');}
+ public function destroyFeeRule($id){$rule=PaymentFeeRule::findOrFail($id);$rule->update(['enabled'=>false,'version'=>$rule->version+1]);return back()->with('success','Payment fee rule disabled. Existing order snapshots are unchanged.');}
+ private function validateFeeRule(Request $r):array{return $r->validate(['name'=>'required|string|max:120','scope_type'=>'required|in:global,organizer,event','scope_id'=>'nullable|required_unless:scope_type,global|integer|min:1','event_type'=>'nullable|in:online,venue,box_office','sales_channel'=>'nullable|in:web,mobile,pos','percentage'=>'required|numeric|min:0|max:100','fixed_amount_rupees'=>'required|numeric|min:0','fee_bearer'=>'required|in:customer,organizer','priority'=>'required|integer|min:0|max:100000','effective_from'=>'nullable|date','effective_until'=>'nullable|date|after:effective_from']);}
+ public function organizers(){$profiles=OrganizerPaymentProfile::with('organizer')->latest()->paginate(25);return view('backend.payments.organizers',compact('profiles'));}
+ public function updateOrganizer(Request $r,$id){$p=OrganizerPaymentProfile::firstOrCreate(['organizer_id'=>$id]);$d=$r->validate(['preferred_settlement_mode'=>'required|in:booktkit_managed,razorpay_split','razorpay_account_id'=>'nullable|string|max:100','razorpay_status'=>'required|in:not_started,details_submitted,razorpay_pending,kyc_pending,bank_verification_pending,active,activated,restricted,suspended,rejected','gst_verified'=>'nullable|boolean','gstin'=>'nullable|string|max:20','split_enabled'=>'nullable|boolean']);$d['gst_verified']=$r->boolean('gst_verified');$d['split_enabled']=$r->boolean('split_enabled');$d['settlement_mode']=$d['preferred_settlement_mode'];$p->update($d);return back()->with('success',$d['preferred_settlement_mode']==='razorpay_split'&&!$p->fresh()->canSplit()?'Direct settlement preferred, but sales will remain BookTKIT Managed until Razorpay KYC/Route is active.':'Organizer settlement preference updated.');}
 }
