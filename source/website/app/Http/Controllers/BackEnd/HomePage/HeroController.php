@@ -36,6 +36,30 @@ class HeroController extends Controller
         if ($name && File::exists($this->dir().$name)) File::delete($this->dir().$name);
     }
 
+    private function youtubeId(?string $url): ?string
+    {
+        if (!$url) return null;
+        $parts = parse_url(trim($url));
+        if (!$parts || empty($parts['host'])) return null;
+        $host = strtolower(preg_replace('/^www\\./', '', $parts['host']));
+        if ($host === 'youtu.be') return isset($parts['path']) ? trim($parts['path'], '/') : null;
+        if (!in_array($host, ['youtube.com', 'm.youtube.com', 'music.youtube.com'], true)) return null;
+        if (isset($parts['path']) && preg_match('~^/(?:embed|shorts|live)/([^/?]+)~', $parts['path'], $m)) return $m[1];
+        parse_str($parts['query'] ?? '', $query);
+        return $query['v'] ?? null;
+    }
+
+    private function videoRules(Request $request, bool $creating): array
+    {
+        if ($request->media_type !== 'video') return [];
+        $source = $request->input('video_source', 'upload');
+        if ($source === 'upload') return ['video' => ($creating ? 'required|' : 'nullable|').'file|mimes:mp4,webm,mov|max:5120'];
+        if ($source === 'youtube') return ['video_url' => ['required','url','max:1500', function ($attribute, $value, $fail) {
+            if (!$this->youtubeId($value)) $fail('Please enter a valid YouTube video URL.');
+        }]];
+        return ['video_url' => 'required|url|max:1500'];
+    }
+
     public function index(Request $request)
     {
         $language = Language::where('code', $request->language)->firstOrFail();
@@ -65,8 +89,11 @@ class HeroController extends Controller
             'custom_url' => 'nullable|string|max:1000',
             'sort_order' => 'nullable|integer|min:0|max:9999',
             'image' => $request->media_type === 'image' ? ['required', new ImageMimeTypeRule()] : ['nullable', new ImageMimeTypeRule()],
-            'video' => $request->media_type === 'video' ? 'required|file|mimes:mp4,webm,mov|max:51200' : 'nullable'
+            'video_source' => 'nullable|required_if:media_type,video|in:upload,youtube,url',
+            'video_url' => 'nullable|string|max:1500',
+            'video' => 'nullable'
         ];
+        $rules = array_merge($rules, $this->videoRules($request, true));
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) return back()->withErrors($validator)->withInput();
 
@@ -74,7 +101,9 @@ class HeroController extends Controller
             'language_id' => $language->id,
             'media_type' => $request->media_type,
             'image' => $request->hasFile('image') ? $this->upload($request->file('image')) : null,
-            'video' => $request->hasFile('video') ? $this->upload($request->file('video')) : null,
+            'video' => $request->media_type === 'video' && $request->video_source === 'upload' && $request->hasFile('video') ? $this->upload($request->file('video')) : null,
+            'video_source' => $request->media_type === 'video' ? $request->video_source : null,
+            'video_url' => $request->media_type === 'video' && $request->video_source !== 'upload' ? trim($request->video_url) : null,
             'title' => $request->title,
             'subtitle' => $request->subtitle,
             'button_text' => $request->button_text,
@@ -99,16 +128,22 @@ class HeroController extends Controller
             'custom_url' => 'nullable|string|max:1000',
             'sort_order' => 'nullable|integer|min:0|max:9999',
             'image' => ['nullable', new ImageMimeTypeRule()],
-            'video' => 'nullable|file|mimes:mp4,webm,mov|max:51200',
+            'video_source' => 'nullable|required_if:media_type,video|in:upload,youtube,url',
+            'video_url' => 'nullable|string|max:1500',
+            'video' => 'nullable',
         ];
+        $rules = array_merge($rules, $this->videoRules($request, false));
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) return back()->withErrors($validator);
 
         $data = $request->only(['media_type','title','subtitle','button_text','event_id','custom_url','sort_order']);
+        $data['video_source'] = $request->media_type === 'video' ? $request->video_source : null;
+        $data['video_url'] = $request->media_type === 'video' && $request->video_source !== 'upload' ? trim($request->video_url) : null;
         $data['open_new_tab'] = $request->boolean('open_new_tab');
         $data['status'] = $request->boolean('status');
         if ($request->hasFile('image')) { $this->remove($slide->image); $data['image'] = $this->upload($request->file('image')); }
         if ($request->hasFile('video')) { $this->remove($slide->video); $data['video'] = $this->upload($request->file('video')); }
+        if ($request->media_type !== 'video' || $request->video_source !== 'upload') { $this->remove($slide->video); $data['video'] = null; }
         $slide->update($data);
         Session::flash('success', 'Banner updated successfully');
         return back();
