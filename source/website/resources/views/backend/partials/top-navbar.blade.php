@@ -48,6 +48,14 @@
           </div>
         </form>
 
+        {{-- Temporary testing utility: clears stale browser/PWA caches but preserves auth cookies. --}}
+        <li class="nav-item mr-3">
+          <button type="button" class="btn btn-sm btn-outline-secondary booktkit-backend-refresh"
+            title="{{ __('Clear cache & load latest') }}" aria-label="{{ __('Clear cache & load latest') }}">
+            <i class="fa fa-refresh"></i>
+          </button>
+        </li>
+
         <li class="nav-item dropdown hidden-caret">
           <a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#" aria-expanded="false">
             <div class="avatar-sm">
@@ -108,3 +116,32 @@
   </nav>
   <!-- Navbar Header End -->
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var buttons = document.querySelectorAll('.booktkit-backend-refresh');
+  buttons.forEach(function (button) {
+    button.addEventListener('click', async function () {
+      button.disabled = true;
+      button.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+      try {
+        if ('caches' in window) {
+          var cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map(function (name) { return caches.delete(name); }));
+        }
+        if ('serviceWorker' in navigator) {
+          var registrations = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(registrations.map(function (registration) { return registration.unregister(); }));
+        }
+        try { localStorage.clear(); } catch (e) {}
+        try { sessionStorage.clear(); } catch (e) {}
+        var url = new URL(window.location.href);
+        url.searchParams.set('_fresh', Date.now().toString());
+        window.location.replace(url.toString());
+      } catch (e) {
+        window.location.reload();
+      }
+    });
+  });
+});
+</script>
