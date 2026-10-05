@@ -40,6 +40,10 @@ restore();$(form).find('input[name="event_type"]').val(initialType);syncEventDat
 
 function process(file,w,h,done){
 if(!file||!file.type.match(/^image\//))return;
+if(window.BookTKITImageEditor&&typeof window.BookTKITImageEditor.open==="function"){
+ var proxy=document.createElement("input");proxy.type="file";proxy.dataset.imageWidth=String(w);proxy.dataset.imageHeight=String(h);proxy.dataset.imageMaxKb="1024";
+ window.BookTKITImageEditor.open(file,proxy,function(out,data){done(out,data)});return;
+}
 var url=URL.createObjectURL(file),img=new Image();
 img.onload=function(){
 var scale=Math.max(w/img.width,h/img.height),minScale=scale,maxScale=scale*3,tx=0,ty=0,drag=false,lastX=0,lastY=0;
