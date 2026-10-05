@@ -15,10 +15,6 @@ Route::prefix('staff')->group(function () {
   });
 });
 
-<?php
-
-use Illuminate\Support\Facades\Route;
-
 /*
 |--------------------------------------------------------------------------
 | User Interface Routes
