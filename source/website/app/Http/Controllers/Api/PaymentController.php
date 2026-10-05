@@ -31,12 +31,12 @@ class PaymentController extends Controller {
   $basic=\App\Models\BasicSettings\Basic::select('tax')->first();
   $taxRate=(float)($basic->tax ?? 0);
   $taxPaise=(int)round($quote['ticket_amount']*$taxRate/100);
-  $snapshot=['items'=>$quote['items'],'quantity'=>$quote['quantity'],'subtotal'=>$quote['subtotal'],'discount'=>$quote['discount'],'tax_rate'=>$taxRate];
+  $snapshot=['items'=>$quote['items'],'quantity'=>$quote['quantity'],'subtotal'=>$quote['subtotal'],'discount'=>$quote['discount'],'tax_rate'=>$taxRate,'sales_channel'=>$r->user() ? 'mobile' : 'web'];
   $order=$orders->createFromPricing($event->id,$event->organizer_id,$quote['ticket_amount'],$taxPaise,$data['idempotency_key'],$snapshot);
   if(!$order->customer_snapshot){ $order->customer_snapshot=$data['customer']; $order->save(); }
   $gateway=$razorpay->createOrder($order);
   return response()->json(['success'=>true,'payment_order'=>$order->uuid,'gateway_order_id'=>$gateway['id'],'amount'=>$order->customer_total,'currency'=>$order->currency,
-   'breakdown'=>['ticket_amount'=>$order->ticket_amount,'platform_fee'=>$order->platform_fee,'tax'=>$order->tax_amount,'organizer_amount'=>$order->organizer_amount,'fee_bearer'=>$order->fee_bearer]]);
+   'breakdown'=>['ticket_amount'=>$order->ticket_amount,'platform_fee'=>$order->platform_fee,'additional_fees'=>$order->additional_fee_total,'tax'=>$order->tax_amount,'customer_total'=>$order->customer_total,'organizer_amount'=>$order->organizer_amount,'fee_bearer'=>$order->fee_bearer,'sales_channel'=>$order->sales_channel,'settlement_mode'=>$order->settlement_mode]]);
  }
  public function verifyRazorpay(Request $r,RazorpayRouteService $razorpay,PaymentLedgerService $ledger,BookingFinalizationService $bookings){
   $data=$r->validate(['payment_order'=>'required|uuid','razorpay_payment_id'=>'required|string','razorpay_signature'=>'required|string']);
