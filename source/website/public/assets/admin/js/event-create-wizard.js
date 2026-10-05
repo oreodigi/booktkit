@@ -1,11 +1,11 @@
 (function($){
 "use strict";
-var form=document.getElementById("eventForm");if(!form)return;var initialType=new URLSearchParams(location.search).get("type");form.setAttribute("data-event-type",initialType||"");
+var form=document.getElementById("eventForm");if(!form)return;var initialType=form.getAttribute("data-event-type")||$(form).find('[name="event_type"]').val()||new URLSearchParams(location.search).get("type")||"";form.setAttribute("data-event-type",initialType);
 var key="booktkit:event-draft:"+location.pathname+":"+new URLSearchParams(location.search).get("type"),thumbKey=key+":thumb";
 function save(){var o={};$(form).find(":input[name]").each(function(){var n=this.name;if(!n||n==="_token"||this.type==="file")return;if((this.type==="checkbox"||this.type==="radio")&&!this.checked)return;o[n]=this.value});try{localStorage.setItem(key,JSON.stringify(o))}catch(e){}}
 function restore(){try{var o=JSON.parse(localStorage.getItem(key)||"{}");Object.keys(o).forEach(function(n){var $e=$(form).find('[name="'+CSS.escape(n)+'"]');if(!$e.length)return;if($e.first().is(":radio,:checkbox"))$e.filter('[value="'+CSS.escape(String(o[n]))+'"]').prop("checked",true).trigger("change");else $e.val(o[n]).trigger("change")})}catch(e){}}
 var timer;$(form).on("input change","input,select,textarea",function(){clearTimeout(timer);timer=setTimeout(save,250)});
-var eventType=new URLSearchParams(location.search).get("type"),isOnline=eventType==="online";
+var eventType=initialType,isOnline=eventType==="online";
 var $gallery=$("#my-dropzone").closest(".col-lg-12"),children=$(form).children();children.attr("data-btk-step","4");
 $("#accordion").attr("data-btk-step","1");
 $("#single_dates,.countDownStatus").attr("data-btk-step","2");$("#multiple_dates").closest(".row").attr("data-btk-step","2");$(".eventDateType").closest(".row").attr("data-btk-step","2");
@@ -27,19 +27,7 @@ function validateStep(n){var ok=true,first=null;$('[data-btk-step="'+n+'"]:visib
 function selectText(sel,text){var el=document.querySelector(sel);if(!el)return false;var opt=[].slice.call(el.options).find(function(o){return o.text.trim().toLowerCase()===text.toLowerCase()});if(opt){el.value=opt.value;$(el).trigger("change");return true}return false}
 function syncEventDateType(){var multiple=$('input[name="date_type"]:checked').val()==="multiple",$multiRow=$("#multiple_dates").closest(".row");$("#single_dates").toggleClass("d-none",multiple).toggle(!multiple);$multiRow.toggleClass("d-none",!multiple).toggle(multiple);$("#multiple_dates").toggleClass("d-none",!multiple).toggle(multiple);$(".countDownStatus").toggleClass("d-none",multiple).toggle(!multiple);$("#single_dates :input").prop("disabled",multiple);$("#multiple_dates :input").prop("disabled",!multiple)}
 $(document).on("change",".eventDateType",syncEventDateType);
-function defaults(){if(new URLSearchParams(location.search).get("type")!=="venue")return;var tries=0,iv=setInterval(function(){tries++;document.querySelectorAll(".countryDropdown").forEach(function(c){if(!c.value)selectText('[name="'+c.name+'"]',"India")});document.querySelectorAll(".stateDropdown").forEach(function(s){if(!s.value)selectText('[name="'+s.name+'"]',"Maharashtra")});document.querySelectorAll(".cityDropdown").forEach(function(c){if(!c.value)selectText('[name="'+c.name+'"]',"Jalgaon")});if(tries>25)clearInterval(iv)},300)}
-restore();defaults();syncEventDateType();show(1);
-// Keep venue defaults stable even when country/state/city options load asynchronously.
-(function venueDefaults(){
- if(new URLSearchParams(location.search).get("type")!=="venue")return;
- var attempts=0,t=setInterval(function(){
-   attempts++;
-   document.querySelectorAll(".countryDropdown").forEach(function(el){var o=[].slice.call(el.options).find(function(x){return x.text.trim().toLowerCase()==="india"});if(o&&el.value!==o.value){el.value=o.value;$(el).trigger("change")}});
-   document.querySelectorAll(".stateDropdown").forEach(function(el){var o=[].slice.call(el.options).find(function(x){return x.text.trim().toLowerCase()==="maharashtra"});if(o&&el.value!==o.value){el.value=o.value;$(el).trigger("change")}});
-   document.querySelectorAll(".cityDropdown").forEach(function(el){var o=[].slice.call(el.options).find(function(x){return x.text.trim().toLowerCase()==="jalgaon"});if(o&&el.value!==o.value){el.value=o.value;$(el).trigger("change")}});
-   if(attempts>=40)clearInterval(t);
- },250);
-})();
+restore();syncEventDateType();show(1);
 
 function process(file,w,h,done){
 if(!file||!file.type.match(/^image\//))return;
