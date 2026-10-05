@@ -9,6 +9,12 @@
   // Dropzone initialization
   Dropzone.options.myDropzone = {
     acceptedFiles: '.png, .jpg, .jpeg',
+    maxFilesize: 12,
+    transformFile: function (file, done) {
+      if (typeof window.booktkitProcessEventImage === 'function') {
+        window.booktkitProcessEventImage(file, 1170, 570, function (processed) { done(processed); });
+      } else { done(file); }
+    },
     url: storeUrl,
     error: function (file, response) {
       let message = 'Image upload failed.';
@@ -70,6 +76,7 @@
       }
 
       $("#sliders").append(`<input type="hidden" name="slider_images[]" id="slider${response.file_id}" value="${response.file_id}">`);
+      window.dispatchEvent(new CustomEvent("booktkit:gallery-uploaded", {detail: {id: response.file_id, preview_url: response.preview_url || ""}}));
 
       // Create the remove button
       var removeButton = Dropzone.createElement("<button type='button' class='rmv-btn'><i class='fa fa-times'></i></button>");
