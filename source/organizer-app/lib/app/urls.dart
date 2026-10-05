@@ -5,6 +5,11 @@ class Urls {
   static const String orgLogin = '/api/organizer/login/submit';
   static const String orgSignup = '/api/organizer/signup/submit';
   static const String orgLogout = '/api/organizer/logout';
+  static const String organizerScannerCheck = '/api/organizer/check-qrcode';
+  static const String staffScannerLogin = '/api/staff-scanner/login';
+  static const String staffScannerEvents = '/api/staff-scanner/events';
+  static const String staffScannerScan = '/api/staff-scanner/scan';
+  static const String staffScannerLogout = '/api/staff-scanner/logout';
   static const String orgDashboard = '/api/organizer/dashboard';
   static const String orgTransaction = '/api/organizer/transcation';
   static const String orgIncome = '/api/organizer/monthly-income';
