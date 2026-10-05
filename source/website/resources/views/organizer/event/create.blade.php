@@ -594,9 +594,9 @@
                                                             <div class="col-lg-4">
                                                                 <div class="form-group">
                                                                     <label
-                                                                        for="">{{ __('Zip/Post Code') }}</label>
+                                                                        for="">{{ __('PIN Code') }}</label>
                                                                     <input type="text"
-                                                                        placeholder="{{ __('Enter Zip/Post Code') }}"
+                                                                        placeholder="{{ __('Enter PIN Code') }}"
                                                                         name="{{ $language->code }}_zip_code"
                                                                         class="form-control {{ $language->direction == 1 ? 'rtl text-right' : '' }}">
                                                                 </div>
@@ -620,8 +620,7 @@
                                                                         </button>
                                                                     @endif
                                                                 </div>
-                                                                <textarea id="descriptionTmce{{ $language->id }}" class="form-control summernote"
-                                                                    name="{{ $language->code }}_description" placeholder="{{ __('Enter Event Description') }}" data-height="300"></textarea>
+                                                                <textarea id="descriptionTmce{{ $language->id }}" class="form-control btk-simple-description"\n                                                                    name="{{ $language->code }}_description" placeholder="{{ __('Enter Event Description') }}" data-height="300" maxlength="1200" rows="8"></textarea>
                                                             </div>
                                                         </div>
                                                     </div>
