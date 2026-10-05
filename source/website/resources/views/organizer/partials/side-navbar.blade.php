@@ -242,6 +242,12 @@
             <p>{{ __('Payments & Settlements') }}</p>
           </a>
         </li>
+        <li class="nav-item {{ request()->routeIs('organizer.staff.*') ? 'active' : '' }}">
+          <a href="{{ route('organizer.staff.index') }}">
+            <i class="fal fa-user-friends"></i>
+            <p>{{ __('Team') }}</p>
+          </a>
+        </li>
         <li class="nav-item">
           <a href="{{ route('organizer.pwa') }}" target="_blank">
             <i class="fas fa-scanner"></i>
