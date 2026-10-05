@@ -1,0 +1,3 @@
+<?php
+namespace App\Models;use Illuminate\Database\Eloquent\Model;
+class BoxOfficeShift extends Model{protected $fillable=['organizer_id','event_id','location_id','staff_id','status','opening_cash','declared_closing_cash','expected_cash','variance','opened_at','closed_at','verified_by_staff_id','verified_by_organizer_id','verified_at','verification_note'];protected $casts=['opened_at'=>'datetime','closed_at'=>'datetime','verified_at'=>'datetime'];public function sales(){return $this->hasMany(BoxOfficeSale::class,'shift_id');}public function staff(){return $this->belongsTo(OrganizerStaff::class,'staff_id');}}
