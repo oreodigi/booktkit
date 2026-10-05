@@ -30,6 +30,7 @@ use App\Models\PaymentGateway\OnlineGateway;
 use App\Services\OrganizerAiTokenPurchaseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 
 class AiTokenPurchaseController extends Controller
@@ -52,6 +53,31 @@ class AiTokenPurchaseController extends Controller
   {
     $package = AiTokenPackage::where('status', 1)->findOrFail($id);
     $this->service->prepareCheckoutSession($package);
+
+    if ((float) $package->price <= 0) {
+      $organizer = Auth::guard('organizer')->user();
+
+      $purchase = DB::transaction(function () use ($organizer, $package) {
+        $purchase = $this->service->createPendingPurchase($organizer->id, $package, [
+          'invoice_no' => $this->service->getCheckoutInvoiceNo(),
+          'payment_method' => 'free',
+          'payment_status' => 'paid',
+          'status' => 'approved',
+        ]);
+
+        $this->service->syncBalanceOnApproval($purchase);
+
+        return $purchase;
+      });
+
+      Session::put('organizer_ai_purchase_id', $purchase->id);
+      Session::put('organizer_ai_last_purchase_id', $purchase->id);
+
+      $this->service->generateInvoice($purchase);
+      $this->service->sendPurchaseMail($purchase);
+
+      return redirect()->route('organizer.ai_token_purchase.complete');
+    }
 
     return redirect()->route('organizer.ai_token_purchase.checkout');
   }
@@ -93,6 +119,13 @@ class AiTokenPurchaseController extends Controller
 
     if (empty($package)) {
       return redirect()->route('organizer.ai_token_purchase.packages');
+    }
+
+    if ((float) $package->price <= 0) {
+      return redirect()->route('organizer.ai_token_purchase.packages')->with([
+        'alert-type' => 'warning',
+        'message' => 'Free AI token packages are activated directly from the package list.',
+      ]);
     }
 
     $request->validate([
