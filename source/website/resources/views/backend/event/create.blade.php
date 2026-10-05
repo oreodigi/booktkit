@@ -2,6 +2,7 @@
 
 @section('content')
     <link rel="stylesheet" href="{{ asset('assets/admin/css/event-create-wizard.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/admin/css/event-media-controls.css') }}">
     <div class="page-header">
         <h4 class="page-title">{{ __('Add Event') }}</h4>
         <ul class="breadcrumbs">
@@ -65,7 +66,7 @@
                                 <div class=" mb-0" id="errpreimg">
 
                                 </div>
-                                <p class="text-warning">{{ __('Required: 1170×570. Maximum 500 KB. You can crop/resize before upload.') }}</p>
+                                <p class="text-warning">{{ __('Required: 1170×570. Maximum saved size 1 MB. Larger originals are compressed automatically after crop/resize.') }}</p>
                             </div>
                             <form id="eventForm" action="{{ route('admin.event_management.store_event') }}" method="POST"
                                 enctype="multipart/form-data">
@@ -85,7 +86,7 @@
                                             <input type="file" class="img-input" name="thumbnail">
                                         </div>
                                     </div>
-                                    <p class="text-warning">{{ __('Required: 320×230. Maximum 500 KB. You can crop/resize before upload.') }}</p>
+                                    <p class="text-warning">{{ __('Required: 320×230. Maximum saved size 1 MB. Larger originals are compressed automatically after crop/resize.') }}</p>
                                 </div>
 
                                 <div class="row">
