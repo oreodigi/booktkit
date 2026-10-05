@@ -50,9 +50,11 @@
 
         {{-- Temporary testing utility: clears stale browser/PWA caches but preserves auth cookies. --}}
         <li class="nav-item mr-3">
-          <button type="button" class="btn btn-sm btn-danger booktkit-backend-refresh" style="color:#fff !important;"
+          <button type="button" class="btn btn-sm btn-danger booktkit-backend-refresh"
+            style="color:#fff !important; background:#dc3545 !important; border-color:#dc3545 !important; font-weight:600; white-space:nowrap;"
             title="{{ __('Clear cache & load latest') }}" aria-label="{{ __('Clear cache & load latest') }}">
-            <i class="fa fa-refresh"></i>
+            <span aria-hidden="true" style="font-size:16px;line-height:1;">↻</span>
+            <span class="ml-1">{{ __('Clear Cache') }}</span>
           </button>
         </li>
 
@@ -123,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function () {
   buttons.forEach(function (button) {
     button.addEventListener('click', async function () {
       button.disabled = true;
-      button.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+      button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> <span class="ml-1">Clearing...</span>';
       try {
         if ('caches' in window) {
           var cacheNames = await caches.keys();
