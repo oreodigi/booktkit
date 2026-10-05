@@ -1,9 +1,13 @@
 <?php
 namespace App\Services\Payments;
 use App\Models\Payments\OrganizerPaymentProfile;
+use App\Models\PaymentGateway\OnlineGateway;
 use Illuminate\Support\Facades\Http;
 class RazorpayLinkedAccountService {
- private function http(){ return Http::withBasicAuth((string)config('services.razorpay.key'),(string)config('services.razorpay.api_secret'))->acceptJson()->asJson()->timeout(30); }
+ private function http(){
+  $g=OnlineGateway::whereKeyword('razorpay')->firstOrFail(); $v=json_decode($g->information,true);
+  return Http::withBasicAuth((string)$v['key'],(string)$v['secret'])->acceptJson()->asJson()->timeout(30)->retry(2,300);
+ }
  public function onboard(OrganizerPaymentProfile $p,string $bankAccount,bool $accepted): OrganizerPaymentProfile {
   if(!$accepted) throw new \InvalidArgumentException('Route terms must be accepted.');
   if(!$p->razorpay_account_id){
