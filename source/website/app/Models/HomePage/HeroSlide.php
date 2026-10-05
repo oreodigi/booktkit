@@ -12,7 +12,7 @@ class HeroSlide extends Model
     use HasFactory;
 
     protected $fillable = [
-        'language_id','media_type','image','video','title','subtitle','button_text',
+        'language_id','media_type','image','video','video_source','video_url','title','subtitle','button_text',
         'event_id','custom_url','open_new_tab','sort_order','status'
     ];
 
