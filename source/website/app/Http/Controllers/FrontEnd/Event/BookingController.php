@@ -227,7 +227,7 @@ class BookingController extends Controller
 
 
         // Deliver the same secure one-time QR credentials used by the scanner.
-        app(\\App\\Services\\Tickets\\TicketDeliveryService::class)->deliver($bookingInfo);
+        app(\App\Services\Tickets\TicketDeliveryService::class)->deliver($bookingInfo);
 
         $request->session()->forget('event_id');
         $request->session()->forget('selTickets');
