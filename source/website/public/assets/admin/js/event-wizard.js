@@ -7,6 +7,7 @@ function restore(){if(mode!=="create")return;try{var raw=localStorage.getItem(ke
 var timer;if(mode==="create")$(form).on("input change","input,select,textarea",function(){clearTimeout(timer);timer=setTimeout(save,250)});
 var eventType=initialType,isOnline=eventType==="online";
 var $gallery=$("#my-dropzone").closest(".col-lg-12"),children=$(form).children();children.attr("data-btk-step","6");
+if(!$(form).find('[name="event_type"]').is(':radio,select')){$('<div class="btk-type-summary alert alert-light"><strong>Event type:</strong> '+(initialType==="online"?"Online":"Venue")+'</div>').attr("data-btk-step","1").prependTo(form);}
 $("#accordion").attr("data-btk-step","2");
 $("#single_dates,.countDownStatus").attr("data-btk-step","3");$("#multiple_dates").closest(".row").attr("data-btk-step","3");$(".eventDateType").closest(".row").attr("data-btk-step","3");
 $gallery.attr("data-btk-step","5");var $thumb=$(form).find('input[name="thumbnail"]').closest(".form-group");$thumb.attr("data-btk-step","5");
