@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
+        \Illuminate\Support\Facades\DB::statement('ALTER TABLE organizer_payment_profiles MODIFY gstin TEXT NULL');
         Schema::table('organizer_payment_profiles', function (Blueprint $table) {
             $table->string('business_type', 32)->nullable()->after('organizer_id');
             $table->string('legal_business_name')->nullable();
@@ -22,7 +23,6 @@ return new class extends Migration {
             $table->string('business_subcategory')->nullable();
             $table->text('pan')->nullable();
             $table->text('stakeholder_pan')->nullable();
-            $table->text('gstin')->nullable()->change();
             $table->string('bank_account_holder')->nullable();
             $table->string('bank_ifsc', 16)->nullable();
             $table->string('bank_account_last4', 4)->nullable();
