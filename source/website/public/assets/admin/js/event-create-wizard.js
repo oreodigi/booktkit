@@ -21,6 +21,18 @@ $(document).on("click","#multiple_dates .addDateRow",function(e){e.preventDefaul
 $(document).on("click","#multiple_dates .deleteDateRow",function(e){e.preventDefault();var rows=$("#multiple_dates tbody tr");if(rows.length>1){$(this).closest("tr").remove()}else{$(this).closest("tr").find("input").val("")}});
 function defaults(){if(new URLSearchParams(location.search).get("type")!=="venue")return;var tries=0,iv=setInterval(function(){tries++;document.querySelectorAll(".countryDropdown").forEach(function(c){if(!c.value)selectText('[name="'+c.name+'"]',"India")});document.querySelectorAll(".stateDropdown").forEach(function(s){if(!s.value)selectText('[name="'+s.name+'"]',"Maharashtra")});document.querySelectorAll(".cityDropdown").forEach(function(c){if(!c.value)selectText('[name="'+c.name+'"]',"Jalgaon")});if(tries>25)clearInterval(iv)},300)}
 restore();defaults();syncEventDateType();show(1);
+// Keep venue defaults stable even when country/state/city options load asynchronously.
+(function venueDefaults(){
+ if(new URLSearchParams(location.search).get("type")!=="venue")return;
+ var attempts=0,t=setInterval(function(){
+   attempts++;
+   document.querySelectorAll(".countryDropdown").forEach(function(el){var o=[].slice.call(el.options).find(function(x){return x.text.trim().toLowerCase()==="india"});if(o&&el.value!==o.value){el.value=o.value;$(el).trigger("change")}});
+   document.querySelectorAll(".stateDropdown").forEach(function(el){var o=[].slice.call(el.options).find(function(x){return x.text.trim().toLowerCase()==="maharashtra"});if(o&&el.value!==o.value){el.value=o.value;$(el).trigger("change")}});
+   document.querySelectorAll(".cityDropdown").forEach(function(el){var o=[].slice.call(el.options).find(function(x){return x.text.trim().toLowerCase()==="jalgaon"});if(o&&el.value!==o.value){el.value=o.value;$(el).trigger("change")}});
+   if(attempts>=40)clearInterval(t);
+ },250);
+})();
+
 function process(file,w,h,done){
 if(!file||!file.type.match(/^image\//))return;
 var url=URL.createObjectURL(file),img=new Image();
