@@ -53,7 +53,7 @@
 
         {{-- Temporary testing utility: clears stale browser/PWA caches but preserves auth cookies. --}}
         <li class="nav-item mr-3">
-          <button type="button" class="btn btn-sm btn-outline-secondary booktkit-backend-refresh"
+          <button type="button" class="btn btn-sm btn-danger booktkit-backend-refresh" style="color:#fff !important;"
             title="{{ __('Clear cache & load latest') }}" aria-label="{{ __('Clear cache & load latest') }}">
             <i class="fa fa-refresh"></i>
           </button>
