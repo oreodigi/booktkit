@@ -81,6 +81,7 @@ Route::prefix('/organizer/ai-token-purchase')->group(function () {
 });
 
 Route::prefix('/organizer')->middleware('auth:organizer', 'Deactive:organizer', 'EmailStatus:organizer', 'adminLang')->group(function () {
+  Route::get('/box-office/reports', 'BackEnd\\Organizer\\BoxOfficeReportController@index')->name('organizer.boxoffice.reports.index');
   Route::get('/box-office/shifts', 'BackEnd\\Organizer\\BoxOfficeShiftController@index')->name('organizer.boxoffice.shifts.index');
   Route::post('/box-office/shifts/{id}/verify', 'BackEnd\\Organizer\\BoxOfficeShiftController@verify')->name('organizer.boxoffice.shifts.verify');
   Route::get('/box-office', 'BackEnd\\Organizer\\BoxOfficeController@index')->name('organizer.boxoffice.index');
