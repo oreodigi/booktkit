@@ -16,6 +16,11 @@ return new class extends Migration {
    $t->unsignedBigInteger('reversed_amount')->default(0);
    $t->timestamp('released_at')->nullable();
   });
+  Schema::table('payment_refunds',function(Blueprint $t){
+   $t->string('gateway_reversal_id')->nullable()->unique();
+   $t->unsignedBigInteger('reversal_amount')->default(0);
+   $t->string('reversal_status',32)->nullable();
+  });
   Schema::create('payment_settings',function(Blueprint $t){
    $t->id(); $t->string('key')->unique(); $t->text('value')->nullable(); $t->timestamps();
   });
@@ -23,6 +28,7 @@ return new class extends Migration {
  }
  public function down(): void {
   Schema::dropIfExists('payment_settings');
+  Schema::table('payment_refunds',function(Blueprint $t){$t->dropColumn(['gateway_reversal_id','reversal_amount','reversal_status']);});
   Schema::table('payment_transfers',function(Blueprint $t){$t->dropUnique(['payment_order_id']); $t->dropColumn(['on_hold','hold_release_at','reversed_amount','released_at']);});
   Schema::table('organizer_payment_profiles',function(Blueprint $t){$t->dropColumn(['split_suspended','route_terms_accepted_at']);});
  }
