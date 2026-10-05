@@ -215,6 +215,10 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::post('/transfers/{id}/retry', 'BackEnd\\Payments\\OrganizerPayoutController@retryTransfer')->name('admin.organizer_payouts.transfers.retry');
   });
 
+  // Box Office / POS administration
+  Route::get('/box-office-settings', 'BackEnd\\AdminBoxOfficeSettingsController@edit')->name('admin.boxoffice.settings');
+  Route::put('/box-office-settings', 'BackEnd\\AdminBoxOfficeSettingsController@update')->name('admin.boxoffice.settings.update');
+
   // Organizer workforce oversight
   Route::get('/organizer-workforce', 'BackEnd\\OrganizerWorkforceController@index')->name('admin.organizer_workforce.index');
   Route::put('/organizer-workforce/{id}', 'BackEnd\\OrganizerWorkforceController@update')->name('admin.organizer_workforce.update');
