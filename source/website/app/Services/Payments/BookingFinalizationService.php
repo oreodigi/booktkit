@@ -48,6 +48,9 @@ class BookingFinalizationService {
   ]);
   $order->booking_id=$booking->id; $order->save();
   app(TicketIssuanceService::class)->ensureForBooking($booking);
+  DB::afterCommit(function () use ($booking) {
+   app(\\App\\Services\\Tickets\\TicketDeliveryService::class)->deliver($booking->fresh());
+  });
   return $booking;
  }
 }
