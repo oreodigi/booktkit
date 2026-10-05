@@ -43,7 +43,7 @@ class CityController extends Controller
   {
     $rules = [
       'language_id' => 'required',
-      'name' => ['required', Rule::unique('event_cities', 'name')->where('language_id', $request->language_id)],
+      'name' => ['required', Rule::unique('event_cities', 'name')->where(fn ($query) => $query->where('language_id', $request->language_id)->where('country_id', $request->country_id)->where('state_id', $request->state_id))],
       'status' => 'required',
       'serial_number' => 'required|numeric|min:0',
     ];
@@ -106,8 +106,10 @@ class CityController extends Controller
 
   public function update(Request $request)
   {
+    $languageId = EventCity::whereKey($request->id)->value('language_id');
+
     $rules = [
-      'name' => ['required', Rule::unique('event_cities', 'name')->where('language_id', $request->language_id)->ignore($request->id)],
+      'name' => ['required', Rule::unique('event_cities', 'name')->where(fn ($query) => $query->where('language_id', $languageId)->where('country_id', $request->country_id)->where('state_id', $request->state_id))->ignore($request->id)],
       'status' => 'required',
       'serial_number' => 'required|numeric|min:0',
     ];
