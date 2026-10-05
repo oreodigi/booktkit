@@ -120,7 +120,8 @@
                                 <p class="text-warning">{{ __('Image Size : 1170 x 570') }}</p>
                             </div>
 
-                            <form id="eventForm" data-actor="admin" data-mode="{{ $mode ?? 'edit' }}" data-event-type="{{ $event->event_type ?? request('type', 'venue') }}" action="{{ route('admin.event.update') }}" method="POST"
+                            <div class="btk-shared-event-wizard" data-event-wizard-actor="admin" data-event-wizard-mode="{{ $mode ?? 'edit' }}">
+<form id="eventForm" data-actor="admin" data-mode="{{ $mode ?? 'edit' }}" data-event-type="{{ $event->event_type ?? request('type', 'venue') }}" action="{{ route('admin.event.update') }}" method="POST"
                                 enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" name="event_id" value="{{ $event->id }}">
@@ -858,6 +859,7 @@
 
                                 <div id="sliders"></div>
                             </form>
+</div>
                         </div>
                     </div>
                 </div>
