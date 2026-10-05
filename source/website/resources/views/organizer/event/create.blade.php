@@ -86,14 +86,14 @@
                                 <p class="text-warning">{{ __('Required: 1170×570. Maximum saved size 1 MB. Larger originals are compressed automatically after crop/resize.') }}</p>
                             </div>
                             <div class="btk-shared-event-wizard" data-event-wizard-actor="organizer" data-event-wizard-mode="create">
-<form id="eventForm" data-actor="organizer" data-mode="create" data-event-type="{{ $event->event_type ?? request('type', 'venue') }}" action="{{ route('organizer.event_management.store_event') }}"
+<form id="eventForm" data-actor="organizer" data-mode="create" data-event-type="{{ request('type', 'venue') }}" action="{{ route('organizer.event_management.store_event') }}"
                                 method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" name="event_type" value="{{ request('type', 'venue') }}">
                                 <input type="hidden" name="box_office_enabled" value="{{ request()->boolean('special') ? 1 : 0 }}">
                                 @if (request()->boolean('special'))
                                 <div class="card border-danger mb-4">
-                                  <div class="card-header"><strong>{{ __('Special Event — Box Office') }}</strong></div>
+                                  <div class="card-header"><strong>{{ __('Box Office Event — Box Office') }}</strong></div>
                                   <div class="card-body">
                                     <div class="form-group"><label>{{ __('Re-entry Policy') }} *</label>
                                       <select name="reentry_policy" class="form-control">
@@ -547,23 +547,8 @@
                                                             </div>
 
                                                             <!-- latitude and longitude -->
-                                                            <div
-                                                                class="col-lg-4 {{ $language->is_default == 1 ? '' : 'd-none' }}">
-                                                                <div class="form-group">
-                                                                    <label for="">{{ __('Latitude') }}</label>
-                                                                    <input type="text" name="latitude"
-                                                                        placeholder="Latitude"
-                                                                        class="form-control latitude">
-                                                                </div>
-                                                            </div>
-                                                            <div
-                                                                class="col-lg-4 {{ $language->is_default == 1 ? '' : 'd-none' }}">
-                                                                <div class="form-group">
-                                                                    <label for="">{{ __('Longitude') }}</label>
-                                                                    <input type="text" placeholder="Longitude"
-                                                                        name="longitude" class="form-control longitude">
-                                                                </div>
-                                                            </div>
+                                                            <input type="hidden" name="latitude" value="{{ @$event->latitude }}" class="latitude">
+                                                            <input type="hidden" name="longitude" value="{{ @$event->longitude }}" class="longitude">
 
                                                             @if ($settings->event_country_status == 1)
                                                                 <div class="col-lg-4">

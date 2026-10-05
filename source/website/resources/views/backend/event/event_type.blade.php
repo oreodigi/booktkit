@@ -78,7 +78,7 @@
             <div class="card-body"><div class="row align-items-center"><div class="col-12"><div class="col-icon mx-auto">
               <div class="icon-big text-center icon-danger bubble-shadow-small"><i class="fas fa-ticket-alt"></i></div>
             </div></div><div class="col col-stats ml-3 ml-sm-0"><div class="numbers mx-auto text-center">
-              <h2 class="card-title mt-2 mb-2 text-uppercase">{{ __('Special Event') }}</h2>
+              <h2 class="card-title mt-2 mb-2 text-uppercase">{{ __('Box Office Event') }}</h2>
               <p class="mb-0">{{ __('Venue event with box office counters and re-entry controls') }}</p>
             </div></div></div></div>
           </div>

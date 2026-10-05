@@ -11,6 +11,14 @@ class EventFormRequest extends FormRequest
 {
     public function authorize(): bool { return true; }
 
+    protected function prepareForValidation(): void
+    {
+        $routeType = $this->query('type');
+        if (!$this->input('event_id') && in_array($routeType, ['venue', 'online'], true)) {
+            $this->merge(['event_type' => $routeType]);
+        }
+    }
+
     public function rules(): array
     {
         $eventId = (int) ($this->input('event_id') ?: 0);
@@ -89,7 +97,7 @@ class EventFormRequest extends FormRequest
                 }
             }
             if ($this->boolean('box_office_enabled') && $this->input('event_type') !== 'venue') {
-                $validator->errors()->add('box_office_enabled','Special Event must use the venue event type.');
+                $validator->errors()->add('box_office_enabled','Box Office Event must use the venue event type.');
             }
             $eventId=(int)$this->input('event_id');
             if ($eventId && $this->input('event_type') && ($event=Event::find($eventId)) && $event->event_type !== $this->input('event_type') && $event->booking()->exists()) {

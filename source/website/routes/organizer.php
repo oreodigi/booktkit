@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BackEnd\Organizer\OrganizerPayoutKycController;
 
 Route::prefix('staff')->group(function () {
   Route::middleware('guest:staff')->group(function () {
@@ -94,6 +95,8 @@ Route::prefix('/organizer')->middleware('auth:organizer', 'Deactive:organizer', 
   Route::post('/team', 'BackEnd\\Organizer\\StaffController@store')->name('organizer.staff.store');
   Route::put('/team/{id}', 'BackEnd\\Organizer\\StaffController@update')->name('organizer.staff.update');
   Route::get('/dashboard', 'BackEnd\Organizer\OrganizerController@index')->name('organizer.dashboard');
+  Route::get('/payouts-kyc', [OrganizerPayoutKycController::class, 'edit'])->name('organizer.payouts.kyc');
+  Route::post('/payouts-kyc', [OrganizerPayoutKycController::class, 'save'])->name('organizer.payouts.kyc.save');
   Route::get('monthly-income', 'BackEnd\Organizer\OrganizerController@monthly_income')->name('organizer.monthly_income');
   Route::get('/transaction', 'BackEnd\Organizer\OrganizerController@transaction')->name('organizer.transcation');
   Route::post('/transcation/delete', 'BackEnd\Organizer\OrganizerController@destroy')->name('organizer.transcation.delete');

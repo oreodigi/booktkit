@@ -129,7 +129,7 @@
                                 <input type="hidden" name="box_office_enabled" value="{{ $event->box_office_enabled ? 1 : 0 }}">
                                 @if ($event->box_office_enabled)
                                 <div class="card border-danger mb-4">
-                                  <div class="card-header"><strong>{{ __('Special Event — Box Office') }}</strong></div>
+                                  <div class="card-header"><strong>{{ __('Box Office Event — Box Office') }}</strong></div>
                                   <div class="card-body">
                                     <div class="form-group"><label>{{ __('Re-entry Policy') }} *</label>
                                       <select name="reentry_policy" class="form-control">

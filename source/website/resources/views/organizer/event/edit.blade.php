@@ -126,7 +126,7 @@
                                 <input type="hidden" name="box_office_enabled" value="{{ $event->box_office_enabled ? 1 : 0 }}">
                                 @if ($event->box_office_enabled)
                                 <div class="card border-danger mb-4">
-                                  <div class="card-header"><strong>{{ __('Special Event — Box Office') }}</strong></div>
+                                  <div class="card-header"><strong>{{ __('Box Office Event — Box Office') }}</strong></div>
                                   <div class="card-body">
                                     <div class="form-group"><label>{{ __('Re-entry Policy') }} *</label>
                                       <select name="reentry_policy" class="form-control">
@@ -678,25 +678,8 @@
                                                                 </div>
                                                             </div>
                                                             <!-- latitude and longitude -->
-                                                            <div
-                                                                class="col-lg-4 {{ $language->is_default == 1 ? '' : 'd-none' }}">
-                                                                <div class="form-group">
-                                                                    <label for="">{{ __('Latitude') }}</label>
-                                                                    <input type="text" name="latitude"
-                                                                        value="{{ @$event->latitude }}"
-                                                                        placeholder="Latitude"
-                                                                        class="form-control latitude">
-                                                                </div>
-                                                            </div>
-                                                            <div
-                                                                class="col-lg-4 {{ $language->is_default == 1 ? '' : 'd-none' }}">
-                                                                <div class="form-group">
-                                                                    <label for="">{{ __('Longitude') }}</label>
-                                                                    <input type="text" placeholder="Longitude"
-                                                                        value="{{ @$event->longitude }}"
-                                                                        name="longitude" class="form-control longitude">
-                                                                </div>
-                                                            </div>
+                                                            <input type="hidden" name="latitude" value="{{ @$event->latitude }}" class="latitude">
+                                                            <input type="hidden" name="longitude" value="{{ @$event->longitude }}" class="longitude">
                                                             @if ($settings->event_country_status == 1)
                                                                 @php
                                                                     $country = \DB::table('event_countries')
