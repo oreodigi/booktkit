@@ -17,11 +17,54 @@ nav.on("click","button",function(){show(+this.dataset.step)});$(".btk-prev").on(
 function selectText(sel,text){var el=document.querySelector(sel);if(!el)return false;var opt=[].slice.call(el.options).find(function(o){return o.text.trim().toLowerCase()===text.toLowerCase()});if(opt){el.value=opt.value;$(el).trigger("change");return true}return false}
 function defaults(){if(new URLSearchParams(location.search).get("type")!=="venue")return;var tries=0,iv=setInterval(function(){tries++;document.querySelectorAll(".countryDropdown").forEach(function(c){if(!c.value)selectText('[name="'+c.name+'"]',"India")});document.querySelectorAll(".stateDropdown").forEach(function(s){if(!s.value)selectText('[name="'+s.name+'"]',"Maharashtra")});document.querySelectorAll(".cityDropdown").forEach(function(c){if(!c.value)selectText('[name="'+c.name+'"]',"Jalgaon")});if(tries>25)clearInterval(iv)},300)}
 restore();defaults();show(1);
-function process(file,w,h,done){if(!file||!file.type.match(/^image\//))return;var url=URL.createObjectURL(file),img=new Image();img.onload=function(){var x=50,y=50,zoom=100;var html='<div class="modal fade" id="btkCropModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Crop / resize image</h5><button type="button" class="close" data-dismiss="modal">×</button></div><div class="modal-body"><div class="btk-crop-preview" style="aspect-ratio:'+w+'/'+h+'"><img src="'+url+'"></div><label>Horizontal position</label><input class="custom-range btk-x" type="range" min="0" max="100" value="50"><label>Vertical position</label><input class="custom-range btk-y" type="range" min="0" max="100" value="50"><label>Zoom / crop</label><input class="custom-range btk-z" type="range" min="100" max="200" value="100"><small class="form-text text-muted">Required output: '+w+'×'+h+'. The saved JPEG will be compressed automatically to a maximum of 1 MB.</small></div><div class="modal-footer"><button class="btn btn-primary btk-apply" type="button">Use this image</button></div></div></div></div>';$("body").append(html);var m=$("#btkCropModal"),p=m.find("img");function preview(){p.css({objectPosition:x+"% "+y+"%",transform:"scale("+(zoom/100)+")"})}m.find(".btk-x,.btk-y,.btk-z").on("input",function(){x=+m.find(".btk-x").val();y=+m.find(".btk-y").val();zoom=+m.find(".btk-z").val();preview()});m.find(".btk-apply").on("click",function(){var sr=img.width/img.height,tr=w/h,sx=0,sy=0,sw=img.width,sh=img.height;if(sr>tr){sw=img.height*tr;sx=(img.width-sw)*(x/100)}else{sh=img.width/tr;sy=(img.height-sh)*(y/100)}sw/=zoom/100;sh/=zoom/100;sx=Math.max(0,Math.min(img.width-sw,sx+(img.width-sw-sx)*(x/100)));sy=Math.max(0,Math.min(img.height-sh,sy+(img.height-sh-sy)*(y/100)));var c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,sx,sy,sw,sh,0,0,w,h);function enc(q){c.toBlob(function(b){if(b.size>1024*1024&&q>.35)return enc(q-.07);if(b.size>1024*1024){alert("This image cannot be compressed below 1 MB. Please choose another image.");return}var out=new File([b],(file.name.replace(/\.[^.]+$/,"")||"event")+".jpg",{type:"image/jpeg"});m.modal("hide");setTimeout(function(){m.remove();URL.revokeObjectURL(url)},250);done(out,c.toDataURL("image/jpeg",q))},"image/jpeg",q)}enc(.9)});m.on("hidden.bs.modal",function(){if(document.body.contains(this)){m.remove();URL.revokeObjectURL(url)}});m.modal({backdrop:"static",keyboard:false})};img.src=url}
+function process(file,w,h,done){
+if(!file||!file.type.match(/^image\//))return;
+var url=URL.createObjectURL(file),img=new Image();
+img.onload=function(){
+var scale=Math.max(w/img.width,h/img.height),minScale=scale,maxScale=scale*3,tx=0,ty=0,drag=false,lastX=0,lastY=0;
+var html='<div class="modal fade btk-position-modal" id="btkCropModal" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><div><h5 class="modal-title">Position your image</h5><small class="text-muted">Drag the image to choose exactly what appears in the final '+w+'×'+h+' frame.</small></div><button type="button" class="close" data-dismiss="modal">×</button></div><div class="modal-body"><div class="btk-cover-stage" style="aspect-ratio:'+w+'/'+h+'"><img draggable="false" src="'+url+'"><div class="btk-cover-grid"></div></div><div class="btk-cover-tools"><button type="button" class="btn btn-light btn-sm btk-fit"><i class="fas fa-expand"></i> Reset</button><div class="btk-zoom-wrap"><i class="fas fa-search-minus"></i><input class="custom-range btk-z" type="range" min="100" max="300" value="100"><i class="fas fa-search-plus"></i></div><span class="btk-output-size">'+w+' × '+h+' px</span></div><p class="btk-editor-help mb-0"><i class="fas fa-arrows-alt"></i> Drag to reposition · use zoom for a tighter crop. Saved image is automatically optimized below 1 MB.</p></div><div class="modal-footer"><button class="btn btn-light" type="button" data-dismiss="modal">Cancel</button><button class="btn btn-primary btk-apply" type="button"><i class="fas fa-check"></i> Use this position</button></div></div></div></div>';
+$("body").append(html);var m=$("#btkCropModal"),stage=m.find(".btk-cover-stage"),p=m.find("img");
+function limits(){var sw=img.width*scale,sh=img.height*scale;return{x:Math.max(0,(sw-w)/2),y:Math.max(0,(sh-h)/2)}}
+function clamp(){var l=limits();tx=Math.max(-l.x,Math.min(l.x,tx));ty=Math.max(-l.y,Math.min(l.y,ty))}
+function render(){clamp();p.css({width:(img.width*scale)+"px",height:(img.height*scale)+"px",transform:"translate(calc(-50% + "+tx+"px),calc(-50% + "+ty+"px))"})}
+function point(e){var o=e.originalEvent,t=o.touches&&o.touches[0]?o.touches[0]:o.changedTouches&&o.changedTouches[0]?o.changedTouches[0]:o;return{x:t.clientX,y:t.clientY}}
+stage.on("mousedown touchstart",function(e){drag=true;var q=point(e);lastX=q.x;lastY=q.y;stage.addClass("is-dragging");e.preventDefault()});
+$(document).on("mousemove.btkCrop touchmove.btkCrop",function(e){if(!drag)return;var q=point(e);tx+=q.x-lastX;ty+=q.y-lastY;lastX=q.x;lastY=q.y;render();e.preventDefault()}).on("mouseup.btkCrop touchend.btkCrop",function(){drag=false;stage.removeClass("is-dragging")});
+m.find(".btk-z").on("input",function(){var old=scale;scale=minScale*(+this.value/100);var ratio=scale/old;tx*=ratio;ty*=ratio;render()});
+m.find(".btk-fit").on("click",function(){scale=minScale;tx=0;ty=0;m.find(".btk-z").val(100);render()});
+m.find(".btk-apply").on("click",function(){var c=document.createElement("canvas");c.width=w;c.height=h;var ctx=c.getContext("2d"),dw=img.width*scale,dh=img.height*scale,dx=(w-dw)/2+tx,dy=(h-dh)/2+ty;ctx.drawImage(img,dx,dy,dw,dh);function enc(q){c.toBlob(function(b){if(b.size>1024*1024&&q>.35)return enc(q-.07);if(b.size>1024*1024){alert("This image cannot be compressed below 1 MB. Please choose another image.");return}var out=new File([b],(file.name.replace(/\.[^.]+$/,"")||"event")+".jpg",{type:"image/jpeg"});m.modal("hide");setTimeout(function(){m.remove();URL.revokeObjectURL(url)},250);done(out,c.toDataURL("image/jpeg",q))},"image/jpeg",q)}enc(.9)});
+m.on("hidden.bs.modal",function(){$(document).off(".btkCrop");if(document.body.contains(this)){m.remove();URL.revokeObjectURL(url)}});render();m.modal({backdrop:"static",keyboard:false})
+};img.src=url
+}
 window.booktkitProcessEventImage=process;
 var ti=form.querySelector('input[name="thumbnail"]');if(ti){ti.dataset.btkEditorSkip="1";ti.dataset.imageWidth="320";ti.dataset.imageHeight="230";ti.dataset.imageMaxKb="1024";var $wrap=$(ti).closest(".form-group"),$remove=$('<button type="button" class="btn btn-danger btn-sm ml-2 btk-remove-thumb"><i class="fas fa-trash"></i> Remove image</button>');$(ti).closest(".mt-3").append($remove);$remove.hide();$wrap.on("booktkit:thumbnail-ready",function(){$remove.show()});
 ti.addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];if(!f||f.__btk)return;e.stopImmediatePropagation();process(f,320,230,function(out,data){Object.defineProperty(out,"__btk",{value:true});var dt=new DataTransfer();dt.items.add(out);ti.files=dt.files;$wrap.find(".uploaded-img").attr("src",data);$remove.show();try{localStorage.setItem(thumbKey,data)}catch(e){}save()})},true);
 $remove.on("click",function(){ti.value="";$wrap.find(".uploaded-img").attr("src",baseUrl+"/assets/admin/img/noimage.jpg");$remove.hide();localStorage.removeItem(thumbKey)});
 try{var td=localStorage.getItem(thumbKey);if(td){fetch(td).then(function(r){return r.blob()}).then(function(b){var f=new File([b],"draft-thumbnail.jpg",{type:"image/jpeg"}),dt=new DataTransfer();Object.defineProperty(f,"__btk",{value:true});dt.items.add(f);ti.files=dt.files;$wrap.find(".uploaded-img").attr("src",td);$remove.show()})}}catch(e){}}
+
+// Always-visible gallery manager: independent of Dropzone's internal preview controls.
+var $dz=$("#my-dropzone");
+if($dz.length){
+  var $manager=$('<div class="btk-gallery-manager"><div class="btk-gallery-manager-title">Uploaded gallery images <small>Use Remove to delete an image before saving.</small></div><div class="btk-gallery-items"></div></div>');
+  $dz.after($manager);
+  window.addEventListener("booktkit:gallery-uploaded",function(e){
+    var d=e.detail||{}; if(!d.id)return;
+    var src=d.preview_url||"";
+    var $card=$('<div class="btk-gallery-card" data-gallery-id="'+d.id+'"><img src="'+src+'" alt="Gallery image"><button type="button" class="btn btn-danger btn-sm btk-gallery-remove"><i class="fas fa-trash"></i> Remove</button></div>');
+    $manager.find(".btk-gallery-items").append($card);
+  });
+  $manager.on("click",".btk-gallery-remove",function(){
+    var $card=$(this).closest(".btk-gallery-card"),id=$card.data("gallery-id"),btn=$(this);
+    btn.prop("disabled",true).text("Removing...");
+    if(typeof window.booktkitRemoveGalleryImage==="function"){
+      window.booktkitRemoveGalleryImage(id);
+      $("#slider"+id).remove();
+      $card.fadeOut(150,function(){$card.remove()});
+      var dzEl=document.getElementById("my-dropzone");
+      if(dzEl&&dzEl.dropzone){dzEl.dropzone.files.slice().forEach(function(file){if(String(file.serverFileId)===String(id))dzEl.dropzone.removeFile(file)})}
+    }
+  });
+}
+
 form.addEventListener("submit",function(){setTimeout(function(){if(!$("#eventErrors").is(":visible")){localStorage.removeItem(key);localStorage.removeItem(thumbKey)}},1500)});
 })(jQuery);
