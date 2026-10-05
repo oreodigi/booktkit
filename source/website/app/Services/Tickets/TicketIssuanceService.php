@@ -24,6 +24,7 @@ class TicketIssuanceService
             }
 
             $definitions = $this->definitions($booking);
+            $legacyScanned = array_map('strval', json_decode((string) $booking->scanned_tickets, true) ?: []);
             $issued = [];
 
             foreach ($definitions as $definition) {
@@ -41,6 +42,8 @@ class TicketIssuanceService
                     'token_hash' => hash('sha256', $token),
                     'status' => 'active',
                     'issued_at' => now(),
+                    'checked_in_at' => in_array((string) $definition['legacy_unique_id'], $legacyScanned, true) ? ($booking->updated_at ?: now()) : null,
+                    'checked_in_by_type' => in_array((string) $definition['legacy_unique_id'], $legacyScanned, true) ? 'legacy' : null,
                 ]);
                 $ticket->setAttribute('plain_token', $token);
                 $issued[] = $ticket;
