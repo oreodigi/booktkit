@@ -1136,6 +1136,6 @@
     </div>
 @endsection
 
-@push('scripts')
-<script src="{{ asset('assets/front/js/booktkit-hero-slider.js') }}" defer></script>
-@endpush
+@section('custom-script')
+<script src="{{ asset('assets/front/js/booktkit-hero-slider.js') }}"></script>
+@endsection
