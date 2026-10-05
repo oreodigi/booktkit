@@ -51,6 +51,15 @@
           </div>
         </form>
 
+        <li class="nav-item mr-3">
+          <a href="{{ route('organizer.boxoffice.index') }}" class="btn btn-sm"
+            style="color:#fff !important;background:#1f2937 !important;border-color:#1f2937 !important;font-weight:700;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;"
+            title="{{ __('Open Box Office POS') }}" aria-label="{{ __('Open Box Office POS') }}">
+            <i class="fas fa-ticket-alt" aria-hidden="true"></i>
+            <span>{{ __('POS') }}</span>
+          </a>
+        </li>
+
         {{-- Temporary testing utility: clears stale browser/PWA caches but preserves auth cookies. --}}
         <li class="nav-item mr-3">
           <button type="button" class="btn btn-sm btn-danger booktkit-backend-refresh"
