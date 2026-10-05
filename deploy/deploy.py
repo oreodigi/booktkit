@@ -164,6 +164,7 @@ class Deployment:
                     name=None
                     if member.name.startswith('source/website/'):
                         name=member.name[len('source/website/'):]
+                        if name.endswith('/.gitignore'): continue
                         if not allowed(name): raise RuntimeError('Protected runtime path tracked: '+name)
                         if self.args.target=='staging' and name=='.htaccess':continue
                     elif member.name=='deploy/staging.htaccess':
