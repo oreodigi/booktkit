@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\TicketSettingRequest;
 use App\Models\OrganizerAiBalance;
 use Illuminate\Support\Facades\Log;
+use App\Services\Payments\PaidEventPayoutGuard;
 
 class EventController extends Controller
 {
@@ -355,6 +356,11 @@ class EventController extends Controller
 
     if (Auth::guard('organizer')->user()->id != $event->organizer_id) {
       return back();
+    }
+
+    if ((int)$request['status'] === 1 && !app(PaidEventPayoutGuard::class)->canPublish($event)) {
+      Session::flash('warning', 'Complete Payouts & KYC before publishing an event with paid tickets. Free events can be published immediately.');
+      return redirect()->back();
     }
 
     $event->update([
