@@ -12,7 +12,7 @@ class OrganizerPaymentProfile extends Model
     protected $casts = [
         'gst_verified' => 'boolean',
         'split_enabled' => 'boolean',
-        'metadata' => 'encrypted:array',
+        'metadata' => 'array',
         'split_suspended' => 'boolean',
         'route_terms_accepted_at' => 'datetime',
         'kyc_remarks' => 'array',
