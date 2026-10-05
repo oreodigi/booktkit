@@ -40,7 +40,7 @@ class RazorpayRouteService {
   $order->refund_status=$order->refunded_amount >= $order->customer_total ? 'full' : 'partial'; $order->save();
   $transfer=$order->transfers()->whereNotNull('gateway_transfer_id')->first();
   if($transfer && $transfer->amount > $transfer->reversed_amount){
-   $target=(int) round($amountPaise * ((int)$order->organizer_amount / max(1,(int)$order->customer_total));
+   $target=(int) round($amountPaise * ((int)$order->organizer_amount / max(1,(int)$order->customer_total)));
    $reverseAmount=min($target,(int)$transfer->amount-(int)$transfer->reversed_amount);
    if($reverseAmount>0){
     $reversal=$this->api->transfer->fetch($transfer->gateway_transfer_id)->reverse(['amount'=>$reverseAmount,'notes'=>['payment_order_uuid'=>$order->uuid,'refund_id'=>$refund->gateway_refund_id]]);
