@@ -115,7 +115,7 @@ class EventController extends Controller
 
     if ($hasFile) {
       $validator = Validator::make($request->all(), [
-        'file' => 'required|image|mimes:jpg,jpeg,png|max:500'
+        'file' => 'required|image|mimes:jpg,jpeg,png|max:1024'
       ], [
         'file.required' => 'Please upload an image file.',
         'file.image'    => 'The uploaded file must be an image.',
