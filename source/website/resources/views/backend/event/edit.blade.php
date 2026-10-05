@@ -881,14 +881,14 @@
 
 @section('script')
     @if ($settings->google_map_status == 1)
-        <script src="{{ asset('assets/admin/js/edit-event-location.js') }}"></script>
+        <script src="{{ asset('assets/admin/js/event-location.js') }}?v={{ @filemtime(public_path('assets/admin/js/event-location.js')) }}"></script>
         <script
             src="https://maps.googleapis.com/maps/api/js?key={{ $settings->google_map_api_key }}&libraries=places&callback=initMap"
             async defer></script>
     @endif
     <script type="text/javascript" src="{{ asset('assets/admin/js/admin-partial.js') }}"></script>
     <script src="{{ asset('assets/admin/js/admin_dropzone.js') }}"></script>
-    <script src="{{ asset('assets/admin/js/event-wizard.js') }}"></script>
+    <script src="{{ asset('assets/admin/js/event-wizard.js') }}?v={{ @filemtime(public_path('assets/admin/js/event-wizard.js')) }}"></script>
     <script>
         $(document).ready(function() {
             $('.js-example-basic-single').select2();
