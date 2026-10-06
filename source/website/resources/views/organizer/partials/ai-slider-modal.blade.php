@@ -29,10 +29,11 @@
                     <input type="hidden" id="ai_slider_engine" name="engine" value="{{ $aiEngines[0] ?? '' }}">
                 @endif
                 <div class="form-group">
-                    <label class="mb-1 d-block label-color-4">{{ __('Prompt') }} <span
+                    <label class="mb-1 d-block label-color-4">{{ __('Describe the event images you need') }} <span
                             class="text-danger">*</span></label>
                     <textarea id="ai_slider_prompt" class="form-control" rows="4"
-                        placeholder="{{ __('Example') . ': ' . __('Modern product showcase, clean background, commercial look') }}"></textarea>
+                        placeholder="{{ __('Include: event name/type, audience, venue or city, mood/theme, key visual elements, colours, and any text you want visible. Example: JITO JBN business networking event in Delhi, premium professional audience, modern conference setting, navy and gold branding, people networking, clean banner composition, no logos.') }}"></textarea>
+                    <small class="form-text text-muted">{{ __('Tip: describe the subject, setting, audience, mood, colours and composition. Do not request copyrighted logos unless you have permission.') }}</small>
                 </div>
 
                 <div class="row">
@@ -41,6 +42,7 @@
                             <label class="label-color-4">{{ __('Number of Images') }}</label>
                             <input type="number" min="1" max="10" class="form-control"
                                 id="ai_slider_count" value="3">
+                            <small class="form-text text-info"><strong id="aiSliderCost">3 AI image credits</strong> — {{ __('1 image = 1 image credit. Only successfully generated images are charged.') }}</small>
                         </div>
                     </div>
 
@@ -104,7 +106,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Close') }}</button>
                 <button type="button" class="btn btn-primary"
-                    id="aiSliderConfirmBtn">{{ __('Generate Images') }}</button>
+                    id="aiSliderConfirmBtn">{{ __('Generate Images') }} · <span id="aiSliderButtonCost">3 credits</span></button>
             </div>
         </div>
     </div>
