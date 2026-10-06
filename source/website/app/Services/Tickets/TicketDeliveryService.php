@@ -58,8 +58,22 @@ class TicketDeliveryService
         $body = str_replace(['{customer_name}','{order_id}','{website_title}'], [$name,$booking->booking_id,$info->website_title ?? 'BookTkit'], $body);
         $body = str_replace('{title}', e($eventInfo->title ?? 'Event'), $body);
         $body = str_replace('{meeting_url}', $event->event_type === 'online' ? e((string)$event->meeting_url) : '', $body);
-        $body .= '<p><strong>Your secure QR ticket(s) are attached as a PDF.</strong> Each QR is valid for one admission only.</p>';
-        if (is_numeric($booking->customer_id)) $body .= '<p><a href="' . route('customer.booking_details', $booking->id) . '">View your tickets on BookTkit</a></p>';
+        $ticketCount = app(TicketIssuanceService::class)->ensureForBooking($booking);
+        $ticketCount = count($ticketCount);
+        $eventDate = $booking->event_date ?: trim(($event->start_date ?? '') . ' ' . ($event->start_time ?? ''));
+        $venue = $event->event_type === 'online' ? __('Online event') : trim((string) ($eventInfo->address ?? ''));
+
+        $body .= '<div style="margin:24px 0;padding:18px;border:1px solid #e7e7e7;border-radius:10px;background:#fafafa">'
+            . '<h2 style="margin:0 0 12px">Booking confirmed</h2>'
+            . '<p style="margin:6px 0"><strong>Event:</strong> ' . e($eventInfo->title ?? 'Event') . '</p>'
+            . '<p style="margin:6px 0"><strong>Booking ID:</strong> ' . e($booking->booking_id) . '</p>'
+            . '<p style="margin:6px 0"><strong>Booked by:</strong> ' . e($name) . '</p>'
+            . '<p style="margin:6px 0"><strong>Tickets:</strong> ' . $ticketCount . '</p>'
+            . ($eventDate ? '<p style="margin:6px 0"><strong>Date:</strong> ' . e($eventDate) . '</p>' : '')
+            . ($venue ? '<p style="margin:6px 0"><strong>Venue:</strong> ' . e($venue) . '</p>' : '')
+            . '</div>';
+        $body .= '<p><strong>Your BookTkit ticket PDF is attached.</strong> It contains one ticket and one secure QR credential per attendee. Do not share the QR codes publicly.</p>';
+        if (is_numeric($booking->customer_id)) $body .= '<p><a style="display:inline-block;padding:11px 18px;background:#f2b705;color:#111;text-decoration:none;border-radius:6px;font-weight:700" href="' . route('customer.booking_details', $booking->id) . '">View tickets on BookTkit</a></p>';
 
         $mail = new \App\Support\EnvironmentMailer(true); $mail->CharSet = 'UTF-8'; $mail->Encoding = 'base64';
         if ((int)($info->smtp_status ?? 0) === 1) {
