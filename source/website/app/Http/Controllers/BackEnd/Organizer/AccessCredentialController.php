@@ -49,7 +49,7 @@ class AccessCredentialController extends Controller
         $data = $request->validate([
             'credential_mode' => ['required', Rule::in(['ticket_only','physical_required','hybrid'])],
             'credential_types' => 'nullable|array',
-            'credential_types.*' => [Rule::in(['qr_wristband','rfid_card','nfc_wristband','qr_badge','physical_id'])],
+            'credential_types.*' => [Rule::in(['qr_wristband','rfid_wristband','rfid_card','nfc_wristband','qr_badge','physical_id'])],
             'reentry_policy' => ['required', Rule::in(['none','limited','unlimited'])],
             'max_reentries' => 'nullable|integer|min:1|max:1000',
             'max_replacements' => 'nullable|integer|min:1|max:100',
