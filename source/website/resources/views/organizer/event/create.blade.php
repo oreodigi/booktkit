@@ -121,14 +121,26 @@
                                     <button type="button" class="btn btn-sm btn-outline-primary" id="addBoxOfficeLocation">{{ __('Add Counter') }}</button>
                                   </div>
                                 </div>
-                                <script>
-                                document.addEventListener('DOMContentLoaded', function () {
-                                  const wrap=document.getElementById('boxOfficeLocations'), add=document.getElementById('addBoxOfficeLocation');
-                                  if (!wrap || !add) return;
-                                  add.addEventListener('click', function(){ const i=wrap.children.length; const row=document.createElement('div'); row.className='row mb-2 box-office-location-row'; row.innerHTML='<div class="col-md-5"><input class="form-control" name="box_office_locations['+i+'][name]" placeholder="Counter name" required></div><div class="col-md-6"><input class="form-control" name="box_office_locations['+i+'][address]" placeholder="Counter address"></div><div class="col-md-1"><button type="button" class="btn btn-danger remove-box-office-location">&times;</button></div>'; wrap.appendChild(row); });
-                                  wrap.addEventListener('click', function(e){ if(e.target.closest('.remove-box-office-location') && wrap.children.length>1) e.target.closest('.box-office-location-row').remove(); });
-                                });
-                                </script>
+                                @push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const wrap = document.getElementById('boxOfficeLocations');
+  const add = document.getElementById('addBoxOfficeLocation');
+  if (!wrap || !add) return;
+  add.addEventListener('click', function () {
+    const i = wrap.children.length;
+    const row = document.createElement('div');
+    row.className = 'row mb-2 box-office-location-row';
+    row.innerHTML = '<div class="col-md-5"><input class="form-control" name="box_office_locations['+i+'][name]" placeholder="Counter name" required></div><div class="col-md-6"><input class="form-control" name="box_office_locations['+i+'][address]" placeholder="Counter address"></div><div class="col-md-1"><button type="button" class="btn btn-danger remove-box-office-location">&times;</button></div>';
+    wrap.appendChild(row);
+  });
+  wrap.addEventListener('click', function (e) {
+    const remove = e.target.closest('.remove-box-office-location');
+    if (remove && wrap.children.length > 1) remove.closest('.box-office-location-row').remove();
+  });
+});
+</script>
+@endpush
                                 @endif
                                 <div class="form-group">
                                     <label for="">{{ __('Thumbnail Image') . '*' }}</label>
