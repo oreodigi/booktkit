@@ -50,7 +50,7 @@ class RazorpayController extends Controller
     $snapshot=['items'=>$pricing['items'],'quantity'=>$pricing['quantity'],'subtotal'=>$pricing['subtotal'],'discount'=>$pricing['discount'],'tax_rate'=>$taxRate,'sales_channel'=>'web'];
     $idem='web-'.hash('sha256',session()->getId().'|'.$event_id.'|'.microtime(true));
     $order=app(PaymentOrderService::class)->createFromPricing($event->id,$event->organizer_id,$pricing['ticket_amount'],$tax,$idem,$snapshot);
-    $order->customer_snapshot=['customer_id'=>auth()->id()?:'guest','fname'=>$request->fname,'lname'=>$request->lname,'email'=>$request->email,'phone'=>$request->phone,
+    $order->customer_snapshot=['customer_id'=>(\Illuminate\Support\Facades\Auth::guard('customer')->id() ?: 'guest'),'fname'=>$request->fname,'lname'=>$request->lname,'email'=>$request->email,'phone'=>$request->phone,
       'country'=>$request->country,'state'=>$request->state,'city'=>$request->city,'zip_code'=>$request->zip_code,'address'=>$request->address,'event_date'=>$request->event_date];
     $order->save(); $gateway=app(RazorpayRouteService::class)->createOrder($order);
     $notifyURL=route('event_booking.razorpay.notify');
