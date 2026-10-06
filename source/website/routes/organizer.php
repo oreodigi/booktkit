@@ -82,6 +82,10 @@ Route::prefix('/organizer/ai-token-purchase')->group(function () {
 });
 
 Route::prefix('/organizer')->middleware('auth:organizer', 'Deactive:organizer', 'EmailStatus:organizer', 'adminLang')->group(function () {
+  Route::get('/events/{eventId}/passes', 'BackEnd\\Organizer\\EventPassController@index')->name('organizer.event.passes.index');
+  Route::post('/events/{eventId}/passes', 'BackEnd\\Organizer\\EventPassController@store')->name('organizer.event.passes.store');
+  Route::put('/events/{eventId}/passes/{passId}', 'BackEnd\\Organizer\\EventPassController@update')->name('organizer.event.passes.update');
+  Route::delete('/events/{eventId}/passes/{passId}', 'BackEnd\\Organizer\\EventPassController@destroy')->name('organizer.event.passes.destroy');
   Route::get('/access-control', 'BackEnd\\Organizer\\AccessCredentialController@index')->name('organizer.access.index');
   Route::put('/access-control/events/{eventId}/policy', 'BackEnd\\Organizer\\AccessCredentialController@savePolicy')->name('organizer.access.policy');
   Route::post('/access-control/batches', 'BackEnd\\Organizer\\AccessCredentialController@createBatch')->name('organizer.access.batch');
