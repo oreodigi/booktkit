@@ -53,6 +53,7 @@ class AccessCredentialController extends Controller
             'reentry_policy' => ['required', Rule::in(['none','limited','unlimited'])],
             'max_reentries' => 'nullable|integer|min:1|max:1000',
             'max_replacements' => 'nullable|integer|min:1|max:100',
+            'replacement_fee' => 'nullable|numeric|min:0|max:100000',
         ]);
         if ($data['reentry_policy'] === 'limited' && empty($data['max_reentries'])) {
             return back()->withErrors(['max_reentries' => 'Set the maximum number of re-entries.']);
@@ -67,6 +68,7 @@ class AccessCredentialController extends Controller
                 'exit_scan_required' => $request->boolean('exit_scan_required'),
                 'replacement_allowed' => $request->boolean('replacement_allowed'),
                 'identity_verification_mode' => 'ticket',
+                'metadata' => array_merge((array)($policyMetadata = optional(EventAccessPolicy::where('event_id',$eventId)->first())->metadata), ['replacement_fee_paise'=>(int)round(((float)($data['replacement_fee']??0))*100)]),
                 'is_enabled' => $request->boolean('is_enabled'),
             ])
         );
@@ -106,6 +108,7 @@ class AccessCredentialController extends Controller
             'ticket_reference' => 'required|string|max:255',
             'credential_identifier' => 'required|string|max:255',
             'reason' => ['required', Rule::in(['lost','damaged','unreadable','rfid_malfunction','staff_replacement','other'])],
+            'payment_reference' => 'nullable|string|max:190',
         ]);
         $ticket = $this->resolveTicket($data['ticket_reference'], $organizerId);
         $policy = EventAccessPolicy::where('event_id', $ticket->event_id)->where('organizer_id', $organizerId)->first();
@@ -116,7 +119,9 @@ class AccessCredentialController extends Controller
         }
         $credential = $inventory->resolve($data['credential_identifier']);
         abort_unless($credential && (int) $credential->organizer_id === $organizerId, 404);
-        $replacement->replace($ticket->id, $credential->id, $data['reason'], 'organizer', $organizerId);
+        $fee=(int)data_get($policy->metadata,'replacement_fee_paise',0);
+        if($fee>0 && empty($data['payment_reference'])) return back()->withErrors(['payment_reference'=>'Replacement fee payment must be recorded before activating the new credential.']);
+        $replacement->replace($ticket->id,$credential->id,$data['reason'],'organizer',$organizerId,$fee,$data['payment_reference']??null);
         return back()->with('success', 'Old credential revoked and replacement activated.');
     }
     public function createZone(Request $request)
