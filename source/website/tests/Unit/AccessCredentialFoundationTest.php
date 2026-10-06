@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use App\Models\OrganizerStaff;
 use App\Services\Access\CredentialInventoryService;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class AccessCredentialFoundationTest extends TestCase
 {
