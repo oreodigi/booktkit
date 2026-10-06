@@ -42,6 +42,8 @@ class OpenAiImageEngine implements AiImageEngineInterface
       'prompt' => $finalPrompt,
       'n'      => 1,
       'size'   => $sizeStr,
+      'quality' => 'low',
+      'output_format' => 'jpeg',
      ];
 
     try {
@@ -93,7 +95,7 @@ class OpenAiImageEngine implements AiImageEngineInterface
         return '';
       }
 
-      $path = $this->storageBase('oa_') . '.png';
+      $path = $this->storageBase('oa_') . '.jpg';
       Storage::disk('public')->put($path, $bytes);
 
       $this->resizeStoredImage($path, $targetW, $targetH);
