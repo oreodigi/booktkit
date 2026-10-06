@@ -51,7 +51,7 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> login(String username, String password) async {
+  Future<bool> login(String username, String password, {int? organizerId}) async {
     if (username.trim().isEmpty || password.isEmpty) return false;
     try {
       _lastError = null;
@@ -60,6 +60,7 @@ class AuthProvider extends ChangeNotifier {
         username: username.trim(),
         password: password,
         deviceName: deviceName,
+        organizerId: organizerId,
       );
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_keyLoggedIn, true);
