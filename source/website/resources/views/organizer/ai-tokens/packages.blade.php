@@ -24,6 +24,8 @@
     </ul>
   </div>
 
+  <div class="card mb-4"><div class="card-header"><div class="card-title">{{ __('How BookTKIT AI credits work') }}</div></div><div class="card-body"><div class="row"><div class="col-md-4"><h5>{{ __('Event content') }}</h5><p class="mb-0">{{ __('AI writes titles, descriptions, SEO and other event copy. Content usage is deducted from the Content Tokens included in your active engine package.') }}</p></div><div class="col-md-4"><h5>{{ __('AI images') }}</h5><p class="mb-0"><strong>{{ __('1 successfully generated image = 1 image credit.') }}</strong> {{ __('Failed generations are not charged. The generator shows the required credits before you submit.') }}</p></div><div class="col-md-4"><h5>{{ __('What you pay') }}</h5><p class="mb-0">{{ __('You pay only the package price shown below. Each card clearly lists the Content Tokens and Image Credits included for that AI engine.') }}</p></div></div><hr><p class="mb-0 text-muted">{{ __('Select an AI engine for which you have an active balance. When a package is exhausted, activate another package to continue. Free packages activate without a payment gateway.') }}</p></div></div>
+
   <div class="row">
     @forelse ($packages as $package)
       <div class="col-md-6 col-lg-4">
