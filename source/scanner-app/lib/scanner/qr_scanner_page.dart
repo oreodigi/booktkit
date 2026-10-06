@@ -214,6 +214,12 @@ class _QrScannerPageState extends State<QrScannerPage> {
           body: Stack(
             fit: StackFit.expand,
             children: [
+              Positioned(top: 16,left: 24,right: 24,child: SafeArea(child: Container(padding: const EdgeInsets.all(6),decoration: BoxDecoration(color: Colors.black.withValues(alpha: .72),borderRadius: BorderRadius.circular(14)),child: Row(children:[
+                Expanded(child: ElevatedButton.icon(onPressed: ()=>scanner.setDirection('entry'),icon: const Icon(Icons.login),label: const Text('ENTRY'),style: ElevatedButton.styleFrom(backgroundColor: scanner.direction=='entry'?Colors.green:Colors.grey.shade700,foregroundColor: Colors.white))),
+                const SizedBox(width:8),
+                Expanded(child: ElevatedButton.icon(onPressed: ()=>scanner.setDirection('exit'),icon: const Icon(Icons.logout),label: const Text('EXIT'),style: ElevatedButton.styleFrom(backgroundColor: scanner.direction=='exit'?Colors.orange:Colors.grey.shade700,foregroundColor: Colors.white))),
+              ])))),
+
               // Only render QRView when scanner tab is active
               if (widget.isActive)
                 LayoutBuilder(
