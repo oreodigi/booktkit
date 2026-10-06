@@ -184,18 +184,19 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <div class="form-group mt-1">
-                                            <label for="">{{ __('Date Type') . '*' }}</label>
+                                            <label for="">{{ __('Schedule Type') . '*' }}</label>
+                                            <p class="text-muted mb-2">{{ __('Choose one continuous event period, or multiple separate sessions/occurrences.') }}</p>
                                             <div class="selectgroup w-100">
                                                 <label class="selectgroup-item">
                                                     <input type="radio" name="date_type" value="single"
                                                         class="selectgroup-input eventDateType" checked>
-                                                    <span class="selectgroup-button">{{ __('Single') }}</span>
+                                                    <span class="selectgroup-button">{{ __('One Continuous Schedule') }}</span>
                                                 </label>
 
                                                 <label class="selectgroup-item">
                                                     <input type="radio" name="date_type" value="multiple"
                                                         class="selectgroup-input eventDateType">
-                                                    <span class="selectgroup-button">{{ __('Multiple') }}</span>
+                                                    <span class="selectgroup-button">{{ __('Multiple Sessions') }}</span>
                                                 </label>
                                             </div>
                                         </div>
@@ -223,6 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     </div>
                                 </div>
 
+                                <div class="row"><div class="col-12"><small class="text-muted">{{ __('A continuous event may start on one day and end on a later day, for example a multi-day festival that remains one occurrence.') }}</small></div></div>
                                 <div class="row" id="single_dates">
                                     <div class="col-lg-3">
                                         <div class="form-group">
@@ -256,6 +258,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                                 <div class="row">
                                     <div class="col-lg-12 d-none" id="multiple_dates">
+                                        <p class="text-muted">{{ __('Add each independently scheduled session or occurrence as its own row. Each session has its own start and end.') }}</p>
                                         <div class="form-group">
                                             <table class="table table-bordered ">
                                                 <thead>
@@ -549,7 +552,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                                         </div>
                                                     </div>
 
-                                                    @if (request()->input('type') == 'venue')
+                                                    @if (in_array(request()->input('type'), ['venue', 'box_office'], true))
                                                         <div class="row">
                                                             <div class="col-lg-12">
                                                                 <div class="form-group">
