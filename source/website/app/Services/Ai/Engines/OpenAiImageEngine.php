@@ -33,7 +33,7 @@ class OpenAiImageEngine implements AiImageEngineInterface
 
     [$targetW, $targetH] = $this->resolveSize((string)($data['size'] ?? 'square_1024'));
 
-    $model = (string) config('ai.openai_image_model', 'dall-e-2');
+    $model = (string) config('ai.openai_image_model', 'gpt-image-1.5');
     [$apiW, $apiH] = $this->normalizeOpenAiSize($targetW, $targetH, $model);
     $sizeStr = $apiW . 'x' . $apiH;
 
@@ -112,6 +112,13 @@ class OpenAiImageEngine implements AiImageEngineInterface
   private function normalizeOpenAiSize(int $w, int $h, string $model): array
   {
     $model = strtolower(trim($model));
+
+    // GPT Image supports 1024x1024, 1536x1024, 1024x1536
+    if (str_contains($model, 'gpt-image')) {
+      if ($w > $h) return [1536, 1024];
+      if ($h > $w) return [1024, 1536];
+      return [1024, 1024];
+    }
 
     // DALL-E 3 supports 1024x1024, 1024x1792, 1792x1024
     if (str_contains($model, 'dall-e-3')) {
