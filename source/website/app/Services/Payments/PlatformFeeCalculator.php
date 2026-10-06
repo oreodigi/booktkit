@@ -11,9 +11,9 @@ class PlatformFeeCalculator {
  public function calculateRule(int $ticketAmountPaise,?PaymentFeeRule $rule,?OrganizerPaymentProfile $legacyProfile=null): array {
   if(!$rule) return $this->calculate($ticketAmountPaise,$legacyProfile);
   $fee=(int)round($ticketAmountPaise*(float)$rule->percentage/100)+(int)$rule->fixed_amount;
-  if($rule->minimum_amount!==null)$fee=max($fee,(int)$rule->minimum_fee);
-  if($rule->maximum_amount!==null)$fee=min($fee,(int)$rule->maximum_fee);
-  return $this->totals($ticketAmountPaise,max(0,$fee),($rule->fee_bearer==='additional'?'customer':'organizer'),$rule);
+  if($rule->minimum_fee!==null)$fee=max($fee,(int)$rule->minimum_fee);
+  if($rule->maximum_fee!==null)$fee=min($fee,(int)$rule->maximum_fee);
+  return $this->totals($ticketAmountPaise,max(0,$fee),$rule->fee_bearer,$rule);
  }
  private function totals(int $ticket,int $fee,string $bearer,?PaymentFeeRule $rule): array {
   $customerPays=$bearer==='customer';return ['ticket_amount'=>$ticket,'platform_fee'=>$fee,'customer_total'=>$ticket+($customerPays?$fee:0),'organizer_amount'=>max(0,$ticket-($customerPays?0:$fee)),'fee_bearer'=>$customerPays?'additional':'included','fee_bearer_v2'=>$bearer,'fee_rule_id'=>$rule?->id,'fee_rule_version'=>$rule?->version];
