@@ -124,7 +124,7 @@ class EventFormService
             $end=Carbon::parse($data['end_date'].' '.$data['end_time']);
             $data['duration']=DurationCalulate($start,$end); $data['end_date_time']=$end;
         } else { $data['start_date']=$data['start_time']=$data['end_date']=$data['end_time']=null; }
-        $data['box_office_enabled'] = (bool)($data['box_office_enabled'] ?? false);
+        $data['box_office_enabled'] = ($data['event_type'] ?? null) === 'box_office' || (bool)($data['box_office_enabled'] ?? false);
         $data['reentry_policy'] = $data['box_office_enabled'] ? ($data['reentry_policy'] ?? 'none') : 'none';
         $data['max_reentries'] = $data['box_office_enabled'] && $data['reentry_policy'] === 'limited' ? ($data['max_reentries'] ?? null) : null;
         if (($data['event_type'] ?? null)==='online') { $data['latitude']=null; $data['longitude']=null; $data['box_office_enabled']=false; $data['reentry_policy']='none'; $data['max_reentries']=null; }
@@ -157,7 +157,7 @@ class EventFormService
             $content->description=Purifier::clean($data[$language->code.'_description']??'','youtube');
             $content->refund_policy=$data[$language->code.'_refund_policy']??null;
             $content->meta_keywords=$data[$language->code.'_meta_keywords']??null; $content->meta_description=$data[$language->code.'_meta_description']??null;
-            if (($data['event_type']??null)==='venue') {
+            if (in_array(($data['event_type']??null), ['venue','box_office'], true)) {
                 $content->address=$data[$language->code.'_address']??null; $content->country_id=$data[$language->code.'_country']??null;
                 $content->state_id=$data[$language->code.'_state']??null; $content->city_id=$data[$language->code.'_city']??null; $content->zip_code=$data[$language->code.'_zip_code']??null;
             } else { $content->address=null; $content->country_id=null; $content->state_id=null; $content->city_id=null; $content->zip_code=null; }
