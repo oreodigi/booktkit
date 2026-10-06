@@ -20,18 +20,21 @@ class PaymentController extends Controller {
    'items.*.ticket_id'=>'required|integer',
    'items.*.quantity'=>'required|integer|min:1|max:50',
    'items.*.variation'=>'nullable|string|max:255',
+   'items.*.pass_product_id'=>'nullable|integer',
+   'items.*.event_date_ids'=>'nullable|array', 'items.*.event_date_ids.*'=>'integer',
    'idempotency_key'=>'required|string|max:100',
    'customer'=>'required|array', 'customer.fname'=>'required|string|max:100', 'customer.lname'=>'required|string|max:100',
    'customer.email'=>'required|email|max:190', 'customer.phone'=>'required|string|max:30', 'customer.country'=>'required|string|max:100',
    'customer.address'=>'required|string|max:500', 'customer.state'=>'nullable|string|max:100', 'customer.city'=>'nullable|string|max:100',
    'customer.zip_code'=>'nullable|string|max:30', 'customer.customer_id'=>'nullable', 'customer.event_date'=>'nullable|date', 'customer.fcm_token'=>'nullable|string|max:500'
   ]);
-  $quote=$pricing->quote((int)$data['event_id'],$data['items']);
+  $channel=$r->user() ? 'mobile' : 'web';
+  $quote=$pricing->quote((int)$data['event_id'],$data['items'],$channel);
   $event=$quote['event'];
   $basic=\App\Models\BasicSettings\Basic::select('tax')->first();
   $taxRate=(float)($basic->tax ?? 0);
   $taxPaise=(int)round($quote['ticket_amount']*$taxRate/100);
-  $snapshot=['items'=>$quote['items'],'quantity'=>$quote['quantity'],'subtotal'=>$quote['subtotal'],'discount'=>$quote['discount'],'tax_rate'=>$taxRate,'sales_channel'=>$r->user() ? 'mobile' : 'web'];
+  $snapshot=['items'=>$quote['items'],'quantity'=>$quote['quantity'],'subtotal'=>$quote['subtotal'],'discount'=>$quote['discount'],'tax_rate'=>$taxRate,'sales_channel'=>$channel];
   $order=$orders->createFromPricing($event->id,$event->organizer_id,$quote['ticket_amount'],$taxPaise,$data['idempotency_key'],$snapshot);
   if(!$order->customer_snapshot){ $order->customer_snapshot=$data['customer']; $order->save(); }
   $gateway=$razorpay->createOrder($order);
