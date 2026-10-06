@@ -5,7 +5,7 @@ import '../home/models/dashboard_models.dart';
 
 const String apiBaseUrl = 'https://booktkit.com';
 
-enum UserRole { admin, organizer }
+enum UserRole { admin, organizer, staff }
 
 class CheckQrResponse {
   final String alertType;
@@ -68,7 +68,7 @@ class UserProfile {
   };
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
-    final role = json['role'] == 'admin' ? UserRole.admin : UserRole.organizer;
+    final role = json['role'] == 'admin' ? UserRole.admin : (json['role'] == 'staff' ? UserRole.staff : UserRole.organizer);
     return UserProfile(
       role: role,
       id: (json['id'] as num).toInt(),
@@ -116,6 +116,7 @@ class ApiClient {
     required String username,
     required String password,
     required String deviceName,
+    int? organizerId,
   }) async {
     // Try admin first, then organizer.
     final admin = await _tryLogin(
@@ -136,7 +137,17 @@ class ApiClient {
     );
     if (organizer != null) return organizer;
 
+    if (organizerId != null) {
+      final staff = await _tryStaffLogin(organizerId: organizerId, username: username, password: password, deviceName: deviceName);
+      if (staff != null) return staff;
+    }
     throw Exception('Invalid credentials');
+  }
+
+  Future<LoginSuccess?> _tryStaffLogin({required int organizerId,required String username,required String password,required String deviceName}) async {
+    final uri=_buildUri('/api/scanner/staff/login/submit',const {});
+    final resp=await _client.post(uri,headers:const {'Accept':'application/json'},body:{'organizer_id':organizerId.toString(),'username':username,'password':password,'device_name':deviceName});
+    if(resp.statusCode!=200)return null; final data=json.decode(resp.body) as Map<String,dynamic>; final s=data['staff'] as Map<String,dynamic>; return LoginSuccess(data['token'].toString(),UserProfile(role:UserRole.staff,id:(s['id'] as num).toInt(),username:(s['name']??username).toString()));
   }
 
   Future<LoginSuccess?> _tryLogin({
@@ -212,14 +223,13 @@ class ApiClient {
     required UserRole role,
     required String bookingId,
     String direction = 'entry',
+    int? gateId,
   }) async {
     if (apiBaseUrl.contains('YOUR_API_BASE_URL_HERE')) {
       throw Exception('Please set apiBaseUrl in lib/services/api_client.dart');
     }
 
-    final path = role == UserRole.admin
-        ? '/api/scanner/admin/check-qrcode'
-        : '/api/scanner/organizer/check-qrcode';
+    final path = role == UserRole.admin ? '/api/scanner/admin/check-qrcode' : (role == UserRole.staff ? '/api/scanner/staff/check-qrcode' : '/api/scanner/organizer/check-qrcode');
     final uri = _buildUri(path, const {});
 
     final resp = await _client.post(
@@ -229,7 +239,7 @@ class ApiClient {
         // If your backend expects a different token header, adjust here.
         'Authorization': 'Bearer $token',
       },
-      body: {'booking_id': bookingId, 'direction': direction},
+      body: {'booking_id': bookingId, 'direction': direction, if(gateId!=null) 'gate_id':gateId.toString()},
     );
 
     // Parse gracefully even on non-200s if server returns JSON
