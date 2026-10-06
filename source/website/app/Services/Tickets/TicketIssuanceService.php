@@ -7,6 +7,7 @@ use App\Models\Event\IssuedTicket;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use App\Models\Event\PassEntitlement;
 
 class TicketIssuanceService
 {
@@ -37,6 +38,7 @@ class TicketIssuanceService
                     'organizer_id' => $booking->organizer_id,
                     'customer_id' => is_numeric($booking->customer_id) ? (int) $booking->customer_id : null,
                     'ticket_type_id' => $definition['ticket_type_id'],
+                    'pass_product_id' => $definition['pass_product_id'] ?? null,
                     'legacy_unique_id' => $definition['legacy_unique_id'],
                     'ticket_name' => $definition['ticket_name'],
                     'token_hash' => hash('sha256', $token),
@@ -45,6 +47,9 @@ class TicketIssuanceService
                     'checked_in_at' => in_array((string) $definition['legacy_unique_id'], $legacyScanned, true) ? ($booking->updated_at ?: now()) : null,
                     'checked_in_by_type' => in_array((string) $definition['legacy_unique_id'], $legacyScanned, true) ? 'legacy' : null,
                 ]);
+                if (!empty($definition['pass_product_id']) && Schema::hasTable('pass_entitlements')) {
+                    foreach (($definition['event_date_ids'] ?? []) as $dateId) PassEntitlement::firstOrCreate(['issued_ticket_id'=>$ticket->id,'event_date_id'=>(int)$dateId],['pass_product_id'=>(int)$definition['pass_product_id'],'status'=>'active']);
+                }
                 $ticket->setAttribute('plain_token', $token);
                 $issued[] = $ticket;
             }
@@ -68,6 +73,8 @@ class TicketIssuanceService
                         'ticket_type_id' => isset($variation['ticket_id']) ? (int) $variation['ticket_id'] : null,
                         'legacy_unique_id' => $legacy ?: null,
                         'ticket_name' => $variation['name'] ?? 'Ticket',
+                        'pass_product_id' => $variation['pass_product_id'] ?? null,
+                        'event_date_ids' => $variation['event_date_ids'] ?? [],
                     ];
                 }
             }
