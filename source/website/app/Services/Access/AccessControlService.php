@@ -12,16 +12,21 @@ use Illuminate\Support\Facades\Schema;
 
 class AccessControlService
 {
-    public function scan(string $token, string $actorType, int $actorId, ?string $deviceName = null, ?string $ip = null, string $direction = 'entry'): array
+    public function scan(string $token, string $actorType, int $actorId, ?string $deviceName = null, ?string $ip = null, string $direction = 'entry', ?int $gateId = null, bool $override = false, ?string $overrideReason = null): array
     {
+        if ($override && (!$overrideReason || mb_strlen($overrideReason) < 5)) return $this->deny('Supervisor override requires a reason', 'override_reason_required');
         if (!in_array($direction, ['entry', 'exit'], true)) return $this->deny('Invalid admission direction', 'invalid_direction');
         if (!Schema::hasTable('issued_tickets')) return $this->deny('Invalid ticket', 'invalid_token');
 
-        return DB::transaction(function () use ($token, $actorType, $actorId, $deviceName, $ip, $direction) {
+        return DB::transaction(function () use ($token, $actorType, $actorId, $deviceName, $ip, $direction, $gateId, $override, $overrideReason) {
             [$ticket, $credential, $source] = $this->resolve($token);
             if (!$ticket || !$ticket->booking) return $this->deny('Invalid ticket or credential', 'invalid_token');
 
             $booking = $ticket->booking;
+            $gate = $gateId ? DB::table('event_gates')->where('id',$gateId)->where('event_id',$ticket->event_id)->where('active',1)->first() : null;
+            if ($gateId && !$gate) return $this->deny('Invalid gate for this event','invalid_gate',$ticket,$credential,$direction,$actorType,$actorId,$deviceName,$ip);
+            if ($gate && $gate->mode !== 'entry_exit' && $gate->mode !== $direction) return $this->deny('This gate does not allow '.strtoupper($direction),'gate_direction_denied',$ticket,$credential,$direction,$actorType,$actorId,$deviceName,$ip);
+            if ($override && !$this->actorCanOverride($booking->organizer_id,$actorType,$actorId)) return $this->deny('Supervisor override permission required','override_forbidden',$ticket,$credential,$direction,$actorType,$actorId,$deviceName,$ip);
             if (!$this->actorCanScan($ticket, $booking->organizer_id, $actorType, $actorId, $direction)) {
                 return $this->deny('You do not have permission', 'forbidden', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
             }
@@ -51,8 +56,8 @@ class AccessControlService
             }
 
             if ($direction === 'entry') {
-                if ($accessEnabled && $ticket->presence_state === 'inside') return $this->deny('Ticket holder is already inside', 'already_inside', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
-                if ($accessEnabled && (int) $ticket->entry_count > 0) {
+                if (!$override && $accessEnabled && $ticket->presence_state === 'inside') return $this->deny('Ticket holder is already inside', 'already_inside', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
+                if (!$override && $accessEnabled && (int) $ticket->entry_count > 0) {
                     if ($reentryPolicy === 'none') return $this->deny('Re-entry is not allowed', 'reentry_not_allowed', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
                     if ($reentryPolicy === 'limited' && ((int) $ticket->entry_count - 1) >= $maxReentries) return $this->deny('Re-entry limit reached', 'reentry_limit', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
                 }
@@ -62,7 +67,7 @@ class AccessControlService
                 $result = 'admitted';
             } else {
                 if (!$accessEnabled) return $this->deny('Exit scanning is not enabled for this event', 'exit_not_enabled', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
-                if ($ticket->presence_state !== 'inside') return $this->deny('Ticket holder is already outside', 'already_outside', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
+                if (!$override && $ticket->presence_state !== 'inside') return $this->deny('Ticket holder is already outside', 'already_outside', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
                 $ticket->exit_count = (int) $ticket->exit_count + 1;
                 $ticket->presence_state = 'outside';
                 $result = 'exited';
@@ -73,7 +78,7 @@ class AccessControlService
             $ticket->checked_in_by_id = $actorId;
             $ticket->save();
 
-            $this->log($ticket, $credential, $actorType, $actorId, $direction, $result, null, $deviceName, $ip);
+            $this->log($ticket, $credential, $actorType, $actorId, $direction, $result, null, $deviceName, $ip, $gateId, $override, $overrideReason);
 
             return [
                 'alert_type' => 'success',
@@ -88,6 +93,8 @@ class AccessControlService
                 'exit_count' => $ticket->exit_count,
                 'credential_type' => $credential?->type,
                 'scan_source' => $source,
+                'gate_id' => $gateId,
+                'override' => $override,
             ];
         }, 3);
     }
@@ -119,17 +126,26 @@ class AccessControlService
         return $staff->hasPermission($permission) || $staff->hasPermission('tickets.scan');
     }
 
+    private function actorCanOverride(int $organizerId,string $actorType,int $actorId): bool
+    {
+        if ($actorType === 'admin') return true;
+        if ($actorType === 'organizer') return $organizerId === $actorId;
+        $staff = $actorType === 'staff' ? OrganizerStaff::find($actorId) : null;
+        return $staff && $staff->active && (int)$staff->organizer_id === $organizerId && $staff->hasPermission('access.override');
+    }
+
     private function deny(string $message, string $reason, ?IssuedTicket $ticket = null, ?Credential $credential = null, ?string $direction = null, ?string $actorType = null, ?int $actorId = null, ?string $deviceName = null, ?string $ip = null): array
     {
         if ($ticket && $actorType && $actorId) $this->log($ticket, $credential, $actorType, $actorId, $direction ?: 'entry', 'denied', $reason, $deviceName, $ip);
         return ['alert_type' => 'error', 'message' => $message, 'reason_code' => $reason];
     }
 
-    private function log(IssuedTicket $ticket, ?Credential $credential, string $actorType, int $actorId, string $direction, string $result, ?string $reason, ?string $deviceName, ?string $ip): void
+    private function log(IssuedTicket $ticket, ?Credential $credential, string $actorType, int $actorId, string $direction, string $result, ?string $reason, ?string $deviceName, ?string $ip, ?int $gateId = null, bool $override = false, ?string $overrideReason = null): void
     {
         if (Schema::hasTable('access_scans')) DB::table('access_scans')->insert([
             'event_id' => $ticket->event_id, 'issued_ticket_id' => $ticket->id, 'credential_id' => $credential?->id,
-            'actor_type' => $actorType, 'actor_id' => $actorId, 'action' => $direction, 'result' => $result,
+            'actor_type' => $actorType, 'actor_id' => $actorId, 'action' => $direction, 'result' => $result, 'gate_id'=>$gateId,
+            'is_override'=>$override, 'override_reason'=>$overrideReason,
             'reason_code' => $reason, 'device_name' => $deviceName, 'ip_address' => $ip,
             'state_snapshot' => json_encode(['presence_state'=>$ticket->presence_state,'entry_count'=>$ticket->entry_count,'exit_count'=>$ticket->exit_count]),
             'created_at' => now(),
