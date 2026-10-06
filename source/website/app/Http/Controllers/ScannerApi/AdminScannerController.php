@@ -71,7 +71,7 @@ class AdminScannerController extends Controller
   }
   public function check_qrcode(Request $request, TicketAdmissionService $admission)
   {
-    $request->validate(['booking_id' => 'required|string|max:255','direction'=>'nullable|in:entry,exit']);
+    $request->validate(['booking_id' => 'required|string|max:255','direction'=>'nullable|in:entry,exit','gate_id'=>'nullable|integer','override'=>'nullable|boolean','override_reason'=>'nullable|string|max:255']);
     $admin = Auth::guard('admin_sanctum')->user();
 
     return response()->json($admission->admit(
@@ -80,7 +80,10 @@ class AdminScannerController extends Controller
       (int) $admin->id,
       $request->header('X-Device-Name'),
       $request->ip(),
-      $request->input('direction','entry')
+      $request->input('direction','entry'),
+      $request->integer('gate_id') ?: null,
+      $request->boolean('override'),
+      $request->input('override_reason')
     ));
   }
 
