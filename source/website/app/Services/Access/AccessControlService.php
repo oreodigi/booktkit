@@ -7,6 +7,7 @@ use App\Models\Access\EventAccessPolicy;
 use App\Models\Access\TicketCredential;
 use App\Models\Event\IssuedTicket;
 use App\Models\OrganizerStaff;
+use App\Models\Event\PassEntitlement;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -32,6 +33,11 @@ class AccessControlService
             }
             if (!in_array($booking->paymentStatus, ['completed', 'free'], true)) return $this->deny('Ticket payment is not valid', 'invalid_payment', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
             if ($ticket->status !== 'active') return $this->deny('Ticket is '.$ticket->status, 'ticket_'.$ticket->status, $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
+            if ($ticket->pass_product_id && Schema::hasTable('pass_entitlements')) {
+                $today=now()->toDateString();
+                $valid=PassEntitlement::where('issued_ticket_id',$ticket->id)->where('status','active')->whereHas('eventDate',fn($q)=>$q->whereDate('start_date',$today)->orWhereDate('end_date',$today))->exists();
+                if(!$valid) return $this->deny('This pass is not valid for today','pass_date_invalid',$ticket,$credential,$direction,$actorType,$actorId,$deviceName,$ip);
+            }
 
             $policy = Schema::hasTable('event_access_policies') ? EventAccessPolicy::where('event_id', $ticket->event_id)->first() : null;
             $accessEnabled = $policy && $policy->is_enabled;
