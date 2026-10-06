@@ -1,17 +1,29 @@
 import { test, expect } from '@playwright/test';
 import { assertMutationAllowed } from '../src/safety.js';
 import { nextStep, selectFirstOption, selectLocation } from './helpers/wizard.js';
-for(const type of ['venue','online']) {
- test(`${type} event saves through all wizard steps`,async({page},info)=>{
+for(const scenario of [
+ {name:'venue',type:'venue',special:false},
+ {name:'online',type:'online',special:false},
+ {name:'box-office',type:'venue',special:true},
+]) {
+ test(`${scenario.name} event saves through all wizard steps`,async({page},info)=>{
+  const {type,special}=scenario;
   assertMutationAllowed();
   const role=info.project.metadata.role;
   page.on('dialog',dialog=>dialog.dismiss());
-  await page.goto(`/${role}/add-event/?type=${type}`,{waitUntil:'domcontentloaded'});
+  await page.goto(`/${role}/add-event/?type=${type}${special?'&special=1':''}`,{waitUntil:'domcontentloaded'});
+  if(special){
+   await expect(page.locator('[name="box_office_enabled"]')).toHaveValue('1');
+   await page.locator('[name="reentry_policy"]').selectOption('limited');
+   await page.locator('[name="max_reentries"]').fill('2');
+   await page.locator('[name="box_office_locations[0][name]"]').fill('QA Main Counter');
+   await page.locator('[name="box_office_locations[0][address]"]').fill('Synthetic QA counter');
+  }
   await expect(page.locator('.btk-wizard-nav button[data-step="1"]')).toHaveClass(/active/);
   await expect(page.locator('#EventSubmit')).toBeHidden();
   await nextStep(page,2);
   const title=page.locator('[name$="_title"]:visible').first();
-  await title.fill(`QA ${type} ${Date.now()}`);
+  await title.fill(`QA ${scenario.name} ${Date.now()}`);
   await selectFirstOption(page.locator('[name$="_category_id"]:visible').first());
   await page.locator('[name$="_description"]:visible').first().fill('Dedicated staging event created by the automated wizard verification suite.');
   await nextStep(page,3);
