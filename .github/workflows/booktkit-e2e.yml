@@ -9,7 +9,7 @@ on:
         description: Staging suite
         type: choice
         default: smoke
-        options: [smoke, auth, organizer, event-creation, mobile, all, contracts, api, security, scanner, diagnostics, signup, login, checkout, razorpay]
+        options: [smoke, auth, organizer, event-creation, pos, staff-rbac, admission, mobile, all, contracts, api, security, scanner, diagnostics, signup, login, checkout, razorpay]
       base_url:
         description: Isolated staging URL only
         default: https://test.booktkit.com
