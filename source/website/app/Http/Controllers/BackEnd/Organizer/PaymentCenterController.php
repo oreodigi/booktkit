@@ -1,9 +1,12 @@
 <?php
 namespace App\Http\Controllers\BackEnd\Organizer;
-use App\Http\Controllers\Controller;use Illuminate\Http\Request;use Illuminate\Support\Facades\Auth;use App\Models\Payments\OrganizerPaymentProfile;use App\Models\Payments\PaymentOrder;
+use App\Http\Controllers\Controller;use Illuminate\Http\Request;use Illuminate\Support\Facades\Auth;use App\Models\Payments\OrganizerPaymentProfile;use App\Models\Payments\PaymentOrder;use App\Models\Payments\PaymentFeeRule;use App\Models\Payments\EventAdditionalFee;use App\Models\Event;
 class PaymentCenterController extends Controller{
  public function index(){$id=Auth::guard('organizer')->id();$profile=OrganizerPaymentProfile::firstOrCreate(['organizer_id'=>$id]);$orders=PaymentOrder::where('organizer_id',$id)->with(['transfers','refunds','feeLines'])->latest()->paginate(20);$paid=PaymentOrder::where('organizer_id',$id)->where('status','paid');
   $summary=['gross'=>(int)(clone $paid)->sum('ticket_amount'),'payable'=>(int)(clone $paid)->sum('organizer_amount'),'fees'=>(int)(clone $paid)->sum('platform_fee'),'additional'=>(int)(clone $paid)->sum('additional_fee_amount'),'booktkit_held'=>(int)(clone $paid)->where('settlement_mode','booktkit_managed')->sum('organizer_amount'),'routed'=>(int)(clone $paid)->where('settlement_mode','razorpay_split')->sum('organizer_amount'),'refunds'=>(int)PaymentOrder::where('organizer_id',$id)->sum('refunded_amount')];
-  return view('organizer.payments.index',compact('profile','orders','summary'));}
+  $events=Event::where('organizer_id',$id)->with('information')->get();$eventIds=$events->pluck('id');
+  $feeRules=PaymentFeeRule::where('is_active',1)->where(function($q)use($id,$eventIds){$q->whereIn('scope',['global','event_type'])->orWhere(function($x)use($id){$x->where('scope','organizer')->where('organizer_id',$id);})->orWhere(function($x)use($eventIds){$x->where('scope','event')->whereIn('event_id',$eventIds);});})->orderByDesc('priority')->get();
+  $additionalFees=EventAdditionalFee::whereIn('event_id',$eventIds)->where('is_active',1)->get();$eventNames=$events->mapWithKeys(fn($e)=>[$e->id=>optional($e->information)->title?:'Event #'.$e->id]);
+  return view('organizer.payments.index',compact('profile','orders','summary','feeRules','additionalFees','eventNames'));}
  public function preference(Request $r){$d=$r->validate(['preferred_settlement_mode'=>'required|in:booktkit_managed,razorpay_split']);$p=OrganizerPaymentProfile::firstOrCreate(['organizer_id'=>Auth::guard('organizer')->id()]);$p->update(['preferred_settlement_mode'=>$d['preferred_settlement_mode'],'settlement_mode'=>$d['preferred_settlement_mode']]);return back()->with('success',$d['preferred_settlement_mode']==='razorpay_split'&&!$p->fresh()->canSplit()?'Razorpay Direct selected as your preference. Ticket sales remain active through BookTKIT Managed until verification is active.':'Settlement preference updated.');}
 }
