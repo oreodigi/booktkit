@@ -748,7 +748,7 @@
                                             <label>{{ __('Pass / Credential Type') }} *</label>
                                             <select name="admission_pass_type" id="admissionPassType" class="form-control" required>
                                                 @foreach(['mobile_qr'=>'QR Ticket on Phone','qr_wristband'=>'QR Wristband','rfid_wristband'=>'RFID Wristband','rfid_card'=>'RFID Card','nfc_wristband'=>'NFC Wristband','qr_badge'=>'QR Badge / Physical Pass','physical_id'=>'Physical ID Card'] as $value => $label)
-                                                    <option value="{{ $value }}" {{ ticket->admission_pass_type ?? 'mobile_qr' == $value ? 'selected' : '' }}>{{ __($label) }}</option>
+                                                    <option value="{{ $value }}" {{ old('admission_pass_type', $ticket->admission_pass_type ?? 'mobile_qr') == $value ? 'selected' : '' }}>{{ __($label) }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
