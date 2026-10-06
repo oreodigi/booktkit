@@ -228,6 +228,9 @@
         $('#aiSliderModal').modal('show');
       });
 
+      function updateCreditCost() { const n=Math.max(1,parseInt($('#ai_slider_count').val()||'1',10)||1); $('#aiSliderCost').text(n+' AI image '+(n===1?'credit':'credits')); $('#aiSliderButtonCost').text(n+' '+(n===1?'credit':'credits')); }
+      $(document).on('input change','#ai_slider_count',updateCreditCost); updateCreditCost();
+
       // confirm generate
       $(document).on('click', '#aiSliderConfirmBtn', async function () {
         const ctx = window.AiSliderDropzone.active;
