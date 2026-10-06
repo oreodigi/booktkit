@@ -571,7 +571,15 @@ class EventController extends Controller
     $ticket_logo = $request->file('ticket_logo');
     $in = $request->all();
     $instructions = Purifier::clean($request->instructions);
-    $event = Event::where('id', $request->event_id)->first();
+    $event = Event::where('organizer_id', Auth::guard('organizer')->id())->findOrFail($request->event_id);
+    if ($request->boolean('remove_ticket_image') && $event->ticket_image) {
+      @unlink(public_path('assets/admin/img/event_ticket/') . $event->ticket_image);
+      $in['ticket_image'] = null;
+    }
+    if ($request->boolean('remove_ticket_logo') && $event->ticket_logo) {
+      @unlink(public_path('assets/admin/img/event_ticket_logo/') . $event->ticket_logo);
+      $in['ticket_logo'] = null;
+    }
     if ($request->hasFile('ticket_image')) {
       @unlink(public_path('assets/admin/img/event_ticket/') . $event->ticket_image);
       $filename = time() . rand(111, 999) . '.' . $ticket_image->getClientOriginalExtension();
