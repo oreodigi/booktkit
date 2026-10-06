@@ -56,19 +56,19 @@ class GeminiImageEngine implements AiImageEngineInterface
           'status' => $response->status(),
           'body' => $response->body(),
         ]);
-        return 'default.jpg';
+        throw new \RuntimeException('Gemini did not return a usable generated image.');
       }
 
       $json = $response->json();
       $base64 = $json['predictions'][0]['bytesBase64Encoded'] ?? null;
 
       if (!$base64) {
-        return 'default.jpg';
+        throw new \RuntimeException('Gemini did not return a usable generated image.');
       }
 
       $imageBinary = base64_decode($base64, true);
       if ($imageBinary === false) {
-        return 'default.jpg';
+        throw new \RuntimeException('Gemini did not return a usable generated image.');
       }
 
       Storage::disk('public')->makeDirectory('ai/categories');
@@ -88,7 +88,7 @@ class GeminiImageEngine implements AiImageEngineInterface
       \Log::error('Gemini image engine exception', [
         'error' => $e->getMessage(),
       ]);
-      return 'default.jpg';
+      throw new \RuntimeException('Gemini did not return a usable generated image.');
     }
   }
 
