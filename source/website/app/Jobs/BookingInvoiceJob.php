@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Http\Controllers\FrontEnd\Event\BookingController;
+use App\Services\Tickets\TicketDeliveryService;
 use App\Models\Event\Booking;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -33,41 +33,16 @@ class BookingInvoiceJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle()
+    public function handle(TicketDeliveryService $delivery)
     {
-        $bookingInfo = Booking::where('id', $this->booking_id)->first();
+        $bookingInfo = Booking::findOrFail($this->booking_id);
 
-        $enrol = new BookingController();
-        try {
-
-            // generate an invoice in pdf format
-            $invoice = $enrol->generateInvoice($bookingInfo, $bookingInfo->event_id);
-
-            //unlink qr code 
-            if (
-                $bookingInfo->variation != null
-            ) {
-                //generate qr code for without wise ticket
-                $variations = json_decode($bookingInfo->variation, true);
-                foreach ($variations as $variation) {
-
-                    @unlink(public_path('assets/admin/qrcodes/') . $bookingInfo->booking_id . '__' . $variation['unique_id'] . '.svg');
-                }
-            } else {
-                //generate qr code for without wise ticket
-                for ($i = 1; $i <= $bookingInfo->quantity; $i++) {
-                    @unlink(public_path('assets/admin/qrcodes/') . $bookingInfo->booking_id . '__' . $i .  '.svg');
-                }
-            }
-
-            // then, update the invoice field info in database
-            $bookingInfo->invoice = $invoice;
-            $bookingInfo->save();
-
-            // send a mail to the customer with the invoice
-            $enrol->sendMail($bookingInfo);
-        } catch (\Exception $e) {
-            throw $e;  
+        // One canonical delivery path: issue secure per-attendee tickets, render every
+        // ticket/QR into the PDF, persist the invoice and send the customer email.
+        // This replaces the legacy invoice path that could render only one ticket
+        // while the customer dashboard correctly showed all issued credentials.
+        if (!$delivery->deliver($bookingInfo)) {
+            throw new \RuntimeException('Ticket delivery could not be completed for booking ' . $bookingInfo->id);
         }
     }
 }
