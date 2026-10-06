@@ -8,6 +8,7 @@ use App\Models\Organizer;
 use App\Models\Event\Slot;
 use App\Models\Event\Coupon;
 use App\Models\Event\Ticket;
+use App\Models\Event\EventPassProduct;
 use Illuminate\Http\Request;
 use App\Models\Event\Wishlist;
 use App\Http\Helpers\GeoSearch;
@@ -348,6 +349,7 @@ class EventController extends Controller
       }
 
       $information['content'] = $content;
+      $information['pass_products'] = EventPassProduct::with('dates')->where('event_id',$id)->where('active',1)->whereJsonContains('sales_channels','web')->orderBy('sort_order')->get();
       $images = EventImage::where('event_id', $id)->get();
       $information['images'] = $images;
 
