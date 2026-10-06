@@ -502,6 +502,36 @@
                                         </div>
                                     @endforeach
                                 </div>
+
+                                <div class="card border mt-4 mb-4" id="admissionPassSettings">
+                                    <div class="card-header"><strong>{{ __('Admission & Pass Type') }}</strong><div class="small text-muted">{{ __('Choose what the attendee will use at entry. Physical credentials are assigned to the issued ticket at collection.') }}</div></div>
+                                    <div class="card-body">
+                                        <div class="form-group">
+                                            <label>{{ __('Pass / Credential Type') }} *</label>
+                                            <select name="admission_pass_type" id="admissionPassType" class="form-control" required>
+                                                @foreach(['mobile_qr'=>'QR Ticket on Phone','qr_wristband'=>'QR Wristband','rfid_wristband'=>'RFID Wristband','rfid_card'=>'RFID Card','nfc_wristband'=>'NFC Wristband','qr_badge'=>'QR Badge / Physical Pass','physical_id'=>'Physical ID Card'] as $value => $label)
+                                                    <option value="{{ $value }}" {{ _dummy = old('admission_pass_type', 'mobile_qr') == $value ? 'selected' : '' }}>{{ __($label) }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div id="physicalCredentialSettings">
+                                            <div class="form-check mb-2"><label class="form-check-label"><input type="checkbox" class="form-check-input" name="collection_required" value="1" {{ old('collection_required', 1) ? 'checked' : '' }}> {{ __('Collection / credential assignment required at venue') }}</label></div>
+                                            <div class="form-check mb-3"><label class="form-check-label"><input type="checkbox" class="form-check-input" name="allow_mobile_qr_before_assignment" value="1" {{ old('allow_mobile_qr_before_assignment', 1) ? 'checked' : '' }}> {{ __('Allow mobile ticket QR until physical credential is assigned') }}</label></div>
+                                            <div class="form-check mb-2"><label class="form-check-label"><input type="checkbox" class="form-check-input" id="replacementAllowed" name="replacement_allowed" value="1" {{ old('replacement_allowed', 0) ? 'checked' : '' }}> {{ __('Allow lost/damaged credential replacement') }}</label></div>
+                                            <div class="row" id="replacementSettings">
+                                                <div class="col-md-6"><div class="form-group"><label>{{ __('Maximum Replacements') }}</label><input type="number" min="1" max="100" name="max_replacements" class="form-control" value="{{ old('max_replacements') }}"></div></div>
+                                                <div class="col-md-6"><div class="form-group"><label>{{ __('Replacement Fee') }} ({{ $getCurrencyInfo->text }})</label><input type="number" min="0" step="0.01" name="replacement_fee" class="form-control" value="{{ old('replacement_fee', 0) }}"></div></div>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="form-check mb-3"><label class="form-check-label"><input type="checkbox" class="form-check-input" name="exit_scan_required" value="1" {{ old('exit_scan_required', 0) ? 'checked' : '' }}> {{ __('Require exit scan for re-entry tracking') }}</label></div>
+                                        <div class="row">
+                                            <div class="col-md-6"><div class="form-group"><label>{{ __('Re-entry') }}</label><select name="reentry_policy" id="ticketReentryPolicy" class="form-control"><option value="none">{{ __('No Re-entry') }}</option><option value="limited">{{ __('Limited') }}</option><option value="unlimited">{{ __('Unlimited') }}</option></select></div></div>
+                                            <div class="col-md-6" id="ticketMaxReentries"><div class="form-group"><label>{{ __('Maximum Re-entries') }}</label><input type="number" min="1" max="1000" name="max_reentries" class="form-control" value="{{ old('max_reentries') }}"></div></div>
+                                        </div>
+                                        <div class="alert alert-info mb-0">{{ __('Credential inventory, wristband/card assignment, replacements, gates and live scanning remain available in Access Operations.') }}</div>
+                                    </div>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -521,6 +551,21 @@
     </div>
 @endsection
 
+
+    <script>
+        $(function () {
+            function syncAdmissionSettings() {
+                const physical = $('#admissionPassType').val() !== 'mobile_qr';
+                $('#physicalCredentialSettings').toggle(physical);
+                $('#replacementSettings').toggle(physical && $('#replacementAllowed').is(':checked'));
+                const limited = $('#ticketReentryPolicy').val() === 'limited';
+                $('#ticketMaxReentries').toggle(limited).find('input').prop('required', limited);
+            }
+            $('#admissionPassType,#ticketReentryPolicy,#replacementAllowed').on('change', syncAdmissionSettings);
+            $('#ticketReentryPolicy').val(@json(old('reentry_policy', 'none')));
+            syncAdmissionSettings();
+        });
+    </script>
 @section('script')
     @php
         $languages = App\Models\Language::get();
