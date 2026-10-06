@@ -598,9 +598,17 @@ class EventController extends Controller
     unset($in['remove_ticket_image'], $in['remove_ticket_logo']);
 
     $event->update($in);
-    Session::flash('success', 'Updated Successfully');
+    Session::flash('success', 'Ticket settings saved. Add tickets for your event.');
 
-    return response()->json(['status' => 'success'], 200);
+    $language = Language::where('is_default', 1)->first() ?: Language::firstOrFail();
+    return response()->json([
+      'status' => 'success',
+      'redirect' => route('organizer.event.ticket', [
+        'language' => $language->code,
+        'event_id' => $event->id,
+        'event_type' => $event->event_type,
+      ]),
+    ], 200);
   }
 
 
