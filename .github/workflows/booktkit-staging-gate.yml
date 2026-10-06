@@ -13,7 +13,7 @@ jobs:
   staging-gate:
     name: staging-gate
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: tools/booktkit-devtools
@@ -61,13 +61,13 @@ jobs:
         run: node src/verify-deployment.js --wait
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - name: Run four staging suites with zero failures or skips
+      - name: Run critical staging suites with zero failures or skips
         run: |
           set -euo pipefail
-          for suite in smoke auth organizer event-creation; do
+          for suite in smoke auth organizer event-creation pos staff-rbac admission; do
             node src/verify-deployment.js
             node src/cli.js "$suite"
-            node -e 'const fs=require("fs");const r=JSON.parse(fs.readFileSync("test-summary.json"));const n={smoke:5,auth:3,organizer:1,"event-creation":4};if(!r.ok||r.counts?.passed!==n[r.suite]||r.counts.failed||r.counts.skipped||r.counts.flaky)process.exit(1)'
+            node -e 'const fs=require("fs");const r=JSON.parse(fs.readFileSync("test-summary.json"));const n={smoke:5,auth:3,organizer:1,"event-creation":6,pos:2,"staff-rbac":3,admission:2};if(!r.ok||r.counts?.passed!==n[r.suite]||r.counts.failed||r.counts.skipped||r.counts.flaky)process.exit(1)'
             node src/verify-deployment.js
           done
       - name: Upload sanitized results
