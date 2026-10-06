@@ -56,6 +56,19 @@ class EventController extends Controller
       })
       ->where('events.organizer_id', '=', Auth::guard('organizer')->user()->id)
       ->when($event_type, function ($query, $event_type) {
+        if ($event_type === 'box_office') {
+          return $query->where(function ($q) {
+            $q->where('events.box_office_enabled', 1)
+              ->orWhere('events.event_type', 'box_office');
+          });
+        }
+        if ($event_type === 'venue') {
+          return $query->where('events.event_type', 'venue')
+            ->where(function ($q) {
+              $q->whereNull('events.box_office_enabled')
+                ->orWhere('events.box_office_enabled', 0);
+            });
+        }
         return $query->where('events.event_type', $event_type);
       })
       ->select('events.*', 'event_contents.id as eventInfoId', 'event_contents.title', 'event_contents.slug', 'event_categories.name as category')
