@@ -135,7 +135,7 @@
 
                 <div class="col-7 col-stats">
                   <div class="numbers">
-                    <p class="card-category">{{ __('Total Transcation') }}</p>
+                    <p class="card-category">{{ __('Total Transaction') }}</p>
                     <h4 class="card-title">{{ $transcation_count }}
                     </h4>
                   </div>

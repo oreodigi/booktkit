@@ -19,6 +19,7 @@ use App\Models\Language;
 use App\Models\OrganizerInfo;
 use App\Models\OrganizerAiBalance;
 use App\Models\Transaction;
+use App\Models\Payments\PaymentOrder;
 use App\Rules\MatchOldPasswordRule;
 use DateTime;
 use Illuminate\Log\Logger;
@@ -46,7 +47,7 @@ class OrganizerController extends Controller
 
     $information['total_events'] = Event::where('organizer_id', Auth::guard('organizer')->user()->id)->get()->count();
     $information['total_event_bookings'] = Booking::where('organizer_id', Auth::guard('organizer')->user()->id)->get()->count();
-    $information['transcation_count'] = Transaction::where('organizer_id', Auth::guard('organizer')->user()->id)->get()->count();
+    $information['transcation_count'] = PaymentOrder::where('organizer_id', $organizerId)->count();
     $information['ai_usage_stats'] = OrganizerAiBalance::query()
       ->where('organizer_id', $organizerId)
       ->orderBy('ai_engine')
@@ -737,12 +738,25 @@ class OrganizerController extends Controller
     if ($request->filled('transcation_id')) {
       $transcation_id = $request->transcation_id;
     }
-    $transcations = Transaction::where('organizer_id', Auth::guard('organizer')->user()->id)
+    $organizerId = Auth::guard('organizer')->id();
+    $paymentOrders = PaymentOrder::where('organizer_id', $organizerId)
+      ->when($transcation_id, function ($query) use ($transcation_id) {
+        return $query->where(function ($paymentQuery) use ($transcation_id) {
+          $paymentQuery->where('gateway_payment_id', 'like', '%' . $transcation_id . '%')
+            ->orWhere('gateway_order_id', 'like', '%' . $transcation_id . '%')
+            ->orWhere('uuid', 'like', '%' . $transcation_id . '%');
+        });
+      })
+      ->latest()
+      ->paginate(20, ['*'], 'payments_page');
+
+    $transcations = Transaction::where('organizer_id', $organizerId)
       ->when($transcation_id, function ($query) use ($transcation_id) {
         return $query->where('transcation_id', 'like', '%' . $transcation_id . '%');
       })
-      ->orderBy('id', 'desc')->paginate(10);
-    return view('organizer.transaction', compact('transcations'));
+      ->orderBy('id', 'desc')->paginate(10, ['*'], 'legacy_page');
+
+    return view('organizer.transaction', compact('transcations', 'paymentOrders'));
   }
 
   //monthly  income

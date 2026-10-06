@@ -145,15 +145,18 @@
                             <a target="_blank"
                               href="{{ route('event.details', ['slug' => $event->slug, 'id' => $event->id]) }}">{{ strlen($event->title) > 30 ? mb_substr($event->title, 0, 30, 'UTF-8') . '....' : $event->title }}</a>
                           </td>
+                          @php
+                            $effectiveEventType = ($event->box_office_enabled || $event->event_type === 'box_office') ? 'box_office' : $event->event_type;
+                          @endphp
                           <td>
-                            {{ ($event->box_office_enabled || $event->event_type === 'box_office') ? __('Box Office') : ucfirst($event->event_type) }}
+                            {{ $effectiveEventType === 'box_office' ? __('Box Office') : ucfirst($effectiveEventType) }}
                           </td>
                           <td>
                             {{ $event->category }}
                           </td>
                           <td>
-                            @if ($event->event_type == 'venue' || $event->event_type == 'box_office')
-                              <a href="{{ route('organizer.event.ticket', ['language' => request()->input('language'), 'event_id' => $event->id, 'event_type' => $event->event_type]) }}"
+                            @if (in_array($effectiveEventType, ['venue', 'box_office'], true))
+                              <a href="{{ route('organizer.event.ticket', ['language' => request()->input('language'), 'event_id' => $event->id, 'event_type' => $effectiveEventType]) }}"
                                 class="btn btn-success btn-sm">{{ __('Manage') }}</a>
                             @endif
                           </td>

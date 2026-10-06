@@ -126,7 +126,7 @@
                         <th scope="col">{{ __('Org. Received') }}</th>
                         <th scope="col">{{ __('Paid via') }}</th>
                         <th scope="col">{{ __('Payment Status') }}</th>
-                        <th scope="col">{{ __('Tickect Scan Status') }}</th>
+                        <th scope="col">{{ __('Ticket Scan Status') }}</th>
                         <th scope="col">{{ __('Actions') }}</th>
                       </tr>
                     </thead>

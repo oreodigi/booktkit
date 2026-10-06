@@ -273,7 +273,7 @@
 
             <div class="row mb-2">
               <div class="col-lg-4">
-                <strong>{{ __('Tickect Scan Status') }}</strong>
+                <strong>{{ __('Ticket Scan Status') }}</strong>
               </div>
               <div class="col-lg-8">
                 @php

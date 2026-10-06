@@ -1,6 +1,8 @@
 'use strict';
 
-const chartOne = document.getElementById('incomeChart').getContext('2d');
+const incomeCanvas = document.getElementById('incomeChart');
+if (incomeCanvas) {
+const chartOne = incomeCanvas.getContext('2d');
 const myIncomeChart = new Chart(chartOne, {
   type: 'line',
   data: {
@@ -50,7 +52,11 @@ const myIncomeChart = new Chart(chartOne, {
   }
 });
 
-const chartTwo = document.getElementById('TotalEventBookingChart').getContext('2d');
+}
+
+const eventBookingCanvas = document.getElementById('TotalEventBookingChart');
+if (eventBookingCanvas) {
+const chartTwo = eventBookingCanvas.getContext('2d');
 const myEventBookingChart = new Chart(chartTwo, {
   type: 'line',
   data: {
@@ -109,7 +115,11 @@ const myEventBookingChart = new Chart(chartTwo, {
 
 
 
-const chartThree = document.getElementById('ProductOrderChart').getContext('2d');
+}
+
+const productIncomeCanvas = document.getElementById('ProductOrderChart');
+if (productIncomeCanvas) {
+const chartThree = productIncomeCanvas.getContext('2d');
 const ProductOrderChart = new Chart(chartThree, {
   type: 'line',
   data: {
@@ -159,7 +169,11 @@ const ProductOrderChart = new Chart(chartThree, {
   }
 });
 
-const chartFour = document.getElementById('TotalProductOrderChart').getContext('2d');
+}
+
+const productOrderCanvas = document.getElementById('TotalProductOrderChart');
+if (productOrderCanvas) {
+const chartFour = productOrderCanvas.getContext('2d');
 const TotalProductOrderChart = new Chart(chartFour, {
   type: 'line',
   data: {
@@ -215,3 +229,4 @@ const TotalProductOrderChart = new Chart(chartFour, {
     }
   }
 });
+}

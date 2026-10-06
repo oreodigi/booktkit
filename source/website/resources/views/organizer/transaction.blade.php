@@ -22,10 +22,40 @@
   <div class="row">
     <div class="col-md-12">
       <div class="card">
+        <div class="card-header"><div class="card-title">{{ __('Payment Transactions') }}</div></div>
+        <div class="card-body table-responsive">
+          <table class="table table-striped mt-3">
+            <thead><tr><th>{{ __('Payment') }}</th><th>{{ __('Channel') }}</th><th>{{ __('Gross') }}</th><th>{{ __('Fees') }}</th><th>{{ __('Your Amount') }}</th><th>{{ __('Collection') }}</th><th>{{ __('Status') }}</th><th>{{ __('Created') }}</th></tr></thead>
+            <tbody>
+              @forelse ($paymentOrders as $payment)
+                <tr>
+                  <td>{{ $payment->gateway_payment_id ?: ($payment->gateway_order_id ?: $payment->uuid) }}</td>
+                  <td>{{ strtoupper($payment->sales_channel ?: 'web') }}</td>
+                  <td>₹{{ number_format($payment->ticket_amount / 100, 2) }}</td>
+                  <td>₹{{ number_format(($payment->platform_fee + $payment->additional_fee_amount) / 100, 2) }}</td>
+                  <td>₹{{ number_format($payment->organizer_amount / 100, 2) }}</td>
+                  <td>{{ $payment->settlement_mode === 'razorpay_split' ? __('Razorpay Direct') : __('BookTKIT Managed') }}</td>
+                  <td><span class="badge badge-{{ $payment->status === 'paid' ? 'success' : ($payment->status === 'failed' ? 'danger' : 'warning') }}">{{ ucfirst(str_replace('_', ' ', $payment->status)) }}</span></td>
+                  <td>{{ optional($payment->created_at)->format('d M Y H:i') }}</td>
+                </tr>
+              @empty
+                <tr><td colspan="8" class="text-center">{{ __('No payment transactions found.') }}</td></tr>
+              @endforelse
+            </tbody>
+          </table>
+          {{ $paymentOrders->appends(['transcation_id' => request()->input('transcation_id')])->links() }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
         <div class="card-header">
           <div class="row">
             <div class="col-lg-4">
-              <div class="card-title d-inline-block">{{ __('Transactions') }}</div>
+              <div class="card-title d-inline-block">{{ __('Legacy Balance Transactions') }}</div>
             </div>
 
             <div class="col-lg-4">
@@ -41,7 +71,7 @@
           <div class="row">
             <div class="col-lg-12">
               @if (count($transcations) == 0)
-                <h3 class="text-center mt-3">{{ __('NO TRANSCATION FOUND') . '!' }}</h3>
+                <h3 class="text-center mt-3">{{ __('No legacy balance transactions found.') }}</h3>
               @else
                 <div class="table-responsive">
                   <table class="table table-striped mt-3">
