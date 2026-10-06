@@ -6,6 +6,7 @@ use App\Models\Access\Credential;
 use App\Models\Access\EventAccessPolicy;
 use App\Models\Access\TicketCredential;
 use App\Models\Event\IssuedTicket;
+use App\Models\Event\Ticket;
 use App\Models\OrganizerStaff;
 use App\Models\Event\PassEntitlement;
 use Illuminate\Support\Facades\DB;
@@ -42,21 +43,29 @@ class AccessControlService
             }
 
             $policy = Schema::hasTable('event_access_policies') ? EventAccessPolicy::where('event_id', $ticket->event_id)->first() : null;
-            $accessEnabled = $policy && $policy->is_enabled;
+            $ticketType = $ticket->ticket_type_id && Schema::hasColumn('tickets', 'admission_pass_type') ? Ticket::find($ticket->ticket_type_id) : null;
+            $ticketConfigured = $ticketType && $ticketType->admission_pass_type;
+            $accessEnabled = $ticketConfigured || ($policy && $policy->is_enabled);
+            $physicalRequired = $ticketConfigured
+                ? $ticketType->admission_pass_type !== 'mobile_qr'
+                : ($policy && $policy->credential_mode === 'physical_required');
+            $allowQrBeforeAssignment = $ticketConfigured
+                ? (bool) $ticketType->allow_mobile_qr_before_assignment
+                : (!$policy || (bool) $policy->allow_ticket_qr_before_assignment);
 
             if ($credential && !in_array($credential->status, ['assigned', 'active'], true)) {
                 return $this->deny('Credential is '.$credential->status, 'credential_'.$credential->status, $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
             }
 
-            if ($accessEnabled && $policy->credential_mode === 'physical_required' && !$credential) {
+            if ($accessEnabled && $physicalRequired && !$credential) {
                 $activeCredential = TicketCredential::where('issued_ticket_id', $ticket->id)->where('status', 'active')->exists();
-                if ($activeCredential || !$policy->allow_ticket_qr_before_assignment) {
+                if ($activeCredential || !$allowQrBeforeAssignment) {
                     return $this->deny('Physical credential required', 'credential_required', $ticket, null, $direction, $actorType, $actorId, $deviceName, $ip);
                 }
             }
 
-            $reentryPolicy = $accessEnabled ? $policy->reentry_policy : 'none';
-            $maxReentries = $accessEnabled ? (int) $policy->max_reentries : 0;
+            $reentryPolicy = $ticketConfigured ? $ticketType->reentry_policy : ($accessEnabled && $policy ? $policy->reentry_policy : 'none');
+            $maxReentries = $ticketConfigured ? (int) $ticketType->max_reentries : ($accessEnabled && $policy ? (int) $policy->max_reentries : 0);
 
             if (!$accessEnabled) {
                 if ($direction === 'exit') return $this->deny('Exit scanning is not enabled for this event', 'exit_not_enabled', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
