@@ -25,6 +25,8 @@ use App\Http\Controllers\FrontEnd\PaymentGateway\XenditController;
 use App\Http\Controllers\FrontEnd\PaymentGateway\YocoController;
 use App\Jobs\BookingInvoiceJob;
 use App\Services\Tickets\TicketDeliveryService;
+use App\Services\Events\EventPassService;
+use App\Services\Tickets\TicketIssuanceService;
 use App\Models\BasicSettings\Basic;
 use App\Models\BasicSettings\MailTemplate;
 use App\Models\Event;
@@ -260,6 +262,7 @@ class BookingController extends Controller
       if ($variations) {
         foreach ($variations as $variation) {
           $ticket = Ticket::where('id', $variation['ticket_id'])->first();
+          if (!empty($variation['pass_product_id'])) app(EventPassService::class)->consume((int)$variation['pass_product_id'], (int)$variation['qty']);
           if ($ticket->pricing_type == 'normal' && $ticket->ticket_available_type == 'limited') {
             if ($ticket->ticket_available - $variation['qty'] >= 0) {
               $ticket->ticket_available = $ticket->ticket_available - $variation['qty'];
@@ -326,6 +329,9 @@ class BookingController extends Controller
               'price' => $variation['price'],
               'scan_status' => 0,
               'unique_id' => Str::random(9),
+              'pass_product_id' => $variation['pass_product_id'] ?? null,
+              'pass_type' => $variation['pass_type'] ?? null,
+              'event_date_ids' => $variation['event_date_ids'] ?? [],
             ];
             $lastIndex = array_key_last($c_variations);
             if (array_key_exists('seat_id',  $variation)) {
@@ -389,6 +395,7 @@ class BookingController extends Controller
         'event_date' => Session::get('event_date'),
       ]);
 
+      app(TicketIssuanceService::class)->ensureForBooking($booking);
       return $booking;
     } catch (\Exception $th) {
     }
