@@ -42,8 +42,7 @@ class OpenAiImageEngine implements AiImageEngineInterface
       'prompt' => $finalPrompt,
       'n'      => 1,
       'size'   => $sizeStr,
-      'response_format' => 'b64_json', 
-    ];
+     ];
 
     try {
       $resp = Http::timeout(120)
@@ -68,6 +67,12 @@ class OpenAiImageEngine implements AiImageEngineInterface
       $json = $resp->json();
 
       $b64 = $json['data'][0]['b64_json'] ?? null;
+      $remoteUrl = $json['data'][0]['url'] ?? null;
+
+      if (!$b64 && $remoteUrl) {
+        $download = Http::timeout(120)->get($remoteUrl);
+        if ($download->successful()) $b64 = base64_encode($download->body());
+      }
 
       if (!$b64) {
         \Log::warning('OpenAI image response missing b64_json', [
