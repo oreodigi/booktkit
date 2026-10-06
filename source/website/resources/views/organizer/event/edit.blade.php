@@ -132,7 +132,7 @@
                                     <div class="form-group"><label>{{ __('Re-entry Policy') }} *</label>
                                       <select name="reentry_policy" class="form-control">
                                         @foreach (['none'=>'No re-entry','unlimited'=>'Unlimited re-entry','limited'=>'Limited re-entry'] as $value=>$label)
-                                          <option value="{{ $value }}" {{ '{{ $event->reentry_policy ?? 'none' }}' === $value ? 'selected' : '' }}>{{ __($label) }}</option>
+                                          <option value="{{ $value }}" {{ ($event->reentry_policy ?? 'none') === $value ? 'selected' : '' }}>{{ __($label) }}</option>
                                         @endforeach
                                       </select>
                                     </div>
