@@ -267,6 +267,9 @@
                                                     <span class="sub-item">{{ __('Online Events') }}</span>
                                                 </a>
                                             </li>
+              <li class="{{ request()->routeIs('admin.event_management.event') && request()->input('event_type') == 'box_office' ? 'active' : '' }}">
+                <a href="{{ route('admin.event_management.event', ['language' => $defaultLang->code, 'event_type' => 'box_office']) }}"><span class="sub-item">{{ __('Box Office Events') }}</span></a>
+              </li>
                                         </ul>
                                     </div>
                                 </li>
