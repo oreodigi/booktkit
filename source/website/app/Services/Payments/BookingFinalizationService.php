@@ -6,6 +6,7 @@ use App\Models\Event\Ticket;
 use App\Models\Payments\PaymentOrder;
 use App\Services\Tickets\TicketIssuanceService;
 use App\Services\Tickets\TicketDeliveryService;
+use App\Services\Events\EventPassService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 class BookingFinalizationService {
@@ -18,6 +19,7 @@ class BookingFinalizationService {
   foreach(($pricing['items']??[]) as $item){
    $ticket=Ticket::where('event_id',$event)->lockForUpdate()->findOrFail($item['ticket_id']);
    $qty=(int)$item['quantity']; $quantity+=$qty;
+   if(!empty($item['pass_product_id'])) app(EventPassService::class)->consume((int)$item['pass_product_id'],$qty);
    if($ticket->pricing_type==='variation'){
     $all=json_decode($ticket->variations,true)?:[]; $found=false;
     foreach($all as &$v) if((string)($v['name']??'')===(string)($item['variation']??'')){
@@ -34,7 +36,7 @@ class BookingFinalizationService {
     $ticket->ticket_available=(int)$ticket->ticket_available-$qty; $ticket->save();
    }
    for($i=0;$i<$qty;$i++) $variations[]=['ticket_id'=>$ticket->id,'early_bird_dicount'=>($item['discount']??0)/100/max(1,$qty),
-    'name'=>$item['variation'] ?: ($ticket->title ?: 'Ticket'),'qty'=>1,'price'=>($item['unit_price']??0)/100,'scan_status'=>0,'unique_id'=>uniqid()];
+    'name'=>$item['pass_name'] ?: ($item['variation'] ?: ($ticket->title ?: 'Ticket')),'qty'=>1,'price'=>($item['unit_price']??0)/100,'scan_status'=>0,'unique_id'=>uniqid(),'pass_product_id'=>$item['pass_product_id']??null,'pass_type'=>$item['pass_type']??null,'event_date_ids'=>$item['event_date_ids']??[],'admissions_per_holder'=>$item['admissions_per_holder']??1];
   }
   $basic=Basic::where('uniqid',12345)->first() ?: Basic::first();
   $booking=Booking::create([
