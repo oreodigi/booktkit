@@ -32,6 +32,11 @@ class TicketRequest extends FormRequest
       'max_ticket_buy_type' => 'required',
       'early_bird_discount_type' => 'required',
       'pricing_type_2' => 'required',
+      'admission_pass_type' => 'required|in:mobile_qr,qr_wristband,rfid_wristband,rfid_card,nfc_wristband,qr_badge,physical_id',
+      'reentry_policy' => 'required|in:none,limited,unlimited',
+      'max_reentries' => 'nullable|required_if:reentry_policy,limited|integer|min:1|max:1000',
+      'max_replacements' => 'nullable|integer|min:1|max:100',
+      'replacement_fee' => 'nullable|numeric|min:0|max:100000',
     ];
 
     $ruleArray['ticket_available'] = 'required_if:ticket_available_type,limited';
