@@ -57,7 +57,15 @@ class GeminiImageEngine implements AiImageEngineInterface
       }
 
       $json = $response->json();
-      $base64 = $json['output_image']['data'] ?? null;
+      // Interactions REST wraps the generated output inside the interaction object.
+      $base64 = $json['interaction']['output_image']['data'] ?? $json['output_image']['data'] ?? null;
+      if (!$base64 && !empty($json['interaction']['steps'])) {
+        foreach ($json['interaction']['steps'] as $step) {
+          foreach (($step['content'] ?? []) as $block) {
+            if (($block['type'] ?? null) === 'image' && !empty($block['data'])) { $base64 = $block['data']; break 2; }
+          }
+        }
+      }
 
       if (!$base64) {
         throw new \RuntimeException('Gemini did not return a usable generated image.');
@@ -70,7 +78,7 @@ class GeminiImageEngine implements AiImageEngineInterface
 
       Storage::disk('public')->makeDirectory('ai/categories');
 
-      $filename = 'gemini_' . now()->format('Ymd_His') . '_' . Str::random(8) . '.png';
+      $filename = 'gemini_' . now()->format('Ymd_His') . '_' . Str::random(8) . '.jpg';
       $path = 'ai/categories/' . $filename;
 
       $saved = Storage::disk('public')->put($path, $imageBinary); 
