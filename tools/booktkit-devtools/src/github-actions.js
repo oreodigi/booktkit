@@ -1,6 +1,6 @@
 import {randomUUID} from 'node:crypto';
 const API='https://api.github.com/repos/oreodigi/booktkit';
-const suites=new Set(['smoke','contracts','mobile','auth','signup','login','organizer','event-creation','checkout','api','security','razorpay','scanner','diagnostics','all']);
+const suites=new Set(['smoke','contracts','mobile','auth','signup','login','organizer','event-creation','pos','staff-rbac','admission','checkout','api','security','razorpay','scanner','diagnostics','all']);
 async function api(path, options={},signal=AbortSignal.timeout(20_000)) {
  const token=process.env.BOOKTKIT_GITHUB_TOKEN;if(!token)throw new Error('GitHub token is not configured');
  const response=await fetch(API+path,{...options,headers:{Accept:'application/vnd.github+json',Authorization:`Bearer ${token}`,'X-GitHub-Api-Version':'2022-11-28','User-Agent':'booktkit-devtools'},signal});
