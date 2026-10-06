@@ -737,7 +737,7 @@
         var loadImgs = 0;
         const haveCoSt = {{ $haveCoSt }};
         const isActiveState = {{ $settings->event_state_status == 1 ? 1 : 0 }};
-        const getStateUrl = "{{ route('get.city.state', ['id' => '__STATE_ID__']) }}".replace('__STATE_ID__', '');
+        const getStateUrl = "{{ route('get.city.state', ['id' => '__STATE_ID__']) }}";
         const getCityUrl = "{{ route('get.cities.state') }}";
     </script>
 @endsection
