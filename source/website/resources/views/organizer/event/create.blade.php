@@ -96,13 +96,13 @@
                                   <div class="card-header"><strong>{{ __('Box Office Event — Box Office') }}</strong></div>
                                   <div class="card-body">
                                     <div class="form-group"><label>{{ __('Re-entry Policy') }} *</label>
-                                      <select name="reentry_policy" class="form-control">
+                                      <select name="reentry_policy" id="boxOfficeReentryPolicy" class="form-control">
                                         @foreach (['none'=>'No re-entry','unlimited'=>'Unlimited re-entry','limited'=>'Limited re-entry'] as $value=>$label)
                                           <option value="{{ $value }}" {{ 'none' === $value ? 'selected' : '' }}>{{ __($label) }}</option>
                                         @endforeach
                                       </select>
                                     </div>
-                                    <div class="form-group"><label>{{ __('Maximum Re-entries') }}</label>
+                                    <div class="form-group" id="maxReentriesGroup" style="display:none"><label>{{ __('Maximum Re-entries') }}</label>
                                       <input type="number" min="1" name="max_reentries" value="" class="form-control" placeholder="{{ __('Required only for limited re-entry') }}">
                                     </div>
                                     <label><strong>{{ __('Box Office Locations') }} *</strong></label>
@@ -113,7 +113,7 @@
                                       @foreach ($boxLocations as $i => $location)
                                       <div class="row mb-2 box-office-location-row">
                                         <div class="col-md-5"><input class="form-control" name="box_office_locations[{{ $i }}][name]" value="{{ optional($location)->name }}" placeholder="{{ __('Counter name') }}" required></div>
-                                        <div class="col-md-6"><input class="form-control" name="box_office_locations[{{ $i }}][address]" value="{{ optional($location)->address }}" placeholder="{{ __('Counter address') }}"></div>
+                                        <div class="col-md-6"><input class="form-control" name="box_office_locations[{{ $i }}][address]" value="{{ optional($location)->address }}" placeholder="{{ __('Counter address') }}" autocomplete="street-address" required></div>
                                         <div class="col-md-1"><button type="button" class="btn btn-danger remove-box-office-location">&times;</button></div>
                                       </div>
                                       @endforeach
@@ -131,13 +131,27 @@ document.addEventListener('DOMContentLoaded', function () {
     const i = wrap.children.length;
     const row = document.createElement('div');
     row.className = 'row mb-2 box-office-location-row';
-    row.innerHTML = '<div class="col-md-5"><input class="form-control" name="box_office_locations['+i+'][name]" placeholder="Counter name" required></div><div class="col-md-6"><input class="form-control" name="box_office_locations['+i+'][address]" placeholder="Counter address"></div><div class="col-md-1"><button type="button" class="btn btn-danger remove-box-office-location">&times;</button></div>';
+    row.innerHTML = '<div class="col-md-5"><input class="form-control" name="box_office_locations['+i+'][name]" placeholder="Counter name" required></div><div class="col-md-6"><input class="form-control" name="box_office_locations['+i+'][address]" placeholder="Counter address" autocomplete="street-address" required></div><div class="col-md-1"><button type="button" class="btn btn-danger remove-box-office-location">&times;</button></div>';
     wrap.appendChild(row);
   });
   wrap.addEventListener('click', function (e) {
     const remove = e.target.closest('.remove-box-office-location');
     if (remove && wrap.children.length > 1) remove.closest('.box-office-location-row').remove();
   });
+  const reentryPolicy = document.getElementById('boxOfficeReentryPolicy');
+  const maxReentriesGroup = document.getElementById('maxReentriesGroup');
+  const maxReentries = document.querySelector('input[name="max_reentries"]');
+  function syncReentryFields() {
+    const limited = reentryPolicy && reentryPolicy.value === 'limited';
+    if (maxReentriesGroup) maxReentriesGroup.style.display = limited ? '' : 'none';
+    if (maxReentries) {
+      maxReentries.required = limited;
+      maxReentries.disabled = !limited;
+      if (!limited) maxReentries.value = '';
+    }
+  }
+  if (reentryPolicy) reentryPolicy.addEventListener('change', syncReentryFields);
+  syncReentryFields();
 });
 </script>
 @endpush
