@@ -22,7 +22,7 @@ class AdmissionContractRegressionTest extends TestCase
 
         $this->assertStringContainsString("where('uuid',\$data['sale_uuid'])", $source);
         $this->assertStringContainsString('lockForUpdate()', $source);
-        $this->assertStringContainsString('inventory->reserve', $source);
-        $this->assertStringContainsString('issuance->ensureForBooking', $source);
+        $this->assertStringContainsString('$this->inventory->reserve', $source);
+        $this->assertStringContainsString('$this->issuance->ensureForBooking', $source);
     }
 }
