@@ -20,7 +20,7 @@
 @endforeach
 </div>
 <div class="card simple-card mb-4"><div class="card-body"><h5>How money moves</h5><p class="text-muted">Every sale is calculated by BookTKIT before payment. Organizer verification never stops ticket sales.</p><div class="flow"><span>Customer pays</span><b>→</b><span>BookTKIT / Razorpay</span><b>→</b><span>Fees calculated</span><b>→</b><span>Organizer earnings</span><b>→</b><span>Settlement</span></div></div></div>
-<div class="card simple-card"><div class="card-header"><h5 class="mb-0">Recent transactions</h5></div><div class="card-body">@foreach($orders->take(5) as $o)<div class="fee-row"><div><strong>{{optional($eventNames)[$o->event_id]??'Event #'.$o->event_id}}</strong><div class="help">{{optional($organizerNames)[$o->organizer_id]??'Organizer #'.$o->organizer_id}} · {{strtoupper($o->sales_channel?:'web')}}</div></div><div class="text-right"><strong>₹{{number_format($o->customer_total/100,2)}}</strong><div class="help">{{ucfirst($o->status)}}</div></div></div>@endforeach</div></div>
+<div class="card simple-card"><div class="card-header"><h5 class="mb-0">Recent transactions</h5></div><div class="card-body">@foreach($orders->take(5) as $o)<div class="fee-row"><div><strong>{{$eventNames[$o->event_id]??'Event #'.$o->event_id}}</strong><div class="help">{{$organizerNames[$o->organizer_id]??'Organizer #'.$o->organizer_id}} · {{strtoupper($o->sales_channel?:'web')}}</div></div><div class="text-right"><strong>₹{{number_format($o->customer_total/100,2)}}</strong><div class="help">{{ucfirst($o->status)}}</div></div></div>@endforeach</div></div>
 </div>
 
 <div class="finance-panel" data-panel="pricing">
