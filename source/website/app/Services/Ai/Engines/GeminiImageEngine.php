@@ -19,7 +19,7 @@ class GeminiImageEngine implements AiImageEngineInterface
       throw new \RuntimeException('GEMINI_API_KEY missing');
     }
 
-    $model = (string) config('ai.gemini_image_model', 'imagen-4.0-generate-001');
+    $model = (string) config('ai.gemini_image_model', 'gemini-3.1-flash-image');
 
     $prompt = trim((string)($data['prompt'] ?? ''));
     if ($prompt === '') {
@@ -36,19 +36,16 @@ class GeminiImageEngine implements AiImageEngineInterface
     [$w, $h] = $this->resolveSize((string)($data['size'] ?? 'square_1024'));
     $aspectRatio = $this->aspectRatioFromSize($w, $h); 
 
-    $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:predict?key={$apiKey}";
+    $endpoint = "https://generativelanguage.googleapis.com/v1beta/interactions";
 
     try {
       $response = Http::timeout(180)
+        ->withHeaders(['x-goog-api-key' => $apiKey])
         ->acceptJson()
         ->post($endpoint, [
-          "instances" => [
-            ["prompt" => $finalPrompt] 
-          ],
-          "parameters" => [
-            "sampleCount" => 1,
-            "aspectRatio" => $aspectRatio,
-          ]
+          'model' => $model,
+          'input' => [['type' => 'text', 'text' => $finalPrompt]],
+          'response_format' => ['type' => 'image', 'mime_type' => 'image/png', 'aspect_ratio' => $aspectRatio, 'image_size' => '1K'],
         ]);
 
       if (!$response->successful()) {
@@ -60,7 +57,7 @@ class GeminiImageEngine implements AiImageEngineInterface
       }
 
       $json = $response->json();
-      $base64 = $json['predictions'][0]['bytesBase64Encoded'] ?? null;
+      $base64 = $json['output_image']['data'] ?? null;
 
       if (!$base64) {
         throw new \RuntimeException('Gemini did not return a usable generated image.');
