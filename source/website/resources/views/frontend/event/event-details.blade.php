@@ -1228,11 +1228,6 @@
                         </div>
                     </div>
                 </div>
-                @if (!empty(showAd(3)))
-                    <div class="text-center mt-4">
-                        {!! showAd(3) !!}
-                    </div>
-                @endif
             </div>
             @if (count($related_events) > 0)
                 <hr>
