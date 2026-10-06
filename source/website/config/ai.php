@@ -7,7 +7,7 @@ return [
 
   'openai_api_key' => env('OPENAI_API_KEY', ''),
   'openai_text_model' => env('OPENAI_TEXT_MODEL', 'gpt-4o'),
-  'openai_image_model' => env('OPENAI_IMAGE_MODEL', 'dall-e-3'),
+  'openai_image_model' => env('OPENAI_IMAGE_MODEL', 'gpt-image-1.5'),
 
   'gemini_api_key' => env('GEMINI_API_KEY', ''),
   'gemini_text_model' => env('GEMINI_TEXT_MODEL', 'gemini-3.8-flash'),
