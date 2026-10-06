@@ -90,8 +90,8 @@
                                 method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" name="event_type" value="{{ request('type', 'venue') }}">
-                                <input type="hidden" name="box_office_enabled" value="{{ request()->boolean('special') ? 1 : 0 }}">
-                                @if (request()->boolean('special'))
+                                <input type="hidden" name="box_office_enabled" value="{{ request('type') === 'box_office' || request()->boolean('special') ? 1 : 0 }}">
+                                @if (request('type') === 'box_office' || request()->boolean('special'))
                                 <div class="card border-danger mb-4">
                                   <div class="card-header"><strong>{{ __('Box Office Event — Box Office') }}</strong></div>
                                   <div class="card-body">
