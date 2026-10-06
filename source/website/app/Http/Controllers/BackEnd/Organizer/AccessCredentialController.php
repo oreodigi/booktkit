@@ -9,6 +9,7 @@ use App\Models\Access\EventAccessPolicy;
 use App\Models\Access\TicketCredential;
 use App\Models\Event;
 use App\Models\Event\IssuedTicket;
+use App\Models\Event\Ticket;
 use App\Services\Access\CredentialAssignmentService;
 use App\Services\Access\CredentialInventoryService;
 use App\Services\Access\CredentialReplacementService;
@@ -112,14 +113,21 @@ class AccessCredentialController extends Controller
         ]);
         $ticket = $this->resolveTicket($data['ticket_reference'], $organizerId);
         $policy = EventAccessPolicy::where('event_id', $ticket->event_id)->where('organizer_id', $organizerId)->first();
-        abort_unless($policy && $policy->is_enabled && $policy->replacement_allowed, 403, 'Credential replacement is not enabled for this event.');
-        if ($policy->max_replacements) {
+        $ticketType = $ticket->ticket_type_id ? Ticket::find($ticket->ticket_type_id) : null;
+        $replacementAllowed = $ticketType && $ticketType->admission_pass_type
+            ? (bool) $ticketType->replacement_allowed
+            : (bool) ($policy && $policy->is_enabled && $policy->replacement_allowed);
+        $maxReplacements = $ticketType && $ticketType->admission_pass_type ? $ticketType->max_replacements : ($policy?->max_replacements);
+        abort_unless($replacementAllowed, 403, 'Credential replacement is not enabled for this ticket.');
+        if ($maxReplacements) {
             $count = \App\Models\Access\CredentialReplacement::where('issued_ticket_id', $ticket->id)->count();
-            abort_if($count >= $policy->max_replacements, 422, 'Maximum credential replacements reached.');
+            abort_if($count >= $maxReplacements, 422, 'Maximum credential replacements reached.');
         }
         $credential = $inventory->resolve($data['credential_identifier']);
         abort_unless($credential && (int) $credential->organizer_id === $organizerId, 404);
-        $fee=(int)data_get($policy->metadata,'replacement_fee_paise',0);
+        $fee = $ticketType && $ticketType->admission_pass_type
+            ? (int) $ticketType->replacement_fee_paise
+            : (int) data_get($policy?->metadata, 'replacement_fee_paise', 0);
         if($fee>0 && empty($data['payment_reference'])) return back()->withErrors(['payment_reference'=>'Replacement fee payment must be recorded before activating the new credential.']);
         $replacement->replace($ticket->id,$credential->id,$data['reason'],'organizer',$organizerId,$fee,$data['payment_reference']??null);
         return back()->with('success', 'Old credential revoked and replacement activated.');
