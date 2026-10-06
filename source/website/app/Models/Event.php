@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Event\Ticket;
 use App\Models\Event\Wishlist;
 use App\Models\Event\BoxOfficeLocation;
+use App\Models\Event\EventPassProduct;
 
 class Event extends Model
 {
@@ -68,6 +69,11 @@ class Event extends Model
   public function boxOfficeLocations()
   {
     return $this->hasMany(BoxOfficeLocation::class);
+  }
+
+  public function passProducts()
+  {
+    return $this->hasMany(EventPassProduct::class);
   }
 
   public function organizer()
