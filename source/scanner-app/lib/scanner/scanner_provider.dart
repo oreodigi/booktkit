@@ -17,6 +17,7 @@ class ScannerProvider extends ChangeNotifier {
   Timer? _delayTimer;
   bool _canDetect = true; // Flag to completely disable detection
   String? _lastScannedCode;
+  String _direction = 'entry';
   DateTime? _lastScanTime;
 
   bool get processing => _processing;
@@ -24,6 +25,8 @@ class ScannerProvider extends ChangeNotifier {
   bool get scanningReady => _scanningReady;
   bool get canDetect => _canDetect;
   QRViewController? get controller => _controller;
+  String get direction => _direction;
+  void setDirection(String value) { if (value == 'entry' || value == 'exit') { _direction = value; resetScanHistory(); notifyListeners(); } }
 
   void setController(QRViewController? controller) {
     _controller = controller;
@@ -157,11 +160,13 @@ class ScannerProvider extends ChangeNotifier {
           token: token,
           role: profile.role,
           bookingId: code,
+          direction: _direction,
         );
         payload = {
           'value': code,
           'apiMessage': res.message,
           'alertType': res.alertType,
+          'direction': _direction,
           if (res.bookingId != null) 'booking_id': res.bookingId,
         };
       } else {
