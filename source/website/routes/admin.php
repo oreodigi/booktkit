@@ -931,4 +931,9 @@ Route::prefix('/admin/payments')->middleware(['auth:admin','adminLang','permissi
   Route::get('/', 'BackEnd\PaymentFinanceController@index')->name('admin.payments.finance');
   Route::get('/organizers', 'BackEnd\PaymentFinanceController@organizers')->name('admin.payments.organizers');
   Route::post('/organizers/{id}', 'BackEnd\PaymentFinanceController@updateOrganizer')->name('admin.payments.organizers.update');
+  Route::post('/fee-rules', 'BackEnd\\PaymentFinanceController@storeFeeRule')->name('admin.payments.fee_rules.store');
+  Route::put('/fee-rules/{id}', 'BackEnd\\PaymentFinanceController@updateFeeRule')->name('admin.payments.fee_rules.update');
+  Route::delete('/fee-rules/{id}', 'BackEnd\\PaymentFinanceController@destroyFeeRule')->name('admin.payments.fee_rules.destroy');
+  Route::post('/additional-fees', 'BackEnd\\PaymentFinanceController@storeAdditionalFee')->name('admin.payments.additional_fees.store');
+  Route::delete('/additional-fees/{id}', 'BackEnd\\PaymentFinanceController@disableAdditionalFee')->name('admin.payments.additional_fees.destroy');
 });
