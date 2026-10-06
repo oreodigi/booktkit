@@ -15,6 +15,7 @@ use App\Services\Access\CredentialReplacementService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class AccessCredentialController extends Controller
 {
@@ -25,9 +26,19 @@ class AccessCredentialController extends Controller
         $event = $request->integer('event_id') ? $events->firstWhere('id', $request->integer('event_id')) : $events->first();
         $policy = $event ? EventAccessPolicy::where('event_id', $event->id)->where('organizer_id', $organizerId)->first() : null;
         $batches = $event ? CredentialBatch::where('event_id', $event->id)->where('organizer_id', $organizerId)->withCount('credentials')->latest()->get() : collect();
+        $stats = $event ? [
+            'inside' => IssuedTicket::where('event_id', $event->id)->where('organizer_id', $organizerId)->where('presence_state', 'inside')->count(),
+            'outside' => IssuedTicket::where('event_id', $event->id)->where('organizer_id', $organizerId)->where('presence_state', 'outside')->count(),
+            'entries' => IssuedTicket::where('event_id', $event->id)->where('organizer_id', $organizerId)->sum('entry_count'),
+            'exits' => IssuedTicket::where('event_id', $event->id)->where('organizer_id', $organizerId)->sum('exit_count'),
+            'credentials' => Credential::where('event_id', $event->id)->where('organizer_id', $organizerId)->where('status', 'active')->count(),
+        ] : ['inside'=>0,'outside'=>0,'entries'=>0,'exits'=>0,'credentials'=>0];
+        $zones = $event ? DB::table('event_access_zones')->where('event_id',$event->id)->where('organizer_id',$organizerId)->orderBy('name')->get() : collect();
+        $gates = $event ? DB::table('event_gates')->where('event_id',$event->id)->where('organizer_id',$organizerId)->orderBy('name')->get() : collect();
+        $scans = $event ? DB::table('access_scans')->where('event_id',$event->id)->latest('created_at')->limit(100)->get() : collect();
         $assignments = $event ? TicketCredential::whereHas('ticket', fn ($q) => $q->where('event_id', $event->id)->where('organizer_id', $organizerId))->with(['ticket.booking', 'credential'])->latest('assigned_at')->limit(50)->get() : collect();
 
-        return view('organizer.access.index', compact('events', 'event', 'policy', 'batches', 'assignments'));
+        return view('organizer.access.index', compact('events', 'event', 'policy', 'batches', 'assignments', 'stats', 'zones', 'gates', 'scans'));
     }
 
     public function savePolicy(Request $request, $eventId)
@@ -107,6 +118,25 @@ class AccessCredentialController extends Controller
         $replacement->replace($ticket->id, $credential->id, $data['reason'], 'organizer', $organizerId);
         return back()->with('success', 'Old credential revoked and replacement activated.');
     }
+    public function createZone(Request $request)
+    {
+        $organizerId = auth('organizer')->id();
+        $data = $request->validate(['event_id'=>'required|integer','name'=>'required|string|max:100','code'=>'required|string|max:60']);
+        Event::where('organizer_id',$organizerId)->findOrFail($data['event_id']);
+        DB::table('event_access_zones')->insert(['event_id'=>$data['event_id'],'organizer_id'=>$organizerId,'name'=>$data['name'],'code'=>strtolower($data['code']),'active'=>1,'created_at'=>now(),'updated_at'=>now()]);
+        return back()->with('success','Access zone created.');
+    }
+
+    public function createGate(Request $request)
+    {
+        $organizerId = auth('organizer')->id();
+        $data = $request->validate(['event_id'=>'required|integer','name'=>'required|string|max:100','code'=>'required|string|max:60','mode'=>['required',Rule::in(['entry','exit','entry_exit'])],'zone_id'=>'nullable|integer']);
+        Event::where('organizer_id',$organizerId)->findOrFail($data['event_id']);
+        if (!empty($data['zone_id'])) abort_unless(DB::table('event_access_zones')->where('id',$data['zone_id'])->where('event_id',$data['event_id'])->where('organizer_id',$organizerId)->exists(),422);
+        DB::table('event_gates')->insert(['event_id'=>$data['event_id'],'organizer_id'=>$organizerId,'zone_id'=>$data['zone_id']??null,'name'=>$data['name'],'code'=>strtolower($data['code']),'mode'=>$data['mode'],'active'=>1,'created_at'=>now(),'updated_at'=>now()]);
+        return back()->with('success','Gate created.');
+    }
+
     private function resolveTicket(string $reference, int $organizerId): IssuedTicket
     {
         $query = IssuedTicket::where('organizer_id', $organizerId);
