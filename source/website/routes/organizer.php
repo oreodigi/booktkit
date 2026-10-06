@@ -82,6 +82,11 @@ Route::prefix('/organizer/ai-token-purchase')->group(function () {
 });
 
 Route::prefix('/organizer')->middleware('auth:organizer', 'Deactive:organizer', 'EmailStatus:organizer', 'adminLang')->group(function () {
+  Route::get('/access-control', 'BackEnd\\Organizer\\AccessCredentialController@index')->name('organizer.access.index');
+  Route::put('/access-control/events/{eventId}/policy', 'BackEnd\\Organizer\\AccessCredentialController@savePolicy')->name('organizer.access.policy');
+  Route::post('/access-control/batches', 'BackEnd\\Organizer\\AccessCredentialController@createBatch')->name('organizer.access.batch');
+  Route::post('/access-control/assign', 'BackEnd\\Organizer\\AccessCredentialController@assign')->name('organizer.access.assign');
+  Route::post('/access-control/replace', 'BackEnd\\Organizer\\AccessCredentialController@replace')->name('organizer.access.replace');
   Route::get('/box-office/reports', 'BackEnd\\Organizer\\BoxOfficeReportController@index')->name('organizer.boxoffice.reports.index');
   Route::get('/box-office/shifts', 'BackEnd\\Organizer\\BoxOfficeShiftController@index')->name('organizer.boxoffice.shifts.index');
   Route::post('/box-office/shifts/{id}/verify', 'BackEnd\\Organizer\\BoxOfficeShiftController@verify')->name('organizer.boxoffice.shifts.verify');
