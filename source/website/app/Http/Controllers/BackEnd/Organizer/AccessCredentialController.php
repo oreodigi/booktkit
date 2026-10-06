@@ -35,10 +35,11 @@ class AccessCredentialController extends Controller
         ] : ['inside'=>0,'outside'=>0,'entries'=>0,'exits'=>0,'credentials'=>0];
         $zones = $event ? DB::table('event_access_zones')->where('event_id',$event->id)->where('organizer_id',$organizerId)->orderBy('name')->get() : collect();
         $gates = $event ? DB::table('event_gates')->where('event_id',$event->id)->where('organizer_id',$organizerId)->orderBy('name')->get() : collect();
+        $gateStats = $event ? DB::table('event_gates as g')->leftJoin('access_scans as s','s.gate_id','=','g.id')->where('g.event_id',$event->id)->where('g.organizer_id',$organizerId)->groupBy('g.id','g.name','g.code','g.mode')->orderBy('g.name')->get(['g.id','g.name','g.code','g.mode',DB::raw("SUM(CASE WHEN s.result='admitted' THEN 1 ELSE 0 END) as entries"),DB::raw("SUM(CASE WHEN s.result='exited' THEN 1 ELSE 0 END) as exits"),DB::raw("SUM(CASE WHEN s.result='denied' THEN 1 ELSE 0 END) as denied")]) : collect();
         $scans = $event ? DB::table('access_scans')->where('event_id',$event->id)->latest('created_at')->limit(100)->get() : collect();
         $assignments = $event ? TicketCredential::whereHas('ticket', fn ($q) => $q->where('event_id', $event->id)->where('organizer_id', $organizerId))->with(['ticket.booking', 'credential'])->latest('assigned_at')->limit(50)->get() : collect();
 
-        return view('organizer.access.index', compact('events', 'event', 'policy', 'batches', 'assignments', 'stats', 'zones', 'gates', 'scans'));
+        return view('organizer.access.index', compact('events', 'event', 'policy', 'batches', 'assignments', 'stats', 'zones', 'gates', 'scans', 'gateStats'));
     }
 
     public function savePolicy(Request $request, $eventId)
