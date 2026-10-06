@@ -1,10 +1,39 @@
 <?php
-return ['roles'=>[
- 'sales_agent'=>['label'=>'Sales Agent','department'=>'sales','permissions'=>['box_office.sell','box_office.reprint']],
- 'cashier'=>['label'=>'Cashier','department'=>'sales','permissions'=>['box_office.sell','box_office.reprint']],
- 'ticket_checker'=>['label'=>'Ticket Checker','department'=>'admissions','permissions'=>['tickets.scan','access.scan_entry','access.scan_exit']],
- 'credential_issuer'=>['label'=>'Credential Issuer','department'=>'admissions','permissions'=>['credentials.issue','credentials.replace']],
- 'box_office_supervisor'=>['label'=>'Box Office Supervisor','department'=>'sales','permissions'=>['box_office.sell','box_office.reprint','box_office.void_request','box_office.void_approve','shifts.verify','reports.view','tickets.scan','credentials.issue','credentials.replace','credentials.inventory','credentials.revoke','access.scan_entry','access.scan_exit','access.override','access.reports']],
- 'event_manager'=>['label'=>'Event Manager','department'=>'operations','permissions'=>['reports.view','tickets.scan','credentials.issue','credentials.replace','credentials.inventory','credentials.revoke','access.scan_entry','access.scan_exit','access.override','access.reports']],
- 'support_staff'=>['label'=>'Support Staff','department'=>'support','permissions'=>[]],
- ],'departments'=>['sales'=>'Sales / Box Office','admissions'=>'Admissions / Scanner','operations'=>'Event Operations','support'=>'Customer Support','other'=>'Other']];
+return [
+ 'permissions'=>[
+  'events.view'=>'View events',
+  'events.manage'=>'Create and edit events',
+  'tickets.manage'=>'Manage tickets and passes',
+  'bookings.view'=>'View event bookings',
+  'bookings.manage'=>'Update booking status',
+  'box_office.sell'=>'Use Box Office POS',
+  'box_office.reprint'=>'Reprint POS tickets',
+  'box_office.void_request'=>'Request POS voids',
+  'box_office.void_approve'=>'Approve POS voids',
+  'shifts.verify'=>'Verify Box Office shifts',
+  'reports.view'=>'View reports',
+  'tickets.scan'=>'Scan tickets',
+  'credentials.issue'=>'Issue access credentials',
+  'credentials.replace'=>'Replace access credentials',
+  'credentials.inventory'=>'Manage credential inventory',
+  'credentials.revoke'=>'Revoke credentials',
+  'access.scan_entry'=>'Scan entry',
+  'access.scan_exit'=>'Scan exit',
+  'access.override'=>'Override admission decisions',
+  'access.reports'=>'View access reports',
+  'support.manage'=>'Manage support tickets',
+  'team.manage'=>'Manage organizer team',
+  'payments.view'=>'View payments and settlements',
+  'ai.use'=>'Use organizer AI tools',
+ ],
+ 'roles'=>[
+  'sales_agent'=>['label'=>'Sales Agent','department'=>'sales','permissions'=>['box_office.sell','box_office.reprint']],
+  'cashier'=>['label'=>'Cashier','department'=>'sales','permissions'=>['box_office.sell','box_office.reprint']],
+  'ticket_checker'=>['label'=>'Ticket Checker','department'=>'admissions','permissions'=>['tickets.scan','access.scan_entry','access.scan_exit']],
+  'credential_issuer'=>['label'=>'Credential Issuer','department'=>'admissions','permissions'=>['credentials.issue','credentials.replace']],
+  'box_office_supervisor'=>['label'=>'Box Office Supervisor','department'=>'sales','permissions'=>['box_office.sell','box_office.reprint','box_office.void_request','box_office.void_approve','shifts.verify','reports.view','tickets.scan','credentials.issue','credentials.replace','credentials.inventory','credentials.revoke','access.scan_entry','access.scan_exit','access.override','access.reports']],
+  'event_manager'=>['label'=>'Event Manager','department'=>'operations','permissions'=>['events.view','events.manage','tickets.manage','bookings.view','bookings.manage','reports.view','tickets.scan','credentials.issue','credentials.replace','credentials.inventory','credentials.revoke','access.scan_entry','access.scan_exit','access.override','access.reports','support.manage','ai.use']],
+  'support_staff'=>['label'=>'Support Staff','department'=>'support','permissions'=>['bookings.view','support.manage']],
+ ],
+ 'departments'=>['sales'=>'Sales / Box Office','admissions'=>'Admissions / Scanner','operations'=>'Event Operations','support'=>'Customer Support','other'=>'Other']
+];

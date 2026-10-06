@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Models\BasicSettings\Basic;
 use App\Models\Organizer;
+use App\Models\OrganizerStaff;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -326,6 +327,24 @@ class OrganizerController extends Controller
         return redirect()->route('organizer.dashboard');
       }
     } else {
+      $staffMatches = OrganizerStaff::with('organizer')->where('active', 1)
+        ->where(function ($query) use ($request) {
+          $query->where('username', $request->username)->orWhere('email', $request->username);
+        })->get()->filter(function ($staff) use ($request) {
+          return Hash::check($request->password, $staff->password);
+        });
+      if ($staffMatches->count() === 1) {
+        $staff = $staffMatches->first();
+        if (!$staff->organizer || !$staff->organizer->status) {
+          return redirect()->back()->with('alert', 'This organizer account is not active.');
+        }
+        Auth::guard('staff')->login($staff);
+        Auth::guard('organizer')->login($staff->organizer);
+        $request->session()->regenerate();
+        $staff->forceFill(['last_login_at' => now()])->save();
+        Session::put('secret_login', 0);
+        return redirect()->route($staff->must_change_password ? 'staff.password.edit' : 'staff.home');
+      }
       return redirect()->back()->with('alert', 'Oops, Username or password does not match!');
     }
   }
@@ -444,6 +463,7 @@ class OrganizerController extends Controller
 
   public function logout(Request $request)
   {
+    Auth::guard('staff')->logout();
     Auth::guard('organizer')->logout();
     Session::forget('secret_login');
     return redirect()->route('organizer.login');

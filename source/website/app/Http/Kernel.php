@@ -73,5 +73,6 @@ class Kernel extends HttpKernel
     'organizer.ai.quota' => \App\Http\Middleware\EnsureOrganizerAiQuotaAvailable::class,
     'organizer.ai.system' => \App\Http\Middleware\EnsureOrganizerAiSystemEnabled::class,
     'staff.assignment' => \App\Http\Middleware\EnsureStaffAssignment::class,
+    'organizer.staff.rbac' => \App\Http\Middleware\EnsureOrganizerStaffRbac::class,
   ];
 }

@@ -81,7 +81,7 @@ Route::prefix('/organizer/ai-token-purchase')->group(function () {
   Route::get('perfect-money/cancel', 'BackEnd\Organizer\PaymentGateway\PerfectMoneyController@cancel')->name('organizer.ai_token_purchase.perfect-money.cancel');
 });
 
-Route::prefix('/organizer')->middleware('auth:organizer', 'Deactive:organizer', 'EmailStatus:organizer', 'adminLang')->group(function () {
+Route::prefix('/organizer')->middleware('auth:organizer', 'Deactive:organizer', 'EmailStatus:organizer', 'adminLang', 'organizer.staff.rbac')->group(function () {
   Route::get('/events/{eventId}/passes', 'BackEnd\\Organizer\\EventPassController@index')->name('organizer.event.passes.index');
   Route::post('/events/{eventId}/passes', 'BackEnd\\Organizer\\EventPassController@store')->name('organizer.event.passes.store');
   Route::put('/events/{eventId}/passes/{passId}', 'BackEnd\\Organizer\\EventPassController@update')->name('organizer.event.passes.update');
