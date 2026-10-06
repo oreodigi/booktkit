@@ -13,6 +13,7 @@ use App\Models\Event\Ticket;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Event\TicketContent;
+use App\Services\Events\EventPassService;
 use App\Models\Language;
 use Carbon\Carbon;
 
@@ -21,6 +22,17 @@ class CheckOutController extends Controller
   //checkout
   public function checkout2(Request $request)
   {
+
+    if ($request->filled('pass_product_id')) {
+      $qty=max(1,(int)$request->input('pass_quantity',1));
+      $quote=app(EventPassService::class)->quote((int)$request->event_id,['pass_product_id'=>(int)$request->pass_product_id,'event_date_ids'=>(array)$request->input('pass_event_date_ids',[])],$qty,'web');
+      $request->merge(['quantity'=>[$qty]]);
+      Session::put('selTickets',[['ticket_id'=>$quote['ticket_id'],'name'=>$quote['pass_name'],'qty'=>$qty,'price'=>$quote['unit_price']/100,'early_bird_dicount'=>0,'pass_product_id'=>$quote['pass_product_id'],'event_date_ids'=>$quote['event_date_ids'],'pass_type'=>$quote['pass_type']]]);
+      Session::put('total',$quote['line_total']/100);Session::put('sub_total',$quote['line_total']/100);Session::put('quantity',$qty);Session::put('total_early_bird_dicount',0);Session::put('discount',null);
+      $event=EventContent::join('events','events.id','event_contents.event_id')->where('events.id',$request->event_id)->select('events.*','event_contents.title','event_contents.slug','event_contents.city','event_contents.address','event_contents.country')->firstOrFail();Session::put('event',$event);Session::put('event_date',implode(',',$quote['event_date_ids']));Session::put('online_gateways',OnlineGateway::where('status',1)->get());Session::put('offline_gateways',OfflineGateway::where('status',1)->orderBy('serial_number','asc')->get());
+      if(!Auth::guard('customer')->check()) return redirect()->route('customer.login',['redirectPath'=>'event_checkout']);
+      return redirect()->route('check-out');
+    }
 
     $basic = Basic::select('event_guest_checkout_status')->first();
     $event_guest_checkout_status = $basic->event_guest_checkout_status;
