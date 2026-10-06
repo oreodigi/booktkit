@@ -9,18 +9,22 @@ const require = createRequire(import.meta.url);
 const cwd = fileURLToPath(new URL('..', import.meta.url));
 const root = path.join(cwd, 'artifacts', 'runs');
 const active = new Map();
-export const allowedSuites = new Set(['all','smoke','mobile','auth','signup','login','organizer','event-creation','checkout','api','security','razorpay','scanner','contracts','diagnostics']);
+export const allowedSuites = new Set(['all','smoke','mobile','auth','signup','login','organizer','event-creation','pos','staff-rbac','admission','checkout','api','security','razorpay','scanner','contracts','diagnostics']);
 const suiteArgs = {
   smoke: ['tests/readonly-smoke.spec.js'],
   auth: ['tests/authenticated-role.spec.js'], login: ['tests/authenticated-role.spec.js'],
   signup: ['tests/customer-auth.spec.js','tests/organizer-auth.spec.js','--grep','signup|register'],
   organizer: ['tests/organizer-authenticated.spec.js'],
   'event-creation': ['tests/staging-event.spec.js'],
+  pos: ['tests/pos-flow.spec.js'],
+  'staff-rbac': ['tests/staff-rbac.spec.js'],
+  admission: ['tests/admission-flow.spec.js'],
   checkout: ['tests/razorpay.spec.js','tests/razorpay-contract.spec.js'],
   api: ['tests/api-surface.spec.js'], security: ['tests/security-boundaries.spec.js','tests/mutation-guard.spec.js'],
   razorpay: ['tests/razorpay.spec.js','tests/razorpay-contract.spec.js'], scanner: ['tests/scanner-contract.spec.js'],
   contracts: ['tests/mobile-api-contract.spec.js','tests/razorpay-contract.spec.js','tests/scanner-contract.spec.js'],
   diagnostics: ['tests/runtime-diagnostics.spec.js'],
+  all: ['tests/readonly-smoke.spec.js','tests/authenticated-role.spec.js','tests/organizer-authenticated.spec.js','tests/staging-event.spec.js','tests/pos-flow.spec.js','tests/staff-rbac.spec.js','tests/admission-flow.spec.js','tests/api-surface.spec.js','tests/security-boundaries.spec.js','tests/mutation-guard.spec.js','tests/mobile-api-contract.spec.js','tests/razorpay-contract.spec.js','tests/scanner-contract.spec.js','tests/runtime-diagnostics.spec.js'],
 };
 function directory(id) {
   if (!/^[a-f0-9-]{36}$/.test(id)) throw new Error('Invalid run_id');
