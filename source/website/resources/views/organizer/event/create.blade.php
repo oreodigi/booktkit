@@ -121,8 +121,7 @@
                                     <button type="button" class="btn btn-sm btn-outline-primary" id="addBoxOfficeLocation">{{ __('Add Counter') }}</button>
                                   </div>
                                 </div>
-                                @push('scripts')
-<script>
+                                <script>
 document.addEventListener('DOMContentLoaded', function () {
   const wrap = document.getElementById('boxOfficeLocations');
   const add = document.getElementById('addBoxOfficeLocation');
@@ -154,7 +153,6 @@ document.addEventListener('DOMContentLoaded', function () {
   syncReentryFields();
 });
 </script>
-@endpush
                                 @endif
                                 <div class="form-group">
                                     <label for="">{{ __('Thumbnail Image') . '*' }}</label>
