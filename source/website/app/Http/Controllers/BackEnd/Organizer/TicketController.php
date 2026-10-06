@@ -70,6 +70,7 @@ class TicketController extends Controller
   {
     Log::info($request->all());
     $in = $request->all();
+    $this->applyAdmissionSettings($in, $request);
     $in['early_bird_discount'] = $request->early_bird_discount_type;
     $in['early_bird_discount_type'] = $request->discount_type;
     if ($request->pricing_type_2 == 'free') {
@@ -187,6 +188,7 @@ class TicketController extends Controller
 
     Log::info($request->all());
     $in = $request->except(['slot_seat_min_price']);
+    $this->applyAdmissionSettings($in, $request);
     $in['early_bird_discount'] = $request->early_bird_discount_type;
     $in['early_bird_discount_type'] = $request->discount_type;
     $in['ticket_available'] = $request->ticket_available_type == 'limited' ? $request->ticket_available : null;
@@ -382,6 +384,22 @@ class TicketController extends Controller
         $slotImage->delete();
       }
     }
+  }
+
+
+  private function applyAdmissionSettings(array &$in, Request $request): void
+  {
+    $physical = $request->input('admission_pass_type', 'mobile_qr') !== 'mobile_qr';
+    $in['admission_pass_type'] = $request->input('admission_pass_type', 'mobile_qr');
+    $in['collection_required'] = $physical && $request->boolean('collection_required');
+    $in['allow_mobile_qr_before_assignment'] = !$physical || $request->boolean('allow_mobile_qr_before_assignment');
+    $in['exit_scan_required'] = $request->boolean('exit_scan_required');
+    $in['reentry_policy'] = $request->input('reentry_policy', 'none');
+    $in['max_reentries'] = $in['reentry_policy'] === 'limited' ? $request->integer('max_reentries') : null;
+    $in['replacement_allowed'] = $physical && $request->boolean('replacement_allowed');
+    $in['max_replacements'] = $in['replacement_allowed'] ? $request->integer('max_replacements') ?: null : null;
+    $in['replacement_fee_paise'] = $in['replacement_allowed'] ? (int) round(((float) $request->input('replacement_fee', 0)) * 100) : 0;
+    unset($in['replacement_fee']);
   }
 
   public function updateSlotIsEnable($slot_unique_id, $slot_enable_input)
