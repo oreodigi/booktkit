@@ -38,25 +38,24 @@
             <div class="text-center">
               {{-- Add to calendar --}}
               @php
-                if ($event->date_type == 'multiple') {
-                    $start_date = str_replace('-', '', $event_date->start_date);
-                    $start_time = str_replace(':', '', $event_date->start_time);
-                    $end_date = str_replace('-', '', $event_date->end_date);
-                    $end_time = str_replace(':', '', $event_date->end_time);
+                $calendarDate = $event->date_type == 'multiple' ? ($event_date ?? null) : $event;
+                $canAddToCalendar = $calendarDate
+                    && !empty($calendarDate->start_date)
+                    && !empty($calendarDate->start_time)
+                    && !empty($calendarDate->end_date)
+                    && !empty($calendarDate->end_time);
 
-                    $s_time = $start_time - 5;
-                    $e_time = $end_time - 5;
-                } else {
-                    $start_date = str_replace('-', '', $event->start_date);
-                    $start_time = str_replace(':', '', $event->start_time);
-                    $end_date = str_replace('-', '', $event->end_date);
-                    $end_time = str_replace(':', '', $event->end_time);
+                if ($canAddToCalendar) {
+                    $start_date = str_replace('-', '', $calendarDate->start_date);
+                    $start_time = str_replace(':', '', $calendarDate->start_time);
+                    $end_date = str_replace('-', '', $calendarDate->end_date);
+                    $end_time = str_replace(':', '', $calendarDate->end_time);
 
                     $s_time = $start_time - 5;
                     $e_time = $end_time - 5;
                 }
-
               @endphp
+              @if ($canAddToCalendar)
               <div class="dropdown show pt-4 pb-4">
                 <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
                   aria-haspopup="true" aria-expanded="false">
@@ -70,6 +69,7 @@
                     href="//calendar.yahoo.com/?v=60&view=d&type=20&TITLE={{ @$event->information->title }}&ST={{ $start_date }}T{{ $start_time }}&ET={{ $end_date }}T{{ $end_time }}&DUR=9959&DESC=For%20details%2C%20click%20here%3A%20{{ route('event.details', [@$event->information->slug, $event->id]) }}&in_loc={{ $event->event_type == 'online' ? 'Online' : @$event->information->address }}">{{ __('Yahoo') }}</a>
                 </div>
               </div>
+              @endif
             </div>
             <div class="icon text-success"><i class="far fa-check-circle"></i></div>
             <h2 class="mb-3">{{ __('Success') }}!</h2>
