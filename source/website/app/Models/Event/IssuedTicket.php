@@ -8,7 +8,7 @@ class IssuedTicket extends Model
 {
     protected $fillable = [
         'uuid', 'booking_id', 'event_id', 'organizer_id', 'customer_id',
-        'ticket_type_id', 'legacy_unique_id', 'ticket_name', 'token_hash',
+        'ticket_type_id', 'pass_product_id', 'legacy_unique_id', 'ticket_name', 'token_hash',
         'status', 'issued_at', 'checked_in_at', 'checked_in_by_type',
         'checked_in_by_id', 'presence_state', 'entry_count', 'exit_count', 'last_admission_at',
     ];
@@ -20,6 +20,8 @@ class IssuedTicket extends Model
     ];
 
     protected $hidden = ['token_hash'];
+
+    public function entitlements(){return $this->hasMany(PassEntitlement::class);}
 
     public function booking()
     {
