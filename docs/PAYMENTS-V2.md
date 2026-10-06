@@ -60,3 +60,7 @@ Organizer Payments exposes preferred settlement method, Razorpay/KYC status, eff
 4. Organizer settlement preference/KYC fallback UX.
 5. Web/mobile/POS integration with the same authoritative order service.
 6. Legacy payment-route cleanup, reconciliation, reports and production migration/verification.
+
+
+## Production reconciliation
+Payments V2 fee resolution and additional-fee services are reconciled against the production fee-engine schema. Production remains server-authoritative for pricing and settlement routing.
