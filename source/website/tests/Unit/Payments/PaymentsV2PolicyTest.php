@@ -1,0 +1,8 @@
+<?php
+namespace Tests\Unit\Payments;
+use Tests\TestCase;use App\Models\Payments\OrganizerPaymentProfile;use App\Models\Payments\PaymentFeeRule;use App\Services\Payments\PlatformFeeCalculator;use App\Services\Payments\SettlementRoutingService;
+class PaymentsV2PolicyTest extends TestCase{
+ public function test_customer_borne_hybrid_fee_is_added_to_total():void{$rule=new PaymentFeeRule(['percentage'=>5,'fixed_amount'=>1000,'fee_bearer'=>'customer','version'=>3]);$rule->id=9;$p=(new PlatformFeeCalculator)->calculateRule(10000,$rule);$this->assertSame(1500,$p['platform_fee']);$this->assertSame(11500,$p['customer_total']);$this->assertSame(10000,$p['organizer_amount']);$this->assertSame(9,$p['fee_rule_id']);$this->assertSame(3,$p['fee_rule_version']);}
+ public function test_organizer_borne_fee_reduces_organizer_amount():void{$rule=new PaymentFeeRule(['percentage'=>10,'fixed_amount'=>0,'fee_bearer'=>'organizer']);$p=(new PlatformFeeCalculator)->calculateRule(10000,$rule);$this->assertSame(1000,$p['platform_fee']);$this->assertSame(10000,$p['customer_total']);$this->assertSame(9000,$p['organizer_amount']);}
+ public function test_direct_preference_falls_back_until_route_eligible():void{$profile=new OrganizerPaymentProfile(['preferred_settlement_mode'=>'razorpay_split','settlement_mode'=>'razorpay_split','split_enabled'=>false,'kyc_status'=>'draft','razorpay_status'=>'not_started']);$r=(new SettlementRoutingService)->decide($profile);$this->assertSame('booktkit_managed',$r['mode']);$this->assertSame('razorpay_kyc_not_active',$r['reason']);}
+}
