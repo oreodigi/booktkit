@@ -211,6 +211,7 @@ class ApiClient {
     required String token,
     required UserRole role,
     required String bookingId,
+    String direction = 'entry',
   }) async {
     if (apiBaseUrl.contains('YOUR_API_BASE_URL_HERE')) {
       throw Exception('Please set apiBaseUrl in lib/services/api_client.dart');
@@ -228,7 +229,7 @@ class ApiClient {
         // If your backend expects a different token header, adjust here.
         'Authorization': 'Bearer $token',
       },
-      body: {'booking_id': bookingId},
+      body: {'booking_id': bookingId, 'direction': direction},
     );
 
     // Parse gracefully even on non-200s if server returns JSON
