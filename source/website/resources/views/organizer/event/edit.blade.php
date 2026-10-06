@@ -73,6 +73,7 @@
                         {{ __('Preview') }}
                     </a>
                     @if ($event->event_type == 'venue')
+                        <a class="mr-2 btn btn-primary btn-sm float-right d-inline-block" href="{{ route('organizer.event.passes.index', $event->id) }}"><i class="fas fa-layer-group"></i> {{ __('Passes & Access') }}</a>
                         <a class="mr-2 btn btn-secondary btn-sm float-right d-inline-block"
                             href="{{ route('organizer.event.ticket', ['language' => $defaultLang->code, 'event_id' => $event->id, 'event_type' => $event->event_type]) }}"
                             target="_blank">
