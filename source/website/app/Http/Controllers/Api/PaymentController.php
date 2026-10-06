@@ -36,7 +36,7 @@ class PaymentController extends Controller {
   if(!$order->customer_snapshot){ $order->customer_snapshot=$data['customer']; $order->save(); }
   $gateway=$razorpay->createOrder($order);
   return response()->json(['success'=>true,'payment_order'=>$order->uuid,'gateway_order_id'=>$gateway['id'],'amount'=>$order->customer_total,'currency'=>$order->currency,
-   'breakdown'=>['ticket_amount'=>$order->ticket_amount,'platform_fee'=>$order->platform_fee,'additional_fees'=>$order->additional_fee_total,'tax'=>$order->tax_amount,'customer_total'=>$order->customer_total,'organizer_amount'=>$order->organizer_amount,'fee_bearer'=>$order->fee_bearer,'sales_channel'=>$order->sales_channel,'settlement_mode'=>$order->settlement_mode]]);
+   'breakdown'=>['ticket_amount'=>$order->ticket_amount,'platform_fee'=>$order->platform_fee,'additional_fees'=>$order->additional_fee_amount,'tax'=>$order->tax_amount,'customer_total'=>$order->customer_total,'organizer_amount'=>$order->organizer_amount,'fee_bearer'=>$order->fee_bearer,'sales_channel'=>$order->sales_channel,'settlement_mode'=>$order->settlement_mode]]);
  }
  public function verifyRazorpay(Request $r,RazorpayRouteService $razorpay,PaymentLedgerService $ledger,BookingFinalizationService $bookings){
   $data=$r->validate(['payment_order'=>'required|uuid','razorpay_payment_id'=>'required|string','razorpay_signature'=>'required|string']);
