@@ -193,20 +193,21 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <div class="form-group mt-1">
-                                            <label for="">{{ __('Date Type') . '*' }}</label>
+                                            <label for="">{{ __('Schedule Type') . '*' }}</label>
+                                            <p class="text-muted mb-2">{{ __('Choose one continuous event period, or multiple separate sessions/occurrences.') }}</p>
                                             <div class="selectgroup w-100">
                                                 <label class="selectgroup-item">
                                                     <input type="radio" name="date_type"
                                                         {{ $event->date_type == 'single' ? 'checked' : '' }}
                                                         value="single" class="selectgroup-input eventDateType" checked>
-                                                    <span class="selectgroup-button">{{ __('Single') }}</span>
+                                                    <span class="selectgroup-button">{{ __('One Continuous Schedule') }}</span>
                                                 </label>
 
                                                 <label class="selectgroup-item">
                                                     <input type="radio" name="date_type"
                                                         {{ $event->date_type == 'multiple' ? 'checked' : '' }}
                                                         value="multiple" class="selectgroup-input eventDateType">
-                                                    <span class="selectgroup-button">{{ __('Multiple') }}</span>
+                                                    <span class="selectgroup-button">{{ __('Multiple Sessions') }}</span>
                                                 </label>
                                             </div>
                                         </div>
@@ -237,6 +238,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 </div>
 
                                 {{-- single dates --}}
+                                <div class="row {{ $event->date_type == 'multiple' ? 'd-none' : '' }}"><div class="col-12"><small class="text-muted">{{ __('A continuous event may start on one day and end on a later day, for example a multi-day festival that remains one occurrence.') }}</small></div></div>
                                 <div class="row {{ $event->date_type == 'multiple' ? 'd-none' : '' }}" id="single_dates">
                                     <div class="col-lg-3">
                                         <div class="form-group">
