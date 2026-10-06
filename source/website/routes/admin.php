@@ -210,6 +210,8 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::post('/fee-rules', 'BackEnd\\PaymentFinanceController@storeFeeRule')->name('admin.payments.fee_rules.store');
     Route::put('/fee-rules/{id}', 'BackEnd\\PaymentFinanceController@updateFeeRule')->name('admin.payments.fee_rules.update');
     Route::delete('/fee-rules/{id}', 'BackEnd\\PaymentFinanceController@destroyFeeRule')->name('admin.payments.fee_rules.destroy');
+    Route::post('/additional-fees', 'BackEnd\\PaymentFinanceController@storeAdditionalFee')->name('admin.payments.additional_fees.store');
+    Route::delete('/additional-fees/{id}', 'BackEnd\\PaymentFinanceController@disableAdditionalFee')->name('admin.payments.additional_fees.destroy');
   });
 
   Route::prefix('/organizer-payouts')->middleware('permission:Organizer Mangement')->group(function () {
