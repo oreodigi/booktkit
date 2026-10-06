@@ -59,8 +59,9 @@ class GeminiImageEngine implements AiImageEngineInterface
       $json = $response->json();
       // Interactions REST wraps the generated output inside the interaction object.
       $base64 = $json['interaction']['output_image']['data'] ?? $json['output_image']['data'] ?? null;
-      if (!$base64 && !empty($json['interaction']['steps'])) {
-        foreach ($json['interaction']['steps'] as $step) {
+      $steps = $json['interaction']['steps'] ?? $json['steps'] ?? [];
+      if (!$base64 && !empty($steps)) {
+        foreach ($steps as $step) {
           foreach (($step['content'] ?? []) as $block) {
             if (($block['type'] ?? null) === 'image' && !empty($block['data'])) { $base64 = $block['data']; break 2; }
           }
