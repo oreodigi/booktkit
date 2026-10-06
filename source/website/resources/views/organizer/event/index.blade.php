@@ -40,6 +40,7 @@
         <li class="nav-item">
           <a href="#">{{ __('Online Events') }}</a>
         </li>
+        <li><a href="{{ route('organizer.event_management.event', ['language' => $defaultLang->code, 'event_type' => 'box_office']) }}">{{ __('Box Office Events') }}</a></li>
       @endif
     </ul>
   </div>
