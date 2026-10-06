@@ -7,4 +7,5 @@ class PaymentOrder extends Model {
  public function ledger(){ return $this->hasMany(PaymentLedgerEntry::class); }
  public function transfers(){ return $this->hasMany(PaymentTransfer::class); }
  public function refunds(){ return $this->hasMany(PaymentRefund::class); }
+ public function feeLines(){ return $this->hasMany(PaymentOrderFeeLine::class); }
 }
