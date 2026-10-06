@@ -33,10 +33,12 @@ class AccessControlService
             }
             if (!in_array($booking->paymentStatus, ['completed', 'free'], true)) return $this->deny('Ticket payment is not valid', 'invalid_payment', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
             if ($ticket->status !== 'active') return $this->deny('Ticket is '.$ticket->status, 'ticket_'.$ticket->status, $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
+            $eventDateId=null;
             if ($ticket->pass_product_id && Schema::hasTable('pass_entitlements')) {
                 $today=now()->toDateString();
-                $valid=PassEntitlement::where('issued_ticket_id',$ticket->id)->where('status','active')->whereHas('eventDate',fn($q)=>$q->whereDate('start_date',$today)->orWhereDate('end_date',$today))->exists();
-                if(!$valid) return $this->deny('This pass is not valid for today','pass_date_invalid',$ticket,$credential,$direction,$actorType,$actorId,$deviceName,$ip);
+                $entitlement=PassEntitlement::where('issued_ticket_id',$ticket->id)->where('status','active')->whereHas('eventDate',fn($q)=>$q->whereDate('start_date',$today)->orWhereDate('end_date',$today))->orderBy('event_date_id')->first();
+                if(!$entitlement) return $this->deny('This pass is not valid for today','pass_date_invalid',$ticket,$credential,$direction,$actorType,$actorId,$deviceName,$ip);
+                $eventDateId=(int)$entitlement->event_date_id;
             }
 
             $policy = Schema::hasTable('event_access_policies') ? EventAccessPolicy::where('event_id', $ticket->event_id)->first() : null;
@@ -61,30 +63,25 @@ class AccessControlService
                 if ($ticket->checked_in_at) return $this->deny('Already Scanned', 'already_used', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
             }
 
-            if ($direction === 'entry') {
-                if (!$override && $accessEnabled && $ticket->presence_state === 'inside') return $this->deny('Ticket holder is already inside', 'already_inside', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
-                if (!$override && $accessEnabled && (int) $ticket->entry_count > 0) {
-                    if ($reentryPolicy === 'none') return $this->deny('Re-entry is not allowed', 'reentry_not_allowed', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
-                    if ($reentryPolicy === 'limited' && ((int) $ticket->entry_count - 1) >= $maxReentries) return $this->deny('Re-entry limit reached', 'reentry_limit', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
-                }
-                $ticket->entry_count = (int) $ticket->entry_count + 1;
-                $ticket->presence_state = 'inside';
-                if (!$ticket->checked_in_at) $ticket->checked_in_at = now();
-                $result = 'admitted';
-            } else {
-                if (!$accessEnabled) return $this->deny('Exit scanning is not enabled for this event', 'exit_not_enabled', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
-                if (!$override && $ticket->presence_state !== 'inside') return $this->deny('Ticket holder is already outside', 'already_outside', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
-                $ticket->exit_count = (int) $ticket->exit_count + 1;
-                $ticket->presence_state = 'outside';
-                $result = 'exited';
+            $state=null;
+            if($eventDateId && Schema::hasTable('ticket_admission_states')){
+                $state=DB::table('ticket_admission_states')->where('issued_ticket_id',$ticket->id)->where('event_date_id',$eventDateId)->lockForUpdate()->first();
+                if(!$state){DB::table('ticket_admission_states')->insert(['issued_ticket_id'=>$ticket->id,'event_date_id'=>$eventDateId,'presence_state'=>'outside','entry_count'=>0,'exit_count'=>0,'created_at'=>now(),'updated_at'=>now()]);$state=DB::table('ticket_admission_states')->where('issued_ticket_id',$ticket->id)->where('event_date_id',$eventDateId)->lockForUpdate()->first();}
             }
-
+            $presence=$state? $state->presence_state : $ticket->presence_state;$entries=$state?(int)$state->entry_count:(int)$ticket->entry_count;$exits=$state?(int)$state->exit_count:(int)$ticket->exit_count;
+            if ($direction === 'entry') {
+                if (!$override && $accessEnabled && $presence === 'inside') return $this->deny('Ticket holder is already inside','already_inside',$ticket,$credential,$direction,$actorType,$actorId,$deviceName,$ip);
+                if (!$override && $accessEnabled && $entries > 0) {if($reentryPolicy==='none')return $this->deny('Re-entry is not allowed','reentry_not_allowed',$ticket,$credential,$direction,$actorType,$actorId,$deviceName,$ip);if($reentryPolicy==='limited'&&($entries-1)>=$maxReentries)return $this->deny('Re-entry limit reached','reentry_limit',$ticket,$credential,$direction,$actorType,$actorId,$deviceName,$ip);}
+                $entries++;$presence='inside';$result='admitted';
+            } else {if(!$accessEnabled)return $this->deny('Exit scanning is not enabled for this event','exit_not_enabled',$ticket,$credential,$direction,$actorType,$actorId,$deviceName,$ip);if(!$override&&$presence!=='inside')return $this->deny('Ticket holder is already outside','already_outside',$ticket,$credential,$direction,$actorType,$actorId,$deviceName,$ip);$exits++;$presence='outside';$result='exited';}
+            if($state)DB::table('ticket_admission_states')->where('id',$state->id)->update(['presence_state'=>$presence,'entry_count'=>$entries,'exit_count'=>$exits,'first_entry_at'=>$state->first_entry_at?:($direction==='entry'?now():null),'last_admission_at'=>now(),'updated_at'=>now()]);
+            $ticket->entry_count=$entries;$ticket->exit_count=$exits;$ticket->presence_state=$presence;if(!$ticket->checked_in_at&&$direction==='entry')$ticket->checked_in_at=now();
             $ticket->last_admission_at = now();
             $ticket->checked_in_by_type = $actorType;
             $ticket->checked_in_by_id = $actorId;
             $ticket->save();
 
-            $this->log($ticket, $credential, $actorType, $actorId, $direction, $result, null, $deviceName, $ip, $gateId, $override, $overrideReason);
+            $this->log($ticket, $credential, $actorType, $actorId, $direction, $result, null, $deviceName, $ip, $gateId, $override, $overrideReason, $eventDateId);
 
             return [
                 'alert_type' => 'success',
@@ -146,10 +143,10 @@ class AccessControlService
         return ['alert_type' => 'error', 'message' => $message, 'reason_code' => $reason];
     }
 
-    private function log(IssuedTicket $ticket, ?Credential $credential, string $actorType, int $actorId, string $direction, string $result, ?string $reason, ?string $deviceName, ?string $ip, ?int $gateId = null, bool $override = false, ?string $overrideReason = null): void
+    private function log(IssuedTicket $ticket, ?Credential $credential, string $actorType, int $actorId, string $direction, string $result, ?string $reason, ?string $deviceName, ?string $ip, ?int $gateId = null, bool $override = false, ?string $overrideReason = null, ?int $eventDateId = null): void
     {
         if (Schema::hasTable('access_scans')) DB::table('access_scans')->insert([
-            'event_id' => $ticket->event_id, 'issued_ticket_id' => $ticket->id, 'credential_id' => $credential?->id,
+            'event_id' => $ticket->event_id, 'event_date_id'=>$eventDateId, 'issued_ticket_id' => $ticket->id, 'credential_id' => $credential?->id,
             'actor_type' => $actorType, 'actor_id' => $actorId, 'action' => $direction, 'result' => $result, 'gate_id'=>$gateId,
             'is_override'=>$override, 'override_reason'=>$overrideReason,
             'reason_code' => $reason, 'device_name' => $deviceName, 'ip_address' => $ip,
