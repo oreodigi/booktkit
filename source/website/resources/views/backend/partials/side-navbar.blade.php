@@ -474,6 +474,18 @@
                     </li>
                 @endif
 
+                {{-- Payments & Finance --}}
+                @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Transaction', $rolePermissions)))
+                    <li class="nav-item {{ request()->routeIs('admin.payments.*') || request()->routeIs('admin.organizer_payouts.*') ? 'active' : '' }}">
+                        <a data-toggle="collapse" href="#paymentsFinance"><i class="fas fa-wallet"></i><p>{{ __('Payments & Finance') }}</p><span class="caret"></span></a>
+                        <div id="paymentsFinance" class="collapse {{ request()->routeIs('admin.payments.*') || request()->routeIs('admin.organizer_payouts.*') ? 'show' : '' }}"><ul class="nav nav-collapse">
+                            <li class="{{ request()->routeIs('admin.payments.finance') ? 'active' : '' }}"><a href="{{ route('admin.payments.finance') }}"><span class="sub-item">{{ __('Overview & Fee Rules') }}</span></a></li>
+                            <li class="{{ request()->routeIs('admin.organizer_payouts.index') ? 'active' : '' }}"><a href="{{ route('admin.organizer_payouts.index') }}"><span class="sub-item">{{ __('Organizer Settlements') }}</span></a></li>
+                            <li class="{{ request()->routeIs('admin.organizer_payouts.transfers') ? 'active' : '' }}"><a href="{{ route('admin.organizer_payouts.transfers') }}"><span class="sub-item">{{ __('Transfers & Reconciliation') }}</span></a></li>
+                        </ul></div>
+                    </li>
+                @endif
+
                 {{-- Transaction --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Transaction', $rolePermissions)))
                     <li class="nav-item @if (request()->routeIs('admin.transcation')) active @endif">
