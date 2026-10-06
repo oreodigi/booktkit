@@ -1,15 +1,14 @@
 <?php
 namespace App\Services\Tickets;
-use App\Models\Event;use App\Models\Event\IssuedTicket;use Illuminate\Support\Facades\DB;use Illuminate\Support\Facades\Schema;
-class TicketAdmissionService{
- public function admit(string $token,string $actorType,int $actorId,?string $deviceName=null,?string $ip=null,string $direction='entry'):array{
-  if(!Schema::hasTable('issued_tickets')||!str_starts_with($token,'btk_'))return ['alert_type'=>'error','message'=>'Invalid ticket'];
-  return DB::transaction(function()use($token,$actorType,$actorId,$deviceName,$ip,$direction){$ticket=IssuedTicket::with('booking')->where('token_hash',hash('sha256',$token))->lockForUpdate()->first();if(!$ticket||!$ticket->booking)return ['alert_type'=>'error','message'=>'Invalid ticket'];$booking=$ticket->booking;if(in_array($actorType,['organizer','staff'],true)){if($actorType==='organizer'&&(int)$booking->organizer_id!==$actorId)return ['alert_type'=>'error','message'=>'You do not have permission'];if($actorType==='staff'){ $staff=\App\Models\OrganizerStaff::find($actorId);if(!$staff||!$staff->active||(int)$staff->organizer_id!==(int)$booking->organizer_id||!$staff->hasPermission('tickets.scan')||!$staff->assignedToEvent((int)$ticket->event_id))return ['alert_type'=>'error','message'=>'You do not have permission'];}}
-   if(!in_array($booking->paymentStatus,['completed','free'],true))return ['alert_type'=>'error','message'=>'Ticket payment is not valid'];if($ticket->status!=='active')return ['alert_type'=>'error','message'=>'Ticket is '.$ticket->status];$event=Event::find($ticket->event_id);$special=$event&&$event->box_office_enabled;
-   if(!$special){if($ticket->checked_in_at){$this->log($ticket,$actorType,$actorId,'already_used',null,$deviceName,$ip);return ['alert_type'=>'error','message'=>'Already Scanned'];}$direction='entry';}
-   if(!in_array($direction,['entry','exit'],true))return ['alert_type'=>'error','message'=>'Invalid admission direction'];
-   if($direction==='entry'){if($special&&$ticket->presence_state==='inside')return ['alert_type'=>'error','message'=>'Ticket holder is already inside'];if($special&&$ticket->entry_count>0){if($event->reentry_policy==='none')return ['alert_type'=>'error','message'=>'Re-entry is not allowed'];if($event->reentry_policy==='limited'&&($ticket->entry_count-1)>=(int)$event->max_reentries)return ['alert_type'=>'error','message'=>'Re-entry limit reached'];}$ticket->entry_count=(int)$ticket->entry_count+1;$ticket->presence_state='inside';if(!$ticket->checked_in_at)$ticket->checked_in_at=now();$result='admitted';}else{if(!$special)return ['alert_type'=>'error','message'=>'Exit scanning is only available for Special Events'];if($ticket->presence_state!=='inside')return ['alert_type'=>'error','message'=>'Ticket holder is already outside'];$ticket->exit_count=(int)$ticket->exit_count+1;$ticket->presence_state='outside';$result='exited';}
-   $ticket->last_admission_at=now();$ticket->checked_in_by_type=$actorType;$ticket->checked_in_by_id=$actorId;$ticket->save();$this->log($ticket,$actorType,$actorId,$result,$direction,$deviceName,$ip);return ['alert_type'=>'success','message'=>$direction==='entry'?'Verified entry':'Verified exit','booking_id'=>$booking->booking_id,'ticket_uuid'=>$ticket->uuid,'event_id'=>$ticket->event_id,'ticket_name'=>$ticket->ticket_name,'direction'=>$direction,'presence_state'=>$ticket->presence_state,'entry_count'=>$ticket->entry_count,'exit_count'=>$ticket->exit_count];},3);
- }
- private function log(IssuedTicket $t,string $actorType,int $actorId,string $result,?string $direction,?string $deviceName,?string $ip):void{if(!Schema::hasTable('ticket_admission_logs'))return;DB::table('ticket_admission_logs')->insert(['issued_ticket_id'=>$t->id,'booking_id'=>$t->booking_id,'event_id'=>$t->event_id,'actor_type'=>$actorType,'actor_id'=>$actorId,'result'=>$result,'direction'=>$direction,'device_name'=>$deviceName,'ip_address'=>$ip,'created_at'=>now()]);}
+
+use App\Services\Access\AccessControlService;
+
+class TicketAdmissionService
+{
+    public function __construct(private AccessControlService $access) {}
+
+    public function admit(string $token, string $actorType, int $actorId, ?string $deviceName = null, ?string $ip = null, string $direction = 'entry'): array
+    {
+        return $this->access->scan($token, $actorType, $actorId, $deviceName, $ip, $direction);
+    }
 }
