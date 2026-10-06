@@ -79,8 +79,8 @@ class AccessCredentialController extends Controller
     public function assign(Request $request, CredentialInventoryService $inventory, CredentialAssignmentService $assignment)
     {
         $organizerId = auth('organizer')->id();
-        $data = $request->validate(['ticket_uuid' => 'required|uuid', 'credential_identifier' => 'required|string|max:255']);
-        $ticket = IssuedTicket::where('organizer_id', $organizerId)->where('uuid', $data['ticket_uuid'])->firstOrFail();
+        $data = $request->validate(['ticket_reference' => 'required|string|max:255', 'credential_identifier' => 'required|string|max:255']);
+        $ticket = $this->resolveTicket($data['ticket_reference'], $organizerId);
         $credential = $inventory->resolve($data['credential_identifier']);
         abort_unless($credential && (int) $credential->organizer_id === $organizerId, 404);
         $assignment->assign($ticket->id, $credential->id, 'organizer', $organizerId);
@@ -91,11 +91,11 @@ class AccessCredentialController extends Controller
     {
         $organizerId = auth('organizer')->id();
         $data = $request->validate([
-            'ticket_uuid' => 'required|uuid',
+            'ticket_reference' => 'required|string|max:255',
             'credential_identifier' => 'required|string|max:255',
             'reason' => ['required', Rule::in(['lost','damaged','unreadable','rfid_malfunction','staff_replacement','other'])],
         ]);
-        $ticket = IssuedTicket::where('organizer_id', $organizerId)->where('uuid', $data['ticket_uuid'])->firstOrFail();
+        $ticket = $this->resolveTicket($data['ticket_reference'], $organizerId);
         $policy = EventAccessPolicy::where('event_id', $ticket->event_id)->where('organizer_id', $organizerId)->first();
         abort_unless($policy && $policy->is_enabled && $policy->replacement_allowed, 403, 'Credential replacement is not enabled for this event.');
         if ($policy->max_replacements) {
@@ -106,5 +106,13 @@ class AccessCredentialController extends Controller
         abort_unless($credential && (int) $credential->organizer_id === $organizerId, 404);
         $replacement->replace($ticket->id, $credential->id, $data['reason'], 'organizer', $organizerId);
         return back()->with('success', 'Old credential revoked and replacement activated.');
+    }
+    private function resolveTicket(string $reference, int $organizerId): IssuedTicket
+    {
+        $query = IssuedTicket::where('organizer_id', $organizerId);
+        if (str_starts_with($reference, 'btk_')) {
+            return $query->where('token_hash', hash('sha256', $reference))->firstOrFail();
+        }
+        return $query->where('uuid', $reference)->firstOrFail();
     }
 }
