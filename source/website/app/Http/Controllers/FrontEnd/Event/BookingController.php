@@ -415,8 +415,15 @@ class BookingController extends Controller
     $id = $request->id;
     $booking_id = $request->booking_id;
 
-    $booking = Booking::where('id', $booking_id)->first();
+    $booking = Booking::where('id', $booking_id)->where('event_id', $id)->firstOrFail();
+
+    // Do not expose another customer's booking/ticket credentials by changing the URL id.
+    if (Auth::guard('customer')->check() && (string) $booking->customer_id !== (string) Auth::guard('customer')->id()) {
+      abort(403);
+    }
+
     $information['booking'] = $booking;
+    $information['issuedTickets'] = app(TicketIssuanceService::class)->ensureForBooking($booking);
     $event = Event::where('id', $id)->with([
       'information' => function ($query) use ($language) {
         return $query->where('language_id', $language->id)->first();
