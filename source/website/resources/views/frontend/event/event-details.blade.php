@@ -28,7 +28,7 @@
         <div class="container">
             <div class="banner-inner">
                 <h2 class="page-title">
-                    {{ strlen($content->title) > 30 ? mb_substr($content->title, 0, 30, 'UTF-8') . '...' : $content->title }}
+                    {{ $content->title }}
                 </h2>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
