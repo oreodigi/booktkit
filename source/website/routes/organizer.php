@@ -230,4 +230,5 @@ Route::prefix('/organizer')->middleware('auth:organizer', 'Deactive:organizer', 
 
 Route::middleware(['auth:organizer'])->group(function () {
   Route::get('/payments-settlements', 'BackEnd\Organizer\PaymentCenterController@index')->name('organizer.payments.index');
+  Route::post('/payments-settlements/preference', 'BackEnd\Organizer\PaymentCenterController@preference')->name('organizer.payments.preference');
 });
