@@ -82,6 +82,30 @@
             @endif
 
             <p class="mb-0">{{ __('Thank you') }}.</p>
+
+            @if (!empty($issuedTickets) && in_array($booking->paymentStatus, ['completed', 'free'], true))
+              <div class="mt-5 text-left">
+                <h4 class="mb-2">{{ __('Your Tickets') }}</h4>
+                <p class="text-muted mb-4">{{ __('Show one QR code per attendee at the entrance. Each QR is a separate ticket credential.') }}</p>
+                <div class="row">
+                  @foreach ($issuedTickets as $index => $issuedTicket)
+                    <div class="col-lg-4 col-md-6 mb-4">
+                      <div class="card h-100 text-center p-3">
+                        <div class="mb-2">{!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(190)->margin(1)->generate($issuedTicket['token']) !!}</div>
+                        <strong>{{ $issuedTicket['ticket_name'] ?? __('Ticket') }} #{{ $index + 1 }}</strong>
+                        <small class="d-block text-muted mt-1">{{ trim($booking->fname . ' ' . $booking->lname) }}</small>
+                        <small class="d-block text-muted">{{ __('Booking') }}: {{ $booking->booking_id }}</small>
+                      </div>
+                    </div>
+                  @endforeach
+                </div>
+                @if (Auth::guard('customer')->check() && (string) Auth::guard('customer')->id() === (string) $booking->customer_id)
+                  <div class="text-center mt-2">
+                    <a class="theme-btn" href="{{ route('customer.booking_details', $booking->id) }}">{{ __('View Full Ticket Details') }}</a>
+                  </div>
+                @endif
+              </div>
+            @endif
           </div>
         </div>
       </div>
