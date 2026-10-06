@@ -6,7 +6,7 @@ const target = targetConfig();
 const suite = process.env.BOOKTKIT_SUITE || 'smoke';
 const runDir = process.env.BOOKTKIT_RUN_DIR || path.resolve('artifacts/local');
 const authDir = path.join(runDir, '.auth');
-const authenticatedFiles = /(?:authenticated-role|organizer-authenticated|staging-event)\.spec\.js/;
+const authenticatedFiles = /(?:authenticated-role|organizer-authenticated|staging-event|pos-flow|staff-rbac|admission-flow)\.spec\.js/;
 const publicProject = (name, device) => ({ name, testIgnore: authenticatedFiles, ...(target.production ? {testMatch:/readonly-smoke\.spec\.js/} : {}), use: { ...devices[device] } });
 const projects = [publicProject('desktop-chromium', 'Desktop Chrome')];
 if (['all','mobile'].includes(suite)) projects.push(
@@ -14,9 +14,9 @@ if (['all','mobile'].includes(suite)) projects.push(
   publicProject('mobile-chromium', 'Pixel 7'), publicProject('mobile-webkit', 'iPhone 14')
 );
 if (suite === 'mobile') projects.splice(0, 3);
-if (!target.production && ['all','auth','login','organizer','event-creation'].includes(suite)) {
+if (!target.production && ['all','auth','login','organizer','event-creation','pos','staff-rbac','admission'].includes(suite)) {
   for (const role of ['organizer','customer','admin']) {
-    if (['organizer','event-creation'].includes(suite) && role === 'customer') continue;
+    if (['organizer','event-creation','pos','staff-rbac','admission'].includes(suite) && role === 'customer') continue;
     projects.push({ name: `${role}-chromium`, metadata: { role },
       testMatch: role === 'organizer' ? authenticatedFiles : role === 'admin' ? /(?:authenticated-role|staging-event)\.spec\.js/ : /authenticated-role\.spec\.js/,
       use: { ...devices['Desktop Chrome'], storageState: path.join(authDir, `${role}.json`) } });
