@@ -45,7 +45,7 @@ class GeminiImageEngine implements AiImageEngineInterface
         ->post($endpoint, [
           'model' => $model,
           'input' => [['type' => 'text', 'text' => $finalPrompt]],
-          'response_format' => ['type' => 'image', 'mime_type' => 'image/png', 'aspect_ratio' => $aspectRatio, 'image_size' => '1K'],
+          'response_format' => ['type' => 'image', 'mime_type' => 'image/jpeg', 'aspect_ratio' => $aspectRatio, 'image_size' => '1K'],
         ]);
 
       if (!$response->successful()) {
