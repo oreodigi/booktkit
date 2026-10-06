@@ -51,7 +51,7 @@
                     @php
                         $payoutKycStatus = \App\Models\Payments\OrganizerPaymentProfile::where('organizer_id', Auth::guard('organizer')->id())->value('kyc_status') ?: 'draft';
                     @endphp
-                    @if($payoutKycStatus !== 'activated' && !request()->routeIs('organizer.payouts.kyc*'))
+                    @if($payoutKycStatus !== 'activated' && !request()->routeIs('organizer.payouts.kyc*') && !request()->routeIs('organizer.boxoffice.*'))
                       <div class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap">
                         <span><strong>{{ __('Complete payout setup to receive ticket money') }}</strong><br><small>{{ __('Paid event payouts require activated KYC.') }}</small></span>
                         <a class="btn btn-sm btn-warning mt-2 mt-md-0" href="{{ route('organizer.payouts.kyc') }}">{{ __('Complete setup') }}</a>
