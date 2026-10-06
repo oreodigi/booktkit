@@ -1,19 +1,12 @@
 <?php
 namespace App\Services\Payments;
-use Illuminate\Support\Str;
-use App\Models\Payments\PaymentOrder;
-use App\Models\Payments\OrganizerPaymentProfile;
-class PaymentOrderService {
- public function createFromPricing(int $eventId,?int $organizerId,int $ticketAmountPaise,int $taxPaise,string $idempotencyKey,array $snapshot=[]): PaymentOrder {
-  if($existing=PaymentOrder::where('idempotency_key',$idempotencyKey)->first()) return $existing;
-  $profile=$organizerId ? OrganizerPaymentProfile::where('organizer_id',$organizerId)->first() : null;
-  $pricing=(new PlatformFeeCalculator)->calculate($ticketAmountPaise,$profile);
-  $routing=(new SettlementRoutingService)->resolve($profile);
-  $settlement=$routing['mode'];
-  return PaymentOrder::create(['uuid'=>(string)Str::uuid(),'event_id'=>$eventId,'organizer_id'=>$organizerId,'currency'=>'INR',
-   'ticket_amount'=>$pricing['ticket_amount'],'platform_fee'=>$pricing['platform_fee'],'tax_amount'=>$taxPaise,
-   'customer_total'=>$pricing['customer_total']+$taxPaise,'organizer_amount'=>$pricing['organizer_amount'],
-   'fee_bearer'=>$pricing['fee_bearer'],'settlement_mode'=>$settlement,'settlement_reason'=>$routing['reason'],'status'=>'created','idempotency_key'=>$idempotencyKey,
-   'pricing_snapshot'=>$snapshot+$pricing+['settlement_reason'=>$routing['reason']]]);
- }
-}
+use Illuminate\Support\Str;use Illuminate\Support\Facades\DB;use App\Models\Event;use App\Models\Payments\PaymentOrder;use App\Models\Payments\OrganizerPaymentProfile;
+class PaymentOrderService{public function createFromPricing(int $eventId,?int $organizerId,int $ticketAmountPaise,int $taxPaise,string $idempotencyKey,array $snapshot=[]):PaymentOrder{
+ if($existing=PaymentOrder::where('idempotency_key',$idempotencyKey)->first())return $existing;
+ return DB::transaction(function()use($eventId,$organizerId,$ticketAmountPaise,$taxPaise,$idempotencyKey,$snapshot){
+  if($existing=PaymentOrder::where('idempotency_key',$idempotencyKey)->lockForUpdate()->first())return $existing;
+  $event=Event::findOrFail($eventId);$profile=$organizerId?OrganizerPaymentProfile::where('organizer_id',$organizerId)->first():null;$channel=$snapshot['sales_channel']??'web';
+  $rule=(new PaymentFeeRuleResolver)->resolve($organizerId,$eventId,$event->event_type,$channel);$pricing=(new PlatformFeeCalculator)->calculateRule($ticketAmountPaise,$rule,$profile);$additional=(new AdditionalFeeCalculator)->calculate($eventId,$channel,$ticketAmountPaise,(int)($snapshot['quantity']??1),(array)($snapshot['additional_fees']??[]));$routing=(new SettlementRoutingService)->decide($profile,$channel);
+  $order=PaymentOrder::create(['uuid'=>(string)Str::uuid(),'event_id'=>$eventId,'organizer_id'=>$organizerId,'sales_channel'=>$channel,'event_type'=>$event->event_type,'currency'=>'INR','ticket_amount'=>$pricing['ticket_amount'],'platform_fee'=>$pricing['platform_fee'],'additional_fee_amount'=>$additional['total'],'pos_fee'=>0,'tax_amount'=>$taxPaise,'customer_total'=>$pricing['customer_total']+$additional['customer_total']+$taxPaise,'organizer_amount'=>max(0,$pricing['organizer_amount']-$additional['organizer_total']),'fee_bearer'=>$pricing['fee_bearer'],'settlement_mode'=>$routing['mode'],'settlement_reason'=>$routing['reason'],'status'=>'created','idempotency_key'=>$idempotencyKey,'pricing_snapshot'=>$snapshot+['fee_rule_id'=>$rule?->id,'sales_channel'=>$channel,'event_type'=>$event->event_type,'settlement_mode'=>$routing['mode'],'settlement_reason'=>$routing['reason']]+$pricing]);
+  foreach($additional['lines'] as $line)$order->feeLines()->create($line);if($pricing['platform_fee']>0)$order->feeLines()->create(['fee_rule_id'=>$rule?->id,'code'=>'platform_fee','name'=>'BookTKIT Platform Fee','category'=>$channel==='pos'?'pos':'platform','bearer'=>$pricing['fee_bearer_v2'],'quantity'=>1,'amount'=>$pricing['platform_fee'],'calculation_snapshot'=>$rule?$rule->toArray():['legacy_profile'=>true]]);
+  return $order;});}}
