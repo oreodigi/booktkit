@@ -188,6 +188,10 @@
                       {{ request()->input('event') == 'venue' ? 'checked' : '' }} name="event" id="radio2">
                   <label class="custom-control-label" for="radio2">{{ __('Venue Events') }}</label>
               </div>
+              <div class="custom-control custom-radio">
+                  <input type="radio" class="custom-control-input" value="box_office" name="event" id="radio3">
+                  <label class="custom-control-label" for="radio3">Box Office Events</label>
+              </div>
           </div>
       </div>
 
