@@ -231,7 +231,7 @@
                                 {{ $event->category }}
                               </td>
                               <td>
-                                @if ($event->event_type == 'venue')
+                                @if (in_array($event->event_type, ['venue', 'box_office']))
                                   <a href="{{ route('admin.event.ticket', ['language' => $defaultLang->code, 'event_id' => $event->id, 'event_type' => $event->event_type]) }}"
                                     class="btn btn-success btn-sm">{{ __('Manage') }}</a>
                                 @endif
