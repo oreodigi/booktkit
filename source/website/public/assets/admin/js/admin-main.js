@@ -217,7 +217,11 @@ $(function ($) {
         });
 
         if (data.status == 'success') {
-          location.reload();
+          if (data.redirect) {
+            window.location.href = data.redirect;
+          } else {
+            location.reload();
+          }
         }
       },
       error: function (error) {
