@@ -270,7 +270,7 @@ class CheckOutController extends Controller
           $ticketArr[] = [
             'ticket_id' => $ticket->id,
             'early_bird_dicount' => $early_bird_dicount,
-            'name' => $ticketContent->title,
+            'name' => optional($ticketContent)->title ?: ($ticket->title ?: 'Ticket'),
             'price' => $ticket->price,
             'type' => $ticket->pricing_type,
             'slot_unique_id' => (int) $ticket->normal_ticket_slot_unique_id
