@@ -1,16 +1,7 @@
-# booktkit_scanner
+# BookTKIT Scanner / Access App
 
-A new Flutter project.
+Flutter venue-access client for BookTKIT.
 
-## Getting Started
+Current backend admission supports organizer/staff sessions, authorized event/gate discovery, secure issued-ticket and credential resolution, explicit ENTRY/EXIT, re-entry policy, date-scoped pass entitlement and audited override.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+New scanner work must use the unified server admission engine; do not rely on legacy manual scan-status mutation or local QR claims. Use staging for mutation tests and read `AGENTS.md` plus `docs/mobile/*`.

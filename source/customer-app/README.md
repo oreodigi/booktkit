@@ -1,16 +1,7 @@
-# booktkit_customer
+# BookTKIT Customer App
 
-A new Flutter project.
+Flutter customer client for BookTKIT. It shares the Laravel backend with web, organizer and scanner clients.
 
-## Getting Started
+Current integration priorities: customer auth, event discovery, Mobile Homepage configuration, server-authoritative checkout/free booking, dates/variations/pass products, bookings, real issued tickets and credential-collection state when exposed by API.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Do not infer payment success locally or reproduce fee calculations. Use staging configuration for development and read `AGENTS.md` plus `docs/mobile/*` before changes.

@@ -1,41 +1,17 @@
-# BookTKIT ChatGPT testing integration
+# BookTKIT ChatGPT Testing Integration
 
-Source of truth: current `oreodigi/booktkit` repository only.
+Source of truth: current `oreodigi/booktkit` only.
 
-## Safe commands exposed to ChatGPT
-- health: public smoke suite
-- auth: customer and organizer authentication surfaces
-- mobile: responsive browser suite
-- api: Laravel API surface
-- contracts: customer/organizer/scanner mobile API contracts
-- organizer: current organizer and Online/Venue event surfaces
-- razorpay: BookTKIT Razorpay v1 validation/test-mode coverage
-- scanner: scanner API contract
-- security: anonymous boundary and mutation-guard checks
-- all: complete approved suite
+## Routing
+Use the protected BookTKIT testing tools/allow-listed suites for auth, public/mobile, organizer/event, checkout/payment, POS, scanner/access, security and full regression where available. Add or extend tests only after verifying the current repository contract.
 
-Do not infer features from previous BookTKIT/Eventora repositories or prior product discussions. Add a test only after the feature is present in this repository.
+## Current architecture awareness
+As of 6 October 2026, tests must treat Box Office POS, workforce/RBAC, Payments V2, issued tickets, pass entitlements and the unified Access credential/admission engine as current backend domains. Scanner tests should cover staff/organizer sessions, gates and explicit entry/exit rather than only legacy one-way QR status.
 
-## Production policy
-Production is read-only. Never create events, bookings, payments, refunds, withdrawals, users, or QR admissions against production from automated tests.
+## Safety
+Production is read-only. Never create events, bookings, payments, refunds, users, credentials or admissions on production from automated tests.
 
-## Mutation policy
-State-changing E2E tests require:
-1. a non-production `*.booktkit.com` environment,
-2. dedicated disposable test accounts/data,
-3. Razorpay test mode for payment tests,
-4. `BOOKTKIT_ALLOW_MUTATIONS=true`,
-5. explicit staging workflow/tool support.
+State-changing E2E requires an approved isolated staging BookTKIT environment, disposable accounts/data, explicit mutation enablement and test-mode payment configuration where applicable.
 
-The current GitHub workflow intentionally forces mutations off.
-
-## Result contract
-Every run should return:
-- suite and target
-- exit status
-- failing test names/output
-- screenshots/traces/videos for failures
-- HTML Playwright report
-- structured `test-summary.json`
-
-The remote MCP control plane should trigger these approved suites rather than exposing arbitrary shell commands or arbitrary URLs.
+## Reporting
+Every run reports target, commit when available, suite, exit status, passed/failed/skipped/flaky counts and failure artifacts. Do not equate a limited smoke pass with full platform verification.

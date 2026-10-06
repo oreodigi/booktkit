@@ -1,16 +1,7 @@
-# booktkit_organizer
+# BookTKIT Organizer App
 
-A new Flutter project.
+Flutter organizer client sharing the BookTKIT Laravel backend.
 
-## Getting Started
+The backend currently includes event management, Box Office POS, organizer workforce/RBAC, Payments V2, pass products and Access credentials. Native parity is not assumed: verify current organizer API routes/contracts before implementing each capability.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Use organizer-scoped auth, staging for writes and server-calculated finance/access state. Read `AGENTS.md` and `docs/mobile/*`.

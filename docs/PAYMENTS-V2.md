@@ -1,66 +1,39 @@
 # BookTKIT Payments V2 — Canonical Payment Flow
 
-Status: implementation in progress
+Status: fee engine, settlement routing/fallback and organizer/admin payment surfaces are implemented on canonical main as of 6 October 2026; continue to verify production migration/runtime separately.
 
-## Objectives
-BookTKIT uses one server-authoritative payment system for every ticket sale. Pricing, fees, settlement routing, refunds, transfers, reconciliation and ticket issuance are backend decisions. Razorpay KYC must never block an organizer from selling tickets.
+## Authority
+BookTKIT uses one server-authoritative payment architecture. The backend owns ticket/pass pricing, discounts, taxes, platform/POS/additional fees, currency, gateway orders, verification, settlement mode, booking finalization, ticket issuance, ledger and reconciliation.
 
 ## Settlement modes
 ### BookTKIT Managed
-BookTKIT collects the customer payment into the BookTKIT Razorpay account. Organizer payable is recorded in the ledger and settled under BookTKIT payout policy. This mode is always available and is the automatic fallback whenever Razorpay Direct is unavailable.
+BookTKIT collects the payment and records organizer payable for later settlement. This is the safe/default fallback.
 
-### Razorpay Direct
-The organizer prefers automated settlement through the existing Razorpay Route linked-account architecture. BookTKIT remains checkout/payment-order authority and calculates all fees. Organizer funds are transferred only when the linked account passes canonical eligibility checks: active Razorpay account/product, activated KYC, split enabled and not suspended.
+### Razorpay Direct / Route
+BookTKIT still owns checkout and fee calculation; eligible organizer payable is routed/transferred through the linked-account architecture.
 
-If eligibility is lost, pending, rejected, suspended or unavailable, new sales automatically use BookTKIT Managed. Existing orders keep the settlement mode snapshotted when created.
+Direct is allowed only when canonical linked-account/KYC/split eligibility passes. Pending/rejected/suspended/unavailable eligibility automatically falls back to BookTKIT Managed for new sales. Ticket sales must not be blocked solely because organizer Razorpay verification is incomplete.
 
-## Settlement decision
-1. Load organizer payment preference.
-2. Resolve event and sales channel.
-3. If preference is Razorpay Direct, verify current Route/KYC eligibility.
-4. If eligible use razorpay_split; otherwise use booktkit_managed.
-5. Persist actual mode and decision reason in the order snapshot.
-6. Never mutate historical order settlement/fee snapshots because settings changed.
+Each payment order snapshots the actual mode and reason; later settings changes do not rewrite history.
 
-## Fee hierarchy
-Resolve the most-specific active rule: specific event override, organizer override, event-type + sales-channel rule, then global default.
+## Fee engine
+Resolve the most specific active rule: event override -> organizer override -> event-type + sales-channel -> global default, according to current resolver implementation.
 
-Supported event types include venue, online and box-office. Sales channels include web, mobile, POS and admin/manual where applicable. Rules support percentage, fixed, hybrid, minimum/maximum fee and fee bearer. Commercial values are admin-configurable, not hardcoded.
+Event types include online, venue and box office. Sales channels include web/mobile/POS/admin-manual where supported.
 
-## POS
-POS is a sales channel, not an event type. POS can have a BookTKIT fee independent of the underlying event type, including percentage, per-order fixed and optional per-ticket fixed fees.
+Fees can include percentage/fixed/hybrid platform fees, POS fees and reusable additional fees such as wristband/RFID/pass/parking/delivery/convenience. Customer-facing fee lines and accounting snapshots are immutable per order.
 
-## Additional fees
-Additional charges use a reusable fee model rather than a hardcoded wristband column. Examples include wristband, RFID/pass, parking, delivery and venue convenience fees. Fees can define scope, fixed/percentage calculation, per-order/per-ticket application, mandatory/optional state and bearer. Checkout/POS show customer-facing charges explicitly and the payment order snapshots every fee line.
-
-## Immutable order accounting
-Every order snapshots ticket subtotal, discounts, tax, platform fee, POS fee, additional fee lines, customer total, organizer payable, BookTKIT revenue, settlement mode, fee-rule metadata, sales channel and event type. Later configuration changes affect only new orders.
-
-## Ledger and refunds
-The payment ledger is the accounting source of truth. Ticket value, platform revenue, additional fees, organizer payable, refunds and transfer/reversal activity remain separately identifiable. Refunds/reversals are idempotent and operate against immutable orders.
-
-## Admin Payments & Finance
-Canonical navigation: Overview, Transactions, Settlements, Organizers, Fee Rules, POS Fees, Additional Fees, Refunds, Reconciliation, Razorpay, Reports and Settings. Legacy/dead payment links are audited and either redirected to canonical destinations or removed when proven unused.
+## Passes and checkout
+Current payment/finalization path preserves pass selections and authoritative pass pricing through Razorpay finalization. Free pass bookings also issue entitlements and consume pass stock. Invalid pass quantities/dates must fail server-side.
 
 ## Organizer UX
-Organizer Payments exposes preferred settlement method, Razorpay/KYC status, effective mode, fallback reason, gross sales, fees, refunds, BookTKIT-held balance, routed amount, pending settlement and settled amount. Selecting Razorpay Direct while verification is incomplete never disables ticket sales.
+Organizer Payments exposes settlement preference/effective mode, Razorpay/KYC state, fallback reason and fee schedule. Fee cards are transparent to the organizer. Payment/settlement routes live under the organizer namespace; legacy/dead links should not be revived.
 
-## Security invariants
-- Server owns price, fee, tax, currency, payment and settlement decisions.
-- Payment finalization, webhooks and ticket issuance are idempotent.
-- Organizer ownership is server-enforced.
-- Payment history is never recomputed from current settings.
-- Production secrets never enter source control.
-- State-changing payment development uses test/staging mode before production release.
+## POS
+POS is a sales channel. POS fee configuration is independent of payout KYC UX; payout setup banners must not interrupt the POS workspace.
 
-## Implementation phases
-1. Canonical documentation and schema for fee rules/additional fee lines/channel snapshots.
-2. Fee resolution engine and settlement routing policy.
-3. Admin Fee Rules/POS/Additional Fees management.
-4. Organizer settlement preference/KYC fallback UX.
-5. Web/mobile/POS integration with the same authoritative order service.
-6. Legacy payment-route cleanup, reconciliation, reports and production migration/verification.
+## Ledger/refunds
+Ledger/reconciliation remains accounting authority. Refunds, reversals and transfers are idempotent and must operate from immutable order snapshots rather than current fee configuration.
 
-
-## Production reconciliation
-Payments V2 fee resolution and additional-fee services are reconciled against the production fee-engine schema. Production remains server-authoritative for pricing and settlement routing.
+## Security
+Never accept client totals, settlement choice or payment-success flags as authority. Payment finalization/webhooks/ticket issuance must be idempotent. Organizer ownership and idempotency scope are server-enforced. Use staging/test gateway for state-changing development.

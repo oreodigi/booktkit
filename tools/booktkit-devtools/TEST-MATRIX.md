@@ -1,37 +1,29 @@
-# BookTKIT DevTools test matrix
+# BookTKIT DevTools Test Matrix
 
-This matrix is derived only from the current `oreodigi/booktkit` repository.
+Reconciled with product architecture: 6 October 2026.
 
-## Web
-- Public homepage, events, organizer directory, contact/about.
-- Customer login, signup, Google sign-in entry, password reset.
-- Organizer login, signup, dashboard protection.
-- Current event modes: Online and Venue.
-- Booking, checkout, ticket delivery and booking history.
+Production is read-only by default. Mutation suites run only against isolated staging/test data.
 
-## API
-- Customer authentication/session behavior.
-- Event discovery and booking endpoints.
-- Organizer Sanctum-protected routes.
-- BookTKIT Razorpay v1 order creation and verification.
-- Organizer payment settings and Razorpay webhook.
-- Notifications and FCM registration.
+## Priority suites
+| Domain | Required coverage |
+|---|---|
+| Public/customer | discovery, auth, event details, ticket/pass selection, free/paid checkout recovery |
+| Event management | online/venue/box-office create/edit/duplicate, dates, media, type-specific validation |
+| Organizer isolation | cross-organizer event/booking/team/finance denial |
+| Workforce/RBAC | staff login, assignments, POS/scanner permissions, archived staff history |
+| Box Office POS | quote, inventory, variations, passes, idempotency, holds, shifts, print/email |
+| Payments V2 | authoritative amount, fee lines, Razorpay verification, settlement fallback, webhook idempotency |
+| Tickets | issued-ticket creation, customer linkage, secure token, delivery recovery |
+| Access credentials | inventory, issue/collection, duplicate assignment, replacement/revocation |
+| Admission | organizer/staff scanner, gate discovery, ENTRY/EXIT, re-entry, wrong gate, override audit |
+| Pass admission | date-scoped entitlement, wrong date denial, multi-day ranges |
+| Mobile contracts | current route/auth/request/response compatibility for all three Flutter apps |
+| Security | uploads, ownership, auth, forged totals/payment/QR state, concurrency |
 
-## Security/correctness regression
-- Server-calculated price/fee/tax totals.
-- Payment verification and idempotent completion.
-- Organizer/customer ownership isolation.
-- Ticket/event ownership validation.
-- Inventory and last-ticket concurrency.
-- Upload allowlisting/private storage.
-- Password reset expiry/attempt limiting.
-- QR must resolve an actually issued ticket.
-- Repeated and simultaneous QR scans must be atomic.
+## Access regression minimum
+Test invalid token, revoked/replaced credential, wrong event/organizer/gate, staff without assignment/permission, already-inside ENTRY, already-outside EXIT, exhausted re-entry, pass date mismatch, concurrent duplicate scan and supervisor override audit.
 
-## Flutter apps
-- Customer app: API_BASE_URL and PGW_BASE_URL compatibility, auth, discovery, booking, payments, tickets, notifications.
-- Organizer app: login, events, tickets, bookings, finance/payment settings, withdrawals and ownership.
-- Scanner app: login, event/attendee retrieval, valid/invalid/repeated QR admission.
+## Payment/POS regression minimum
+Test duplicate idempotency key scope, last inventory concurrency, free pass entitlement, paid pass finalization, missing optional translation/date recovery, authenticated customer preservation and POS operation without payout/KYC UI coupling.
 
-## Environments
-Production checks are read-only. Booking creation, payment execution, event creation, refunds, withdrawals and QR admission require an approved staging/test database and gateway test mode.
+Never report a skipped/unavailable suite as passed. Record environment, commit and exact failures.

@@ -1,11 +1,20 @@
-# Booktkit
+# BookTKIT
 
-Independently maintained event ticketing platform for https://booktkit.com.
+Production event-ticketing, Box Office POS and venue-access platform for BookTKIT.
 
-Read [project instructions.md](project%20instructions.md) before changing the platform.
+Canonical repository: `oreodigi/booktkit` (private). Read `AGENTS.md` and `project instructions.md` before changes.
 
-The maintained applications are in `source/website`, `source/customer-app`, `source/organizer-app`, and `source/scanner-app`. Purchased archives are retained locally outside Git. Production credentials, customer uploads, database contents and generated files are not repository contents.
+## Applications
+- `source/website` — Laravel website, APIs, admin and organizer operations.
+- `source/customer-app` — Flutter customer app.
+- `source/organizer-app` — Flutter organizer app.
+- `source/scanner-app` — Flutter scanner/access app.
+- `tools/booktkit-devtools` — Playwright/MCP/ChatGPT QA.
+- `deploy` — GitHub-to-cPanel deployment/rollback tooling.
 
-GitHub repository: https://github.com/oreodigi/booktkit (private).
+## Current capability baseline — 6 October 2026
+Current `main` includes online/venue/box-office events; unified event forms; Box Office POS, holds, shifts and reporting; organizer team/RBAC; Payments V2 and Razorpay fallback settlement; secure issued tickets; QR/RFID credential lifecycle; gates/zones and entry/exit/re-entry admission; multi-day passes; AI credits/image generation; managed hero banners; Mobile Homepage Studio; and isolated staging QA tooling.
 
-Deployment configuration and its verified activation status are recorded under `deploy/`. Do not assume a local commit has reached production until the deployment status confirms its commit identifier.
+See `docs/CANONICAL-ARCHITECTURE.md`, `docs/BOOKTKIT-ACCESS-CREDENTIAL-SYSTEM.md`, `docs/BOX-OFFICE-DESIGN.md`, `docs/PAYMENTS-V2.md` and `docs/mobile/MOBILE-API-CONTRACT.md`.
+
+Production credentials, customer uploads, databases and generated runtime files are not repository contents. GitHub state and production deployment state are separate; verify the deployed commit before claiming a change is live.

@@ -1,26 +1,19 @@
 ---
 name: booktkit-testing
-description: Deterministic QA for BookTKIT through its protected MCP and Playwright regression framework.
+description: Deterministic QA for the current BookTKIT platform through protected MCP and Playwright regression tooling.
 ---
 
 # BookTKIT Testing
 
-Use this skill for testing the current `oreodigi/booktkit` system. Never infer routes or behavior from old Eventora repositories.
+Use only current `oreodigi/booktkit` contracts. Never infer behavior from Eventora.
+
+Current QA domains include auth, event management, Box Office/POS, organizer workforce/RBAC, Payments V2, issued tickets, pass entitlements, credential lifecycle and organizer/staff gate admission.
 
 ## Tool routing
-- login -> `booktkit_test_login`
-- signup -> `booktkit_test_signup`
-- organizer workflow -> `booktkit_test_organizer_flow`
-- event creation -> `booktkit_test_event_creation`
-- checkout/payment -> `booktkit_test_checkout`
-- mobile/responsive -> `booktkit_test_mobile`
-- console/page/network errors -> `booktkit_get_runtime_errors`
-- full regression -> `booktkit_run_regression`
-- arbitrary approved suite -> `booktkit_start_test_run`
-- status -> `booktkit_recent_test_runs`
+Use the available BookTKIT tools for login/signup, organizer/event workflows, checkout/payment, mobile/responsive, runtime errors, scanner/access and full regression. Prefer the narrowest applicable suite, then broader regression for cross-domain changes.
 
 ## Safety
-Production is read-only. Never weaken mutation guards. State-changing event/payment/admission tests require an approved non-production BookTKIT subdomain, disposable accounts, explicit mutation enablement, and Razorpay test mode.
+Production is read-only. State-changing event/payment/POS/credential/admission tests require isolated staging, disposable accounts, explicit mutation enablement and Razorpay test mode when payment execution is involved.
 
 ## Reporting
-Report target, suite, run status, failures, and artifact/run link. Distinguish passing read-only coverage from skipped state-changing coverage.
+Report target, suite, run status, pass/fail/skip/flaky counts and artifacts. Distinguish verified coverage from untested domains.

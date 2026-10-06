@@ -1,66 +1,59 @@
 # BookTKIT Canonical Architecture
 
-Last reconciled with GitHub `main`: 5 October 2026.
+Last reconciled with `oreodigi/booktkit` main: 6 October 2026.
 
-## Purpose
-This file is the compact architecture source of truth for agents and developers. Historical audits under `project-review/` are evidence, not a replacement for current code inspection.
+## System
+BookTKIT is a Laravel 9.x / PHP 8.3 event-commerce and venue-operations platform with Blade/Laravel Mix web UI plus three Flutter applications. Laravel is the shared authority for web/mobile/POS/scanner behavior.
 
-## Repository map
-- `source/website` — Laravel 9.x / PHP 8.3 website and shared backend.
-- `source/customer-app` — Flutter customer application.
-- `source/organizer-app` — Flutter organizer application.
-- `source/scanner-app` — Flutter ticket/admission scanner.
-- `tools/booktkit-devtools` — Playwright browser/API/regression tests, diagnostics, MCP control plane and ChatGPT testing package.
-- `docs/mobile` — mobile engineering instructions and backend contract baseline.
-- `deploy` — cPanel deployment/rollback tooling.
-- `project-review` — audits, vendor-cleanup history and historical live-deployment reports.
+## Applications
+- `source/website`: public web, customer/organizer/admin auth, APIs, organizer/admin panels, checkout, POS, payments, tickets and Access.
+- `source/customer-app`: customer discovery/checkout/bookings/tickets.
+- `source/organizer-app`: organizer mobile client; API parity must be verified feature-by-feature.
+- `source/scanner-app`: organizer/staff access client.
+- `tools/booktkit-devtools`: Playwright, diagnostics, MCP and ChatGPT test orchestration.
+- `deploy`: cPanel staging/production deployment tooling.
 
-## Website/backend
-The Laravel application owns the canonical business data and rules. Route surfaces include public/customer web routes, admin routes, organizer routes, shared API routes and scanner API routes.
+## Event domain
+Canonical event types are `online`, `venue` and `box_office`. Create/edit/duplicate share domain validation/services and common wizard assets. Event type selected by route is authoritative; venue coordinates are implementation data rather than required manual organizer UI.
 
-Core domains include customers, organizers, events, categories, dates, tickets, variations, bookings, coupons, wishlists, finance/earnings, support, notifications and scanner admission.
+Events support dates, tickets, variations, media and current pass products. Multi-day passes are server-priced products with date-scoped entitlements persisted through checkout/POS/finalization and enforced by Access.
 
-Current repository additions also include Mobile Homepage Studio models/services for templates, sections, campaigns and versions.
+## Sales channels
+Web/mobile checkout and POS must converge on server-authoritative price/inventory/payment/ticket state. Box Office is both an event capability/type and an operational sales workspace; POS itself is a sales channel for fee/accounting purposes.
 
-## Payments
-The repository contains a newer Razorpay orchestration path using server-side services including:
-- `AuthoritativeTicketPricingService`
-- `PaymentOrderService`
-- `BookingFinalizationService`
-- `PaymentReconciliationService`
-- `PlatformFeeCalculator`
-- `RazorpayRouteService`
-- `RazorpayWebhookService`
+Current POS includes three-column selling UI, ticket/pass products, customer/identity metadata, quote/reserve/complete flow, secure issued tickets, print/email, holds, staff sessions, cash shifts, reporting and configurable POS settings.
 
-The server must remain authoritative for prices, fees, currency, payment state, booking finalization and ticket issuance. Legacy gateway/payment paths coexist and must be inspected before changes.
+## Workforce/RBAC
+Organizer staff identities are separate operational users with organizer ownership, assignments, departments/roles and granular permissions. POS/scanner/access actions must enforce organizer + event/location/gate assignment server-side. Deleting/archive operations must preserve financial/audit history.
 
-## Authentication
-The system contains distinct customer, organizer and admin flows plus Sanctum-style API guards. Socialite/Google auth and reCAPTCHA v3 are present in current development. Native mobile auth compatibility must be verified independently from browser OAuth behavior.
+## Payments V2
+The server owns pricing, fee rules, additional fees, settlement routing, payment orders, finalization, ledger, refunds/reversals, reconciliation and ticket issuance.
 
-## Mobile applications
-All three Flutter applications consume the Laravel backend. Never assume purchased mobile clients match current APIs.
+Settlement modes:
+- BookTKIT Managed — BookTKIT collects and later settles organizer payable.
+- Razorpay Direct/Route — used only when current linked-account/KYC/split eligibility permits.
 
-Customer app: discovery, authentication, checkout, bookings/tickets, support/notifications.
+Organizer preference never overrides eligibility. Ineligible Direct automatically falls back to Managed for new orders. Orders snapshot actual settlement mode and fee lines.
 
-Organizer app: organizer auth, event/ticket management, bookings, finance/settings and related organizer capabilities.
+## Tickets, passes and delivery
+`issued_tickets` are the canonical attendee entitlement records. Ticket issuance uses secure opaque/HMAC bearer tokens and server-side token hashes. Booking success must preserve authenticated customer linkage. Ticket delivery is a post-finalization service and cannot define payment success.
 
-Scanner app: organizer/admin scanner authentication, authorized events, QR validation and admission.
+Pass products create explicit entitlements; admission checks the entitled event date.
 
-Before mobile changes read `docs/mobile/CODEX-MOBILE-DEVELOPMENT.md`, `docs/mobile/MOBILE-API-CONTRACT.md` and the app's own `AGENTS.md`.
+## Access & credentials
+Physical/digital credentials are separate from commercial ticket entitlement. Supported domain types include QR wristband, RFID wristband/card, NFC card, QR badge and physical ID.
 
-## QA system
-`tools/booktkit-devtools` provides repository-level Playwright testing and the BookTKIT MCP/plugin testing layer. CI workflows include BookTKIT DevTools and E2E jobs. Production defaults to read-only testing; mutation suites require approved isolated staging/test data.
+Current main includes credential batches/inventory, ticket assignment, collection desk, replacement/revocation, replacement fee reference, access policies, gates, zones, scan ledger, live operations, staff scanner sessions and audited supervisor overrides.
 
-## Production
-Domain: `https://booktkit.com`
-Server: `server.tejum.cloud`
-cPanel account: `booktkit`
-Live path: `/home/booktkit/public_html`
+The unified admission engine resolves ticket or active credential to an issued ticket and performs transactional, assignment-scoped, gate-aware `entry`/`exit` transitions with re-entry/date/pass enforcement. Legacy arbitrary scan-status mutation is retired from the new authority path.
 
-Production is cPanel-hosted. It is not a Vercel deployment.
+## AI and presentation
+Organizer AI credits/packages support free activation and paid purchase paths. Image generation integrations use current OpenAI GPT Image and current Gemini image APIs/response formats, with credit estimates shown in organizer UX.
 
-## Deployment
-`deploy/` contains the maintained GitHub-to-cPanel deployment/rollback tooling. The deployment runner stages tracked website files, validates changes, preserves runtime/private state, records deployed commits and supports rollback. A Git commit is not proof of production deployment; verify runtime/deployment state.
+Public presentation includes managed multi-banner image/video hero content and Mobile Homepage Studio campaigns/templates/versioning.
 
-## Non-canonical system
-`sourcecatch-konnect/eventora` is scrapped and must never supply architecture assumptions for BookTKIT.
+## Authority
+Server authority is mandatory for money, inventory, entitlements, credential lifecycle and admission. Use transactions/locks/unique constraints for concurrency-sensitive operations. Never trust client totals, payment flags, QR payload claims or UI permissions.
+
+## Non-canonical
+`sourcecatch-konnect/eventora` is scrapped. Historical `project-review` documents are evidence only and must be reconciled with current code/runtime.

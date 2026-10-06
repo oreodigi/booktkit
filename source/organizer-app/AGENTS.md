@@ -1,10 +1,12 @@
-# BookTKIT mobile Codex instructions
-Read ../../AGENTS.md, ../../project instructions.md, ../README.md, and ../../docs/mobile/CODEX-MOBILE-DEVELOPMENT.md plus MOBILE-API-CONTRACT.md before edits.
-This app shares the current Laravel backend in ../website with the other two apps. Fetch current oreodigi/booktkit code safely; reconcile API routes/controllers and DTOs. Preserve purchased archives and local branding. Do not use the old Eventora/Supabase/Vercel architecture.
+# BookTKIT organizer app instructions
 
-## Organizer-specific requirements
-Inspect lib/app/urls.dart, organizer API controllers and auth:organizer_sanctum. Use real organizer-owned events, tickets, bookings and financial data; enforce isolation on server.
-Match current event/ticket/date/seat schemas and validation; do not recreate obsolete special-event features as if already present.
-Read current /api/v1/organizer/payments/settings schema, settlement eligibility and fee behavior. Display backend-calculated finance; split settlement is available only when server eligibility permits it.
-Centralize configurable staging URLs before mutations. Reuse current architecture, handle expired sessions/validation and avoid duplicate updates.
-Run analysis, meaningful tests, Android debug build and two-organizer isolation checks. Confirm customer purchases appear in organizer bookings and authorized scanner access agrees.
+Read root `AGENTS.md`, `project instructions.md`, `source/README.md`, `docs/mobile/CODEX-MOBILE-DEVELOPMENT.md` and `docs/mobile/MOBILE-API-CONTRACT.md`.
+
+## Current requirements
+Use organizer-scoped Laravel APIs and current backend models. Current web backend includes online/venue/box-office events, passes, POS, workforce, Payments V2 and Access credentials; do not assume equivalent organizer-app screens/endpoints exist until verified.
+
+Organizer finance must display server-calculated fees, settlement preference/effective mode and Razorpay eligibility/fallback. Never reproduce fee calculations client-side.
+
+Event management must follow current event-type validation and shared domain behavior. Access/credential operations require granular permissions and event/gate scope. Staff identities are not organizer superusers.
+
+Centralize staging URLs. Test two-organizer isolation, expired auth, validation, customer booking visibility and authorized scanner/access behavior. Run format/analyze/tests/debug build.

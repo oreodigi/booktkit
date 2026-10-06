@@ -1,9 +1,16 @@
-# BookTKIT mobile Codex instructions
-Read ../../AGENTS.md, ../../project instructions.md, ../README.md, and ../../docs/mobile/CODEX-MOBILE-DEVELOPMENT.md plus MOBILE-API-CONTRACT.md before edits.
-This app shares the current Laravel backend in ../website with the other two apps. Fetch current oreodigi/booktkit code safely; reconcile API routes/controllers and DTOs. Preserve purchased archives and local branding. Do not use the old Eventora/Supabase/Vercel architecture.
+# BookTKIT customer app instructions
 
-## Customer-specific requirements
-Inspect lib/app/urls.dart and lib/features/checkout before building. Adapt checkout to current server-owned orders/verification, explicit minor units and idempotency. Reconcile free tickets, seats, coupons and date/variation support with backend; do not silently bypass missing support.
-Integrate current homepage configuration through an actual API; disabled sections and active seasonal templates should agree with backend settings.
-Verify email/password and Google native login against current backend token issuance. Notifications must not gate checkout. Repair permissive WebView paid detection and environment leakage. Protect customer tokens/data and booking ownership.
-Run analysis, meaningful tests and Android debug build; verify purchase -> server booking -> organizer visibility -> scanner admission using staging. Release signing must not use debug keys.
+Read root `AGENTS.md`, `project instructions.md`, `source/README.md`, `docs/mobile/CODEX-MOBILE-DEVELOPMENT.md` and `docs/mobile/MOBILE-API-CONTRACT.md`.
+
+Use the current Laravel backend; never use Eventora/Supabase/Vercel assumptions.
+
+## Current requirements
+- Checkout must use server-owned pricing/order/verification, idempotency and minor units.
+- Reconcile online, venue and box-office event visibility, dates, variations and current pass products before adding UI.
+- Customer bookings/tickets must resolve real `issued_tickets`; credential-required events should eventually expose collection/credential state through documented APIs rather than local assumptions.
+- Payments V2 settlement/fees are backend concerns; display returned customer totals/fee lines.
+- Homepage work must honor current Mobile Homepage Studio/hero configuration exposed by actual APIs.
+- Auth tokens and booking ownership are server-enforced. Notifications must never gate booking/login.
+- Do not infer payment success from WebView/SDK alone.
+
+Test against isolated staging: discovery -> auth -> server-confirmed purchase/free booking -> booking/ticket visibility -> organizer visibility -> scanner/access admission. Run format/analyze/tests/debug build for changed app code.
