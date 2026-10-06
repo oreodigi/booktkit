@@ -34,13 +34,12 @@
         </li>
       @endif
       @if (request()->filled('event_type') && request()->input('event_type') == 'online')
-        <li class="separator">
-          <i class="flaticon-right-arrow"></i>
-        </li>
-        <li class="nav-item">
-          <a href="#">{{ __('Online Events') }}</a>
-        </li>
-        <li><a href="{{ route('organizer.event_management.event', ['language' => $defaultLang->code, 'event_type' => 'box_office']) }}">{{ __('Box Office Events') }}</a></li>
+        <li class="separator"><i class="flaticon-right-arrow"></i></li>
+        <li class="nav-item"><a href="#">{{ __('Online Events') }}</a></li>
+      @endif
+      @if (request()->filled('event_type') && request()->input('event_type') == 'box_office')
+        <li class="separator"><i class="flaticon-right-arrow"></i></li>
+        <li class="nav-item"><a href="#">{{ __('Box Office Events') }}</a></li>
       @endif
     </ul>
   </div>
@@ -86,6 +85,9 @@
 
                   <a href="{{ route('organizer.add.event.event', ['type' => 'venue']) }}" class="dropdown-item">
                     {{ __('Venue Event') }}
+                  </a>
+                  <a href="{{ route('organizer.add.event.event', ['type' => 'venue', 'special' => 1]) }}" class="dropdown-item">
+                    {{ __('Box Office Event') }}
                   </a>
                 </div>
               </div>
@@ -144,13 +146,13 @@
                               href="{{ route('event.details', ['slug' => $event->slug, 'id' => $event->id]) }}">{{ strlen($event->title) > 30 ? mb_substr($event->title, 0, 30, 'UTF-8') . '....' : $event->title }}</a>
                           </td>
                           <td>
-                            {{ ucfirst($event->event_type) }}
+                            {{ ($event->box_office_enabled || $event->event_type === 'box_office') ? __('Box Office') : ucfirst($event->event_type) }}
                           </td>
                           <td>
                             {{ $event->category }}
                           </td>
                           <td>
-                            @if ($event->event_type == 'venue')
+                            @if ($event->event_type == 'venue' || $event->event_type == 'box_office')
                               <a href="{{ route('organizer.event.ticket', ['language' => request()->input('language'), 'event_id' => $event->id, 'event_type' => $event->event_type]) }}"
                                 class="btn btn-success btn-sm">{{ __('Manage') }}</a>
                             @endif
