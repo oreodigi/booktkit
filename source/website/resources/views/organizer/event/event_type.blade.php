@@ -73,7 +73,7 @@
         </a>
       </div>
       <div class="col-lg-4">
-        <a href="{{ route('organizer.add.event.event', ['type' => 'venue', 'special' => 1]) }}" class="d-block text-decoration-none">
+        <a href="{{ route('organizer.add.event.event', ['type' => 'box_office']) }}" class="d-block text-decoration-none">
           <div class="card card-stats card-round p-50">
             <div class="card-body"><div class="row align-items-center"><div class="col-12"><div class="col-icon mx-auto">
               <div class="icon-big text-center icon-danger bubble-shadow-small"><i class="fas fa-ticket-alt"></i></div>
