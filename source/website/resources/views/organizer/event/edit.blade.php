@@ -141,8 +141,7 @@
                                     </div>
                                     <label><strong>{{ __('Box Office Locations') }} *</strong></label>
                                     <div id="boxOfficeLocations">
-                                      @php($boxLocations = $event->boxOfficeLocations)
-                                      @foreach ($boxLocations as $i => $location)
+                                      @foreach ($event->boxOfficeLocations as $i => $location)
                                       <div class="row mb-2 box-office-location-row">
                                         <div class="col-md-5"><input class="form-control" name="box_office_locations[{{ $i }}][name]" value="{{ optional($location)->name }}" placeholder="{{ __('Counter name') }}" required></div>
                                         <div class="col-md-6"><input class="form-control" name="box_office_locations[{{ $i }}][address]" value="{{ optional($location)->address }}" placeholder="{{ __('Counter address') }}"></div>
