@@ -36,7 +36,7 @@ class BookingFinalizationService {
     $ticket->ticket_available=(int)$ticket->ticket_available-$qty; $ticket->save();
    }
    for($i=0;$i<$qty;$i++) $variations[]=['ticket_id'=>$ticket->id,'early_bird_dicount'=>($item['discount']??0)/100/max(1,$qty),
-    'name'=>$item['pass_name'] ?: ($item['variation'] ?: ($ticket->title ?: 'Ticket')),'qty'=>1,'price'=>($item['unit_price']??0)/100,'scan_status'=>0,'unique_id'=>uniqid(),'pass_product_id'=>$item['pass_product_id']??null,'pass_type'=>$item['pass_type']??null,'event_date_ids'=>$item['event_date_ids']??[],'admissions_per_holder'=>$item['admissions_per_holder']??1];
+    'name'=>($item['pass_name']??null) ?: (($item['variation']??null) ?: ($ticket->title ?: 'Ticket')),'qty'=>1,'price'=>($item['unit_price']??0)/100,'scan_status'=>0,'unique_id'=>uniqid(),'pass_product_id'=>$item['pass_product_id']??null,'pass_type'=>$item['pass_type']??null,'event_date_ids'=>$item['event_date_ids']??[],'admissions_per_holder'=>$item['admissions_per_holder']??1];
   }
   $basic=Basic::where('uniqid',12345)->first() ?: Basic::first();
   $booking=Booking::create([
