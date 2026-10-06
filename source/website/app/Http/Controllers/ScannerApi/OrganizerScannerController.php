@@ -82,7 +82,7 @@ class OrganizerScannerController extends Controller
   //check qr-code
   public function check_qrcode(Request $request, TicketAdmissionService $admission)
   {
-    $request->validate(['booking_id' => 'required|string|max:255','direction'=>'nullable|in:entry,exit']);
+    $request->validate(['booking_id' => 'required|string|max:255','direction'=>'nullable|in:entry,exit','gate_id'=>'nullable|integer','override'=>'nullable|boolean','override_reason'=>'nullable|string|max:255']);
     $organizer = Auth::guard('organizer_sanctum')->user();
 
     return response()->json($admission->admit(
@@ -91,7 +91,10 @@ class OrganizerScannerController extends Controller
       (int) $organizer->id,
       $request->header('X-Device-Name'),
       $request->ip(),
-      $request->input('direction','entry')
+      $request->input('direction','entry'),
+      $request->integer('gate_id') ?: null,
+      $request->boolean('override'),
+      $request->input('override_reason')
     ));
   }
 
@@ -268,49 +271,10 @@ class OrganizerScannerController extends Controller
   }
   public function ticketScanStatusChanged(Request $request)
   {
-    $organizer_id = Auth::guard('organizer_sanctum')->user()->id;
-    $rules = [
-      'booking_id' => 'required',
-      'ticket_id' => 'required',
-      'status' => 'required|in:scanned,unscanned',
-    ];
-    $messages = [];
-    $validator = Validator::make($request->all(), $rules, $messages);
-    if ($validator->fails()) {
-      return response()->json([
-        'status' => 'validation_error',
-        'errors' => $validator->errors(),
-      ], 422);
-    }
-    $booking = Booking::where('booking_id',$request->booking_id)->first();
-    if(!$booking){
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Invalid booking id',
-      ], 404);
-    }
-    if($booking->organizer_id != $organizer_id){
-      return response()->json([
-        'status' => 'error',
-        'message' => 'You do not have permission',
-      ], 403);
-    }
-    $scanned_tickets = !is_null($booking->scanned_tickets) ? json_decode($booking->scanned_tickets,true) : [];
-    if($request->status == 'scanned'){
-      if(!in_array($request->ticket_id,$scanned_tickets)){
-        $scanned_tickets[] = $request->ticket_id;
-      }
-    }else{
-      if(in_array($request->ticket_id,$scanned_tickets)){
-        $index = array_search($request->ticket_id, $scanned_tickets);
-        unset($scanned_tickets[$index]);
-      }
-    }
-    $booking->scanned_tickets = !empty($scanned_tickets) ? json_encode(array_values($scanned_tickets)) : null;
-    $booking->save();
     return response()->json([
-      'status' => 'success',
-      'message' => 'Ticket scan status updated successfully',
-    ], 200);
+      'status' => 'error',
+      'message' => 'Manual scan status mutation is retired. Scan the issued ticket or credential through BookTKIT Access.',
+      'code' => 'legacy_scan_mutation_retired',
+    ], 409);
   }
 }
