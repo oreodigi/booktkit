@@ -42,12 +42,12 @@ class RazorpayController extends Controller
   {
     $request->validate(['fname'=>'required','lname'=>'required','email'=>'required|email','phone'=>'required','country'=>'required','address'=>'required','gateway'=>'required']);
     $sel=collect(Session::get('selTickets',[]))->map(function($x){
-      return ['ticket_id'=>(int)$x['ticket_id'],'quantity'=>(int)$x['qty'],'variation'=>($x['name']??null)];
+      return ['ticket_id'=>(int)$x['ticket_id'],'quantity'=>(int)$x['qty'],'variation'=>($x['pass_product_id']??null)?null:($x['name']??null),'pass_product_id'=>$x['pass_product_id']??null,'event_date_ids'=>$x['event_date_ids']??[]];
     })->values()->all();
     if(empty($sel)) return back()->with('error','Please select at least one ticket.')->withInput();
     $pricing=app(AuthoritativeTicketPricingService::class)->quote((int)$event_id,$sel);
     $event=$pricing['event']; $basic=Basic::first(); $taxRate=(float)($basic->tax??0); $tax=(int)round($pricing['ticket_amount']*$taxRate/100);
-    $snapshot=['items'=>$pricing['items'],'quantity'=>$pricing['quantity'],'subtotal'=>$pricing['subtotal'],'discount'=>$pricing['discount'],'tax_rate'=>$taxRate];
+    $snapshot=['items'=>$pricing['items'],'quantity'=>$pricing['quantity'],'subtotal'=>$pricing['subtotal'],'discount'=>$pricing['discount'],'tax_rate'=>$taxRate,'sales_channel'=>'web'];
     $idem='web-'.hash('sha256',session()->getId().'|'.$event_id.'|'.microtime(true));
     $order=app(PaymentOrderService::class)->createFromPricing($event->id,$event->organizer_id,$pricing['ticket_amount'],$tax,$idem,$snapshot);
     $order->customer_snapshot=['customer_id'=>auth()->id()?:'guest','fname'=>$request->fname,'lname'=>$request->lname,'email'=>$request->email,'phone'=>$request->phone,
@@ -69,7 +69,7 @@ class RazorpayController extends Controller
       app(RazorpayRouteService::class)->verifyCheckout($order,$request->razorpayPaymentId,$request->razorpaySignature);
       $booking=DB::transaction(function() use($order,$request){
         $locked=PaymentOrder::whereKey($order->id)->lockForUpdate()->first();
-        if($locked->status==='paid' && $locked->booking_id) return AppModelsEventBooking::findOrFail($locked->booking_id);
+        if($locked->status==='paid' && $locked->booking_id) return \App\Models\Event\Booking::findOrFail($locked->booking_id);
         $locked->update(['gateway_payment_id'=>$request->razorpayPaymentId,'status'=>'paid','paid_at'=>now()]);
         $booking=app(BookingFinalizationService::class)->finalize($locked);
         app(PaymentLedgerService::class)->recordPaid($locked);
@@ -77,11 +77,11 @@ class RazorpayController extends Controller
       });
       $profile=OrganizerPaymentProfile::where('organizer_id',$order->organizer_id)->first();
       if($order->settlement_mode==='razorpay_split' && $profile && $profile->canSplit()){
-        try { app(RazorpayRouteService::class)->transferToOrganizer($order->fresh(),$profile->razorpay_account_id); } catch(Throwable $e) { report($e); }
+        try { app(RazorpayRouteService::class)->transferToOrganizer($order->fresh(),$profile->razorpay_account_id); } catch(\Throwable $e) { report($e); }
       }
       session()->forget(['event_id','selTickets','arrData','paymentId','discount','razorpayOrderId','booktkitPaymentOrder']);
       return redirect()->route('event_booking.complete',['id'=>$eventId,'booking_id'=>$booking->id]);
-    } catch(Throwable $e) {
+    } catch(\Throwable $e) {
       report($e); session()->forget(['booktkitPaymentOrder']);
       return redirect()->route('event_booking.cancel',['id'=>$eventId])->with('error','Payment verification failed.');
     }
