@@ -80,6 +80,10 @@
                           {{ __('Choose Image') }}
                           <input type="file" class="img-input2" name="ticket_image">
                         </div>
+                        @if ($event->ticket_image)
+                          <button type="button" class="btn btn-danger btn-sm ml-2" id="removeTicketImage">{{ __('Remove Image') }}</button>
+                          <input type="hidden" name="remove_ticket_image" id="removeTicketImageInput" value="0">
+                        @endif
                       </div>
                       <p id="editErr_ticket_image" class="mt-1 mb-0 text-danger em"></p>
                       <p class="mt-2 mb-0 text-warning">{{ __('Best Size 255x390') }}</p>
@@ -99,6 +103,10 @@
                           {{ __('Choose Image') }}
                           <input type="file" class="img-input" name="ticket_logo">
                         </div>
+                        @if ($event->ticket_logo)
+                          <button type="button" class="btn btn-danger btn-sm ml-2" id="removeTicketLogo">{{ __('Remove Logo') }}</button>
+                          <input type="hidden" name="remove_ticket_logo" id="removeTicketLogoInput" value="0">
+                        @endif
                       </div>
                       <p id="editErr_ticket_logo" class="mt-1 mb-0 text-danger em"></p>
                       <p class="mt-2 mb-0 text-warning">{{ __('Best Size 200*50') }}</p>
@@ -144,6 +152,18 @@
   <script>
     $(document).ready(function() {
       $('.js-example-basic-single').select2();
+      $('#removeTicketImage').on('click', function() {
+        $('#removeTicketImageInput').val('1');
+        $('.uploaded-img2').attr('src', "{{ asset('assets/admin/img/noimage.jpg') }}");
+        $(this).prop('disabled', true).text("{{ __('Image will be removed on Update') }}");
+      });
+      $('#removeTicketLogo').on('click', function() {
+        $('#removeTicketLogoInput').val('1');
+        $('.uploaded-img').attr('src', "{{ asset('assets/admin/img/noimage.jpg') }}");
+        $(this).prop('disabled', true).text("{{ __('Logo will be removed on Update') }}");
+      });
+      $('input[name="ticket_image"]').on('change', function() { $('#removeTicketImageInput').val('0'); });
+      $('input[name="ticket_logo"]').on('change', function() { $('#removeTicketLogoInput').val('0'); });
     });
   </script>
 @endsection
