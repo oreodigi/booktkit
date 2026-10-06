@@ -39,6 +39,7 @@
         <li class="nav-item">
           <a href="#">{{ __('Online Events') }}</a>
         </li>
+        <li><a href="{{ route('admin.event_management.event', ['language' => $defaultLang->code, 'event_type' => 'box_office']) }}">{{ __('Box Office Events') }}</a></li>
       @endif
     </ul>
   </div>
@@ -85,6 +86,7 @@
                   <a href="{{ route('add.event.event', ['type' => 'venue']) }}" class="dropdown-item">
                     {{ __('Venue Event') }}
                   </a>
+                  <a href="{{ route('add.event.event', ['type' => 'box_office']) }}" class="dropdown-item">{{ __('Box Office Event') }}</a>
                 </div>
               </div>
 
