@@ -261,4 +261,6 @@ class AdminScannerController extends Controller
     ], 409);
   }
 
+  public function gates(Request $request){$eventId=$request->integer('event_id');abort_unless(Event::whereKey($eventId)->exists(),404);return response()->json(['status'=>'success','gates'=>DB::table('event_gates')->where('event_id',$eventId)->where('active',1)->orderBy('name')->get(['id','name','code','mode','zone_id'])]);}
+
 }
