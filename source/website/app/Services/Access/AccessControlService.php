@@ -36,7 +36,7 @@ class AccessControlService
             $eventDateId=null;
             if ($ticket->pass_product_id && Schema::hasTable('pass_entitlements')) {
                 $today=now()->toDateString();
-                $entitlement=PassEntitlement::where('issued_ticket_id',$ticket->id)->where('status','active')->whereHas('eventDate',fn($q)=>$q->whereDate('start_date',$today)->orWhereDate('end_date',$today))->orderBy('event_date_id')->first();
+                $entitlement=PassEntitlement::where('issued_ticket_id',$ticket->id)->where('status','active')->whereHas('eventDate',fn($q)=>$q->whereDate('start_date','<=',$today)->where(function($d)use($today){$d->whereNull('end_date')->orWhereDate('end_date','>=',$today);} ))->orderBy('event_date_id')->first();
                 if(!$entitlement) return $this->deny('This pass is not valid for today','pass_date_invalid',$ticket,$credential,$direction,$actorType,$actorId,$deviceName,$ip);
                 $eventDateId=(int)$entitlement->event_date_id;
             }
