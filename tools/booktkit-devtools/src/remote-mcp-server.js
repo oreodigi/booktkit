@@ -2,7 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { dispatchSuite, recentRuns, getRemoteRunStatus, getRemoteRunLog } from './github-actions.js';
 
-const suites = ['smoke','contracts','mobile','auth','signup','login','organizer','event-creation','checkout','api','security','razorpay','scanner','diagnostics','all'];
+const suites = ['smoke','contracts','mobile','auth','signup','login','organizer','event-creation','pos','staff-rbac','admission','checkout','api','security','razorpay','scanner','diagnostics','all'];
 
 export function createRemoteServer() {
   const server = new McpServer({ name:'booktkit-testing', version:'1.0.0' });
@@ -19,7 +19,7 @@ export function createRemoteServer() {
 
   const fixed = [
     ['booktkit_test_login','login'], ['booktkit_test_signup','signup'], ['booktkit_test_organizer_flow','organizer'],
-    ['booktkit_test_event_creation','event-creation'], ['booktkit_test_checkout','checkout'], ['booktkit_test_mobile','mobile'],
+    ['booktkit_test_event_creation','event-creation'], ['booktkit_test_pos','pos'], ['booktkit_test_staff_rbac','staff-rbac'], ['booktkit_test_admission','admission'], ['booktkit_test_checkout','checkout'], ['booktkit_test_mobile','mobile'],
     ['booktkit_run_regression','all'], ['booktkit_get_runtime_errors','diagnostics']
   ];
   for (const [name,suite] of fixed) server.tool(name, `Run BookTKIT ${suite} testing through the protected CI control plane.`,
