@@ -30,8 +30,7 @@ class OrganizerPaymentProfile extends Model
 
     public function canSplit(): bool
     {
-        return $this->settlement_mode === 'razorpay_split'
-            && $this->split_enabled
+        return $this->split_enabled
             && in_array($this->razorpay_status, ['active','activated'], true)
             && $this->kyc_status === 'activated'
             && !$this->split_suspended
