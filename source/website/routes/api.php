@@ -207,7 +207,7 @@ Route::prefix('/organizer')->middleware('auth:organizer_sanctum')->group(functio
 
       Route::post('delete-ticket',  [TicketController::class, 'destroy'])->name('api.organizer.ticket_management.delete_ticket');
 
-      Route::post('bulk-delete-ticket',  [TicketController::class, 'bulk_delete'])->name('organizer.event_management.bulk_delete_event_ticket');
+      Route::post('bulk-delete-ticket',  [TicketController::class, 'bulk_delete'])->name('api.organizer.event_management.bulk_delete_event_ticket');
     });
 
     Route::post('/event-delete/{id}',  [OrganizerEventController::class, 'destroy'])->name('api.organizer.event_management.delete_event');
