@@ -15,6 +15,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _usernameCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
+  final _organizerIdCtrl = TextEditingController();
+  bool _staffLogin = false;
   bool _busy = false;
   bool _obscure = true;
 
@@ -22,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _usernameCtrl.dispose();
     _passwordCtrl.dispose();
+    _organizerIdCtrl.dispose();
     super.dispose();
   }
 
@@ -33,6 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final ok = await context.read<AuthProvider>().login(
       _usernameCtrl.text,
       _passwordCtrl.text,
+      organizerId: _staffLogin ? int.tryParse(_organizerIdCtrl.text) : null,
     );
     if (!mounted) return;
     setState(() => _busy = false);
@@ -91,6 +95,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
+                        SwitchListTile(contentPadding: EdgeInsets.zero,title: const Text('Staff / gate team login'),value:_staffLogin,onChanged:(v)=>setState(()=>_staffLogin=v)),
+                        if(_staffLogin) ...[
+                          TextFormField(controller:_organizerIdCtrl,keyboardType:TextInputType.number,decoration:const InputDecoration(labelText:'Organizer ID',prefixIcon:Icon(Icons.business),border:OutlineInputBorder()),validator:(v)=>_staffLogin&&(int.tryParse(v??'')==null)?'Enter organizer ID':null),
+                          const SizedBox(height:12),
+                        ],
                         TextFormField(
                           controller: _usernameCtrl,
                           keyboardType: TextInputType.text,

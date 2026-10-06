@@ -277,4 +277,6 @@ class OrganizerScannerController extends Controller
       'code' => 'legacy_scan_mutation_retired',
     ], 409);
   }
+  public function gates(Request $request){$o=Auth::guard('organizer_sanctum')->user();$eventId=$request->integer('event_id');abort_unless(Event::where('organizer_id',$o->id)->whereKey($eventId)->exists(),403);return response()->json(['status'=>'success','gates'=>DB::table('event_gates')->where('event_id',$eventId)->where('organizer_id',$o->id)->where('active',1)->orderBy('name')->get(['id','name','code','mode','zone_id'])]);}
+
 }
