@@ -39,7 +39,10 @@
         <li class="nav-item">
           <a href="#">{{ __('Online Events') }}</a>
         </li>
-        <li><a href="{{ route('admin.event_management.event', ['language' => $defaultLang->code, 'event_type' => 'box_office']) }}">{{ __('Box Office Events') }}</a></li>
+      @endif
+      @if (request()->filled('event_type') && request()->input('event_type') == 'box_office')
+        <li class="separator"><i class="flaticon-right-arrow"></i></li>
+        <li class="nav-item"><a href="#">{{ __('Box Office Events') }}</a></li>
       @endif
     </ul>
   </div>
@@ -86,7 +89,7 @@
                   <a href="{{ route('add.event.event', ['type' => 'venue']) }}" class="dropdown-item">
                     {{ __('Venue Event') }}
                   </a>
-                  <a href="{{ route('add.event.event', ['type' => 'box_office']) }}" class="dropdown-item">{{ __('Box Office Event') }}</a>
+                  <a href="{{ route('add.event.event', ['type' => 'venue', 'special' => 1]) }}" class="dropdown-item">{{ __('Box Office Event') }}</a>
                 </div>
               </div>
 
@@ -153,13 +156,13 @@
                             @endif
                           </td>
                           <td>
-                            {{ ucfirst($event->event_type) }}
+                            {{ ($event->box_office_enabled || $event->event_type === 'box_office') ? __('Box Office') : ucfirst($event->event_type) }}
                           </td>
                           <td>
                             {{ $event->category }}
                           </td>
                           <td>
-                            @if ($event->event_type == 'venue')
+                            @if ($event->event_type == 'venue' || $event->event_type == 'box_office')
                               <a href="{{ route('admin.event.ticket', ['language' => request()->input('language'), 'event_id' => $event->id, 'event_type' => $event->event_type]) }}"
                                 class="btn btn-success btn-sm">{{ __('Manage') }}</a>
                             @endif
