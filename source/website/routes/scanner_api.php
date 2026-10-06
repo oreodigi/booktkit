@@ -3,6 +3,7 @@
 use App\Http\Controllers\ScannerApi\AdminScannerController;
 use App\Http\Controllers\ScannerApi\BasicController;
 use App\Http\Controllers\ScannerApi\OrganizerScannerController;
+use App\Http\Controllers\ScannerApi\StaffScannerController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/scanner')->group(function () {
@@ -27,6 +28,14 @@ Route::prefix('/scanner')->group(function () {
       Route::post('/ticket/scanned-status-change', [AdminScannerController::class, 'ticketScanStatusChanged'])->name('api.scanner.admin.scanned_status_change');
       Route::post('/check-qrcode', [AdminScannerController::class, 'check_qrcode'])->name('api.scanner.admin.check-qrcode');
       Route::post('/logout', [AdminScannerController::class, 'logoutSubmit'])->name('api.scanner.admin.logout');
+    });
+  });
+  Route::prefix('/staff')->group(function () {
+    Route::post('/login/submit', [StaffScannerController::class, 'login'])->name('api.scanner.staff.login');
+    Route::middleware('auth:staff_sanctum')->group(function () {
+      Route::get('/events', [StaffScannerController::class, 'events'])->name('api.scanner.staff.events');
+      Route::post('/check-qrcode', [StaffScannerController::class, 'scan'])->name('api.scanner.staff.check-qrcode');
+      Route::post('/logout', [StaffScannerController::class, 'logout'])->name('api.scanner.staff.logout');
     });
   });
 });
