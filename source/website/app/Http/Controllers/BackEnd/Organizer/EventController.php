@@ -595,6 +595,7 @@ class EventController extends Controller
       $in['ticket_logo'] = $filename;
     }
     $in['instructions'] = $instructions;
+    unset($in['remove_ticket_image'], $in['remove_ticket_logo']);
 
     $event->update($in);
     Session::flash('success', 'Updated Successfully');
