@@ -14,6 +14,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
 import urllib.request
 
 HOME = Path('/home/booktkit')
@@ -32,6 +33,22 @@ def run(args, cwd=None, timeout=120):
         # Command arguments/output can contain DB credentials or SQL bindings.
         raise RuntimeError('Command failed: {} (exit {})'.format(Path(args[0]).name, proc.returncode))
     return proc.stdout.strip()
+
+
+def fetch_remote(ref, remote_ref, attempts=3):
+    last_code = None
+    for attempt in range(1, attempts + 1):
+        proc = subprocess.run(
+            ['git', 'fetch', '--quiet', 'origin', '+refs/heads/' + ref + ':' + remote_ref],
+            cwd=str(REPO), stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            universal_newlines=True, timeout=90
+        )
+        if proc.returncode == 0:
+            return
+        last_code = proc.returncode
+        if attempt < attempts:
+            time.sleep(attempt * 2)
+    raise RuntimeError('Git fetch failed after {} attempts (exit {})'.format(attempts, last_code))
 
 
 def digest(path):
@@ -148,7 +165,7 @@ class Deployment:
         if not ref or ref.startswith('-') or any(x in ref for x in ['..','~','^',':','\\']):
             raise RuntimeError('Invalid branch')
         remote_ref='refs/remotes/booktkit-deploy/'+ref
-        run(['git','fetch','--quiet','origin','+refs/heads/'+ref+':'+remote_ref],timeout=90)
+        fetch_remote(ref, remote_ref)
         commit=run(['git','rev-parse',remote_ref])
         previous=json.loads(self.state.read_text()) if self.state.exists() else {'commit':None,'files':{}}
         if previous['commit']==commit and not self.args.migrate and not self.args.adopt:
@@ -252,7 +269,7 @@ def main():
     args.branch = args.branch or expected_branch
     if args.branch != expected_branch: parser.error(args.target + ' deploys ' + expected_branch + ' only')
     os.umask(0o077)
-    os.environ['GIT_SSH_COMMAND']='ssh -i /home/booktkit/.ssh/booktkit_github -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/home/booktkit/.ssh/known_hosts_booktkit'
+    os.environ['GIT_SSH_COMMAND']='ssh -i /home/booktkit/.ssh/booktkit_github -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/home/booktkit/.ssh/known_hosts_booktkit -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=2'
     deployment=Deployment(args)
     # Shared repository lock serializes all deployer mutations of the bare repository.
     with open(str(REPO)+'.lock','a') as lock:
