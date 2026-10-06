@@ -8,9 +8,14 @@ class AdmissionContractRegressionTest extends TestCase
 {
     public function test_current_admission_service_retains_transactional_ticket_lock_and_secure_token_lookup(): void
     {
-        $source = file_get_contents(__DIR__.'/../../app/Services/Tickets/TicketAdmissionService.php');
+        $adapter = file_get_contents(__DIR__.'/../../app/Services/Tickets/TicketAdmissionService.php');
+        $source = file_get_contents(__DIR__.'/../../app/Services/Access/AccessControlService.php');
 
-        $this->assertStringContainsString("hash('sha256',\$token)", $source);
+        // TicketAdmissionService is now a compatibility adapter; the authoritative
+        // locking, hashing and entry/exit policy live in AccessControlService.
+        $this->assertStringContainsString('AccessControlService', $adapter);
+        $this->assertStringContainsString('->scan(', $adapter);
+        $this->assertStringContainsString("hash('sha256', \$token)", $source);
         $this->assertStringContainsString('lockForUpdate()', $source);
         $this->assertStringContainsString('DB::transaction', $source);
         $this->assertStringContainsString("['entry','exit']", str_replace(' ', '', $source));
