@@ -14,7 +14,7 @@ class EventFormRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $routeType = $this->query('type');
-        if (!$this->input('event_id') && in_array($routeType, ['venue', 'online'], true)) {
+        if (!$this->input('event_id') && in_array($routeType, ['venue', 'online', 'box_office'], true)) {
             $this->merge(['event_type' => $routeType]);
         }
     }
@@ -25,7 +25,7 @@ class EventFormRequest extends FormRequest
         $editing = $eventId > 0;
         $rules = [
             'event_id' => ['nullable','integer','exists:events,id'],
-            'event_type' => ['required', Rule::in(['venue','online'])],
+            'event_type' => ['required', Rule::in(['venue','online','box_office'])],
             'box_office_enabled' => ['nullable','boolean'],
             'reentry_policy' => ['required_if:box_office_enabled,1', Rule::in(['none','unlimited','limited'])],
             'max_reentries' => ['nullable','required_if:reentry_policy,limited','integer','min:1'],
@@ -70,10 +70,10 @@ class EventFormRequest extends FormRequest
             $rules[$code.'_title']=['required','string','max:255'];
             $rules[$code.'_category_id']=['required','integer','exists:event_categories,id'];
             $rules[$code.'_description']=['required','string','min:30','max:1200'];
-            $rules[$code.'_address']=['required_if:event_type,venue','nullable','string','max:500'];
+            $rules[$code.'_address']=[Rule::requiredIf(fn () => in_array($this->input('event_type'), ['venue','box_office'], true)),'nullable','string','max:500'];
             $rules[$code.'_country']=['nullable','integer'];
             $rules[$code.'_state']=['nullable','integer'];
-            $rules[$code.'_city']=['required_if:event_type,venue','nullable','integer'];
+            $rules[$code.'_city']=[Rule::requiredIf(fn () => in_array($this->input('event_type'), ['venue','box_office'], true)),'nullable','integer'];
             $rules[$code.'_zip_code']=['nullable','string','max:30'];
             $rules[$code.'_refund_policy']=['nullable','string'];
             $rules[$code.'_meta_keywords']=['nullable','string'];
@@ -96,9 +96,7 @@ class EventFormRequest extends FormRequest
                     if ($start && $end && $end <= $start) $validator->errors()->add("m_end_time.$i",'Event end must be after the start.');
                 }
             }
-            if ($this->boolean('box_office_enabled') && $this->input('event_type') !== 'venue') {
-                $validator->errors()->add('box_office_enabled','Box Office Event must use the venue event type.');
-            }
+            
             $eventId=(int)$this->input('event_id');
             if ($eventId && $this->input('event_type') && ($event=Event::find($eventId)) && $event->event_type !== $this->input('event_type') && $event->booking()->exists()) {
                 $validator->errors()->add('event_type','Event type cannot be changed after bookings exist.');
