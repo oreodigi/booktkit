@@ -56,7 +56,7 @@ trait BuildsFixtures
     {
         $event = Event::create(array_merge([
             'organizer_id' => $organizer->id, 'thumbnail' => 'qa.jpg', 'status' => '1', 'event_type' => 'venue', 'date_type' => 'single',
-            'start_date' => now()->toDateString(), 'start_time' => '00:00', 'end_date' => now()->addDays(2)->toDateString(), 'end_time' => '23:00',
+            'start_date' => now()->subDay()->toDateString(), 'start_time' => '00:00', 'end_date' => now()->addDays(2)->toDateString(), 'end_time' => '23:00',
             'end_date_time' => now()->addDays(2)->setTime(23, 0)->toDateTimeString(), 'is_featured' => 'no',
         ], $overrides));
         DB::table('event_contents')->insert(['event_id' => $event->id, 'language_id' => DB::table('languages')->value('id') ?? 1, 'event_category_id' => 1,

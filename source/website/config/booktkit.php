@@ -16,4 +16,7 @@ return [
 
     // Hours after the last session ends during which tickets can still be scanned (late exits).
     'admission_grace_hours' => (int) env('BOOKTKIT_ADMISSION_GRACE_HOURS', 6),
+
+    // Timezone in which organizers enter event dates/times (stored without a zone).
+    'business_timezone' => env('BOOKTKIT_TIMEZONE', 'Asia/Kolkata'),
 ];

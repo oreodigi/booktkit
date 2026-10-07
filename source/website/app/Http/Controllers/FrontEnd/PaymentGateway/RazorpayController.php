@@ -42,7 +42,7 @@ class RazorpayController extends Controller
   public function bookingProcess(Request $request, $event_id)
   {
     $request->validate(['fname'=>'required','lname'=>'required','email'=>'required|email','phone'=>'required','country'=>'required','address'=>'required','gateway'=>'required']);
-    $sel=collect(Session::get('selTickets',[]))->map(function($x){
+    $sel=collect(Session::get('selTickets',[]))->filter(fn($x)=>(int)($x['qty']??0)>0)->map(function($x){
       return ['ticket_id'=>(int)$x['ticket_id'],'quantity'=>(int)$x['qty'],'variation'=>($x['pass_product_id']??null)?null:($x['name']??null),'pass_product_id'=>$x['pass_product_id']??null,'event_date_ids'=>$x['event_date_ids']??[],'seat_id'=>$x['seat_id']??null,'slot_id'=>$x['slot_id']??null];
     })->values()->all();
     if(empty($sel)) return back()->with('error','Please select at least one ticket.')->withInput();

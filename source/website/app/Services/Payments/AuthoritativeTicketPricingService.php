@@ -65,7 +65,7 @@ class AuthoritativeTicketPricingService {
  private function assertSellable(Event $event,string $channel): void {
   $online=!in_array($channel,['pos','box_office'],true);
   if($online && (string)$event->status!=='1') throw ValidationException::withMessages(['event'=>'This event is not available for booking.']);
-  if($event->end_date_time && Carbon::parse($event->end_date_time)->isPast()) throw ValidationException::withMessages(['event'=>'This event has ended.']);
+  if($event->end_date_time && \App\Support\BusinessTime::parse((string)$event->end_date_time)->lt(\App\Support\BusinessTime::now())) throw ValidationException::withMessages(['event'=>'This event has ended.']);
  }
  private function assertMaxPerOrder(Ticket $ticket,?string $variation,int $qty): void {
   $max=null;

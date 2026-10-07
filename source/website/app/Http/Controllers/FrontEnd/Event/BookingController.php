@@ -63,6 +63,9 @@ class BookingController extends Controller
     //valiadation
     $check = false;
     $event = Session::get('event');
+    if (!$event || (int) $event->id !== (int) $id) {
+      return redirect()->route('index')->with(['alert-type' => 'error', 'message' => __('Your checkout session expired. Please select your tickets again.')]);
+    }
 
     //when event type venue and selTickete is exits
     if ($event->event_type == 'venue' &&  Session::has('selTickets')) {

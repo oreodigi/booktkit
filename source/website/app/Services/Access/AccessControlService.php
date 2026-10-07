@@ -43,7 +43,7 @@ class AccessControlService
                 return $this->deny($window[0], $window[1], $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
             }
             if ($ticket->pass_product_id && Schema::hasTable('pass_entitlements')) {
-                $today=now()->toDateString();
+                $today=\App\Support\BusinessTime::now()->toDateString();
                 $entitlement=PassEntitlement::where('issued_ticket_id',$ticket->id)->where('status','active')->whereHas('eventDate',fn($q)=>$q->whereDate('start_date','<=',$today)->where(function($d)use($today){$d->whereNull('end_date')->orWhereDate('end_date','>=',$today);} ))->orderBy('event_date_id')->first();
                 if(!$entitlement) return $this->deny('This pass is not valid for today','pass_date_invalid',$ticket,$credential,$direction,$actorType,$actorId,$deviceName,$ip);
                 $eventDateId=(int)$entitlement->event_date_id;
@@ -129,11 +129,11 @@ class AccessControlService
         $firstDay = $event->date_type === 'multiple' && Schema::hasTable('event_dates')
             ? DB::table('event_dates')->where('event_id', $eventId)->min('start_date')
             : $event->start_date;
-        $today = now()->startOfDay();
+        $today = \App\Support\BusinessTime::now()->toDateString();
         try {
-            if ($firstDay && \Carbon\Carbon::parse($firstDay)->startOfDay()->gt($today)) return ['This ticket is not valid until the event date', 'wrong_date'];
+            if ($firstDay && substr((string) $firstDay, 0, 10) > $today) return ['This ticket is not valid until the event date', 'wrong_date'];
             $grace = max(0, (int) config('booktkit.admission_grace_hours', 6));
-            if ($event->end_date_time && \Carbon\Carbon::parse($event->end_date_time)->addHours($grace)->isPast()) return ['This event has ended', 'event_ended'];
+            if ($event->end_date_time && \App\Support\BusinessTime::parse((string) $event->end_date_time)->addHours($grace)->lt(\App\Support\BusinessTime::now())) return ['This event has ended', 'event_ended'];
         } catch (\Throwable $e) {
             return null; // Unparseable legacy dates never block admission.
         }
