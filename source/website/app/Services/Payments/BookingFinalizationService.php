@@ -18,6 +18,10 @@ class BookingFinalizationService {
   $variations=[]; $quantity=0;
   foreach(($pricing['items']??[]) as $item){
    $ticket=Ticket::where('event_id',$event)->lockForUpdate()->findOrFail($item['ticket_id']);
+   if(!empty($item['seat_id'])){
+    \App\Models\Event\Slot::whereKey((int)$item['slot_id'])->lockForUpdate()->first();
+    if(in_array((int)$item['seat_id'],array_map('intval',app(\App\Services\BookingServices::class)->getBookedSlot((int)$event)['seat_ids']??[]),true)) throw ValidationException::withMessages(['tickets'=>'Seat was booked by someone else before payment completed.']);
+   }
    $qty=(int)$item['quantity']; $quantity+=$qty;
    if(!empty($item['pass_product_id'])) app(EventPassService::class)->consume((int)$item['pass_product_id'],$qty);
    if($ticket->pricing_type==='variation'){
@@ -36,7 +40,7 @@ class BookingFinalizationService {
     $ticket->ticket_available=(int)$ticket->ticket_available-$qty; $ticket->save();
    }
    for($i=0;$i<$qty;$i++) $variations[]=['ticket_id'=>$ticket->id,'early_bird_dicount'=>($item['discount']??0)/100/max(1,$qty),
-    'name'=>($item['pass_name']??null) ?: (($item['variation']??null) ?: ($ticket->title ?: 'Ticket')),'qty'=>1,'price'=>($item['unit_price']??0)/100,'scan_status'=>0,'unique_id'=>uniqid(),'pass_product_id'=>$item['pass_product_id']??null,'pass_type'=>$item['pass_type']??null,'event_date_ids'=>$item['event_date_ids']??[],'admissions_per_holder'=>$item['admissions_per_holder']??1];
+    'name'=>($item['pass_name']??null) ?: (($item['variation']??null) ?: ($ticket->title ?: 'Ticket')),'qty'=>1,'price'=>($item['unit_price']??0)/100,'scan_status'=>0,'unique_id'=>uniqid(),'pass_product_id'=>$item['pass_product_id']??null,'pass_type'=>$item['pass_type']??null,'event_date_ids'=>$item['event_date_ids']??[],'admissions_per_holder'=>$item['admissions_per_holder']??1]+array_intersect_key($item,array_flip(['seat_id','seat_name','slot_id','slot_name','slot_unique_id']));
   }
   $basic=Basic::where('uniqid',12345)->first() ?: Basic::first();
   $booking=Booking::create([
@@ -45,9 +49,9 @@ class BookingFinalizationService {
    'city'=>$customer['city']??null,'zip_code'=>$customer['zip_code']??null,'address'=>$customer['address']??'','event_id'=>$event,
    'organizer_id'=>$order->organizer_id,'variation'=>json_encode($variations),'price'=>$order->ticket_amount/100,'tax'=>$order->tax_amount/100,
    'commission'=>$order->platform_fee/100,'tax_percentage'=>$pricing['tax_rate']??0,'commission_percentage'=>0,'quantity'=>$quantity,
-   'discount'=>($pricing['discount']??0)/100,'early_bird_discount'=>($pricing['discount']??0)/100,'currencyText'=>$order->currency,
+   'discount'=>($pricing['discount']??0)/100,'early_bird_discount'=>($pricing['early_bird_discount']??$pricing['discount']??0)/100,'currencyText'=>$order->currency,
    'currencyTextPosition'=>'right','currencySymbol'=>'₹','currencySymbolPosition'=>'left','paymentMethod'=>'Razorpay','gatewayType'=>'online',
-   'paymentStatus'=>'completed','event_date'=>$customer['event_date']??now()->toDateString(),'fcm_token'=>$customer['fcm_token']??null
+   'paymentStatus'=>'completed','event_date'=>($customer['event_date']??null) ?: self::defaultEventDate((int)$event),'fcm_token'=>$customer['fcm_token']??null
   ]);
   $order->booking_id=$booking->id; $order->save();
   app(TicketIssuanceService::class)->ensureForBooking($booking);
@@ -55,5 +59,11 @@ class BookingFinalizationService {
    app(TicketDeliveryService::class)->deliver($booking->fresh());
   });
   return $booking;
+ }
+ /** Single-date events: the event's own start; otherwise today's date as a last resort. */
+ private static function defaultEventDate(int $eventId): string {
+  $e=\Illuminate\Support\Facades\DB::table('events')->where('id',$eventId)->first(['date_type','start_date','start_time']);
+  if($e && $e->date_type!=='multiple' && $e->start_date) return trim($e->start_date.' '.($e->start_time??''));
+  return now()->toDateString();
  }
 }

@@ -386,6 +386,7 @@ class EventController extends Controller
 
     if (!$coupon) {
       Session::put('discount', NULL);
+      Session::forget('coupon_code');
       return response()->json(['status' => 'error', 'message' => "Coupon is not valid"]);
     } else {
 
@@ -415,6 +416,7 @@ class EventController extends Controller
             }
             $cartTotal - $couponAmount;
             Session::put('discount', $couponAmount);
+            Session::put('coupon_code', $coupon->code);
             return response()->json(['status' => 'success', 'message' => "Coupon applied successfully"]);
           } else {
             return response()->json(['status' => 'error', 'message' => "Coupon is not valid"]);
@@ -440,6 +442,7 @@ class EventController extends Controller
           }
           $cartTotal - $couponAmount;
           Session::put('discount', $couponAmount);
+            Session::put('coupon_code', $coupon->code);
           return response()->json(['status' => 'success', 'message' => "Coupon applied successfully"]);
         } else {
           return response()->json(['status' => 'error', 'message' => "Coupon is not valid"]);

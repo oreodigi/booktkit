@@ -2,10 +2,38 @@
 namespace App\Http\Controllers\BackEnd\Organizer;
 use App\Http\Controllers\Controller;use App\Models\BoxOfficeSale;use App\Models\BoxOfficeVoidRequest;use App\Models\Event;use App\Services\BoxOffice\BoxOfficeLedgerService;use App\Services\BoxOffice\BoxOfficeSaleService;use App\Services\BoxOffice\LockedTicketInventoryService;use Illuminate\Http\Request;use Illuminate\Support\Facades\DB;use Illuminate\Validation\Rule;use Illuminate\Support\Facades\Crypt;use Illuminate\Support\Facades\Storage;use App\Services\Tickets\TicketIssuanceService;
 class BoxOfficeController extends Controller{
- public function index(){ $oid=auth('organizer')->id();return view('organizer.box-office.pos',['events'=>Event::where('organizer_id',$oid)->where(function($q){$q->where('box_office_enabled',1)->orWhere('event_type','box_office');})->with(['boxOfficeLocations','tickets','dates','information','passProducts.dates'])->orderByDesc('id')->get()]);}
- public function store(Request $r,BoxOfficeSaleService $svc){$d=$r->validate(['sale_uuid'=>'required|uuid','event_id'=>'required|integer','location_id'=>'required|integer','customer_name'=>'required|string|max:120','customer_phone'=>'required|string|max:30','customer_email'=>'required|email','customer_age'=>'nullable|integer|min:1|max:120','aadhaar_number'=>'nullable|digits:12','aadhaar_document'=>'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120','customer_photo'=>'nullable|image|mimes:jpg,jpeg,png|max:5120','event_date'=>'nullable|string|max:80','deliver_email'=>'nullable|boolean','payment_method'=>['required',Rule::in(['cash','card','upi','other'])],'items'=>'required|array|min:1','items.*.ticket_id'=>'required|integer','items.*.quantity'=>'required|integer|min:1','items.*.variation'=>'nullable|string','items.*.pass_product_id'=>'nullable|integer','items.*.event_date_ids'=>'nullable|array','items.*.event_date_ids.*'=>'integer','cash_received'=>'nullable|numeric|min:0']);if(!empty($d['aadhaar_number'])){$d['aadhaar_number_encrypted']=Crypt::encryptString($d['aadhaar_number']);$d['aadhaar_last4']=substr($d['aadhaar_number'],-4);unset($d['aadhaar_number']);}if($r->hasFile('aadhaar_document'))$d['aadhaar_document_path']=$r->file('aadhaar_document')->store('box-office/identity','local');if($r->hasFile('customer_photo'))$d['customer_photo_path']=$r->file('customer_photo')->store('box-office/customers','local');$sale=$svc->sell($d,auth('organizer')->id());return redirect()->route('organizer.boxoffice.print',$sale->id);}
+ public function index(){
+  $oid=auth('organizer')->id(); $staff=auth('staff')->user();
+  $events=Event::where('organizer_id',$oid)->where(function($q){$q->where('box_office_enabled',1)->orWhere('event_type','box_office');})
+   ->when($staff,fn($q)=>$q->whereIn('id',$staff->assignments()->pluck('event_id')))
+   ->with(['boxOfficeLocations','tickets','dates','information','passProducts.dates'])->orderByDesc('id')->get();
+  return view('organizer.box-office.pos',['posSettings'=>\App\Services\BoxOffice\BoxOfficeSaleInput::settings((int)$oid),'events'=>$events]);
+ }
+ public function store(Request $r,BoxOfficeSaleService $svc,\App\Services\BoxOffice\BoxOfficeSaleInput $input){
+  $oid=(int)auth('organizer')->id(); $staff=auth('staff')->user();
+  // Team members selling from this workspace: assignment-scoped, attributed to them and their open shift.
+  if($staff && !$staff->assignedTo((int)$r->input('event_id'),(int)$r->input('location_id'))) abort(403,'You are not assigned to this event counter.');
+  $sale=$svc->sell($input->validate($r,$oid),$oid,$staff?(int)$staff->id:null);
+  return redirect()->route('organizer.boxoffice.print',$sale->id);
+ }
  public function print($id,TicketIssuanceService $issuance){$sale=BoxOfficeSale::where('organizer_id',auth('organizer')->id())->with('booking')->findOrFail($id);$issuedTickets=$issuance->ensureForBooking($sale->booking);return view('organizer.box-office.print',compact('sale','issuedTickets'));}
- public function reprint($id){$sale=BoxOfficeSale::where('organizer_id',auth('organizer')->id())->findOrFail($id);$sale->logs()->create(['action'=>'reprint','actor_organizer_id'=>auth('organizer')->id()]);return redirect()->route('organizer.boxoffice.print',$sale->id);}
- public function requestVoid(Request $r,$id){$sale=BoxOfficeSale::where('organizer_id',auth('organizer')->id())->where('status','completed')->findOrFail($id);$d=$r->validate(['reason'=>'required|string|max:1000']);BoxOfficeVoidRequest::firstOrCreate(['sale_id'=>$sale->id],['reason'=>$d['reason']]);return back()->with('success','Void request created.');}
- public function approveVoid($id,LockedTicketInventoryService $inventory,BoxOfficeLedgerService $ledger){$oid=auth('organizer')->id();DB::transaction(function()use($id,$oid,$inventory,$ledger){$sale=BoxOfficeSale::where('organizer_id',$oid)->where('status','completed')->lockForUpdate()->findOrFail($id);if($sale->booking()->whereHas('issuedTickets',fn($q)=>$q->whereNotNull('checked_in_at'))->exists())abort(422,'Scanned tickets cannot be voided.');$inventory->restore($sale->event_id,$sale->pricing_snapshot);$sale->update(['status'=>'voided']);$sale->booking->update(['paymentStatus'=>'rejected']);$ledger->reverse($sale);BoxOfficeVoidRequest::where('sale_id',$sale->id)->update(['status'=>'approved','approved_by_organizer_id'=>$oid,'resolved_at'=>now()]);$sale->logs()->create(['action'=>'void_approved','actor_organizer_id'=>$oid]);});return back()->with('success','Sale voided and inventory restored.');}
+ public function reprint($id){
+  $oid=auth('organizer')->id(); $staff=auth('staff')->user();
+  $sale=BoxOfficeSale::where('organizer_id',$oid)->where('status','completed')->findOrFail($id);
+  $sale->logs()->create(['action'=>'reprint','actor_staff_id'=>$staff?$staff->id:null,'actor_organizer_id'=>$staff?null:$oid]);
+  return redirect()->route('organizer.boxoffice.print',$sale->id);
+ }
+ public function requestVoid(Request $r,$id,\App\Services\BoxOffice\BoxOfficeVoidService $voids){
+  $oid=auth('organizer')->id(); $staff=auth('staff')->user();
+  $sale=BoxOfficeSale::where('organizer_id',$oid)->where('status','completed')->findOrFail($id);
+  $d=$r->validate(['reason'=>'required|string|max:1000']);
+  $voids->request($sale,$d['reason'],$staff?(int)$staff->id:null,$oid);
+  return back()->with('success','Void request created.');
+ }
+ public function approveVoid($id,\App\Services\BoxOffice\BoxOfficeVoidService $voids){
+  $staff=auth('staff')->user();
+  try { $voids->approve((int)$id,(int)auth('organizer')->id(),$staff?(int)$staff->id:null); }
+  catch(\Illuminate\Validation\ValidationException $e){ return back()->with('warning',collect($e->errors())->flatten()->first()); }
+  return back()->with('success','Sale voided: stock returned and its tickets cancelled.');
+ }
 }

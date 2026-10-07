@@ -14,6 +14,7 @@ class BookingServices
     $slotIds = [];
     $seatIds = [];
     $bookedTickets = Booking::where('event_id', $eventId)
+      ->whereIn('paymentStatus', ['completed', 'free', 'pending'])
       ->get();
     foreach ($bookedTickets as $ticket) {
       if (!empty($ticket->variation)) {
@@ -140,6 +141,7 @@ class BookingServices
     $slotIds = [];
     $seatIds = [];
     $bookedTickets = Booking::where('event_id', $eventId)
+      ->whereIn('paymentStatus', ['completed', 'free', 'pending'])
       ->get();
     foreach ($bookedTickets as $ticket) {
       if (!empty($ticket->variation)) {

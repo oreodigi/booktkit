@@ -43,16 +43,20 @@ class RazorpayController extends Controller
   {
     $request->validate(['fname'=>'required','lname'=>'required','email'=>'required|email','phone'=>'required','country'=>'required','address'=>'required','gateway'=>'required']);
     $sel=collect(Session::get('selTickets',[]))->map(function($x){
-      return ['ticket_id'=>(int)$x['ticket_id'],'quantity'=>(int)$x['qty'],'variation'=>($x['pass_product_id']??null)?null:($x['name']??null),'pass_product_id'=>$x['pass_product_id']??null,'event_date_ids'=>$x['event_date_ids']??[]];
+      return ['ticket_id'=>(int)$x['ticket_id'],'quantity'=>(int)$x['qty'],'variation'=>($x['pass_product_id']??null)?null:($x['name']??null),'pass_product_id'=>$x['pass_product_id']??null,'event_date_ids'=>$x['event_date_ids']??[],'seat_id'=>$x['seat_id']??null,'slot_id'=>$x['slot_id']??null];
     })->values()->all();
     if(empty($sel)) return back()->with('error','Please select at least one ticket.')->withInput();
-    $pricing=app(AuthoritativeTicketPricingService::class)->quote((int)$event_id,$sel);
-    $event=$pricing['event']; $basic=Basic::first(); $taxRate=(float)($basic->tax??0); $tax=(int)round($pricing['ticket_amount']*$taxRate/100);
-    $snapshot=['items'=>$pricing['items'],'quantity'=>$pricing['quantity'],'subtotal'=>$pricing['subtotal'],'discount'=>$pricing['discount'],'tax_rate'=>$taxRate,'sales_channel'=>'web'];
+    try { $pricing=app(AuthoritativeTicketPricingService::class)->quote((int)$event_id,$sel); }
+    catch(\Illuminate\Validation\ValidationException $e){ return back()->with(['alert-type'=>'error','message'=>collect($e->errors())->flatten()->first()]); }
+    // A coupon applied at checkout is re-validated and priced on the server so the charge matches the page.
+    $coupon=app(\App\Services\Payments\CouponService::class)->discount(Session::get('coupon_code'),(int)$event_id,(int)$pricing['ticket_amount']);
+    $ticketAmount=max(0,(int)$pricing['ticket_amount']-$coupon['amount']);
+    $event=$pricing['event']; $basic=Basic::first(); $taxRate=(float)($basic->tax??0); $tax=(int)round($ticketAmount*$taxRate/100);
+    $snapshot=['items'=>$pricing['items'],'quantity'=>$pricing['quantity'],'subtotal'=>$pricing['subtotal'],'discount'=>$pricing['discount']+$coupon['amount'],'early_bird_discount'=>$pricing['discount'],'coupon'=>$coupon,'tax_rate'=>$taxRate,'sales_channel'=>'web'];
     $idem='web-'.hash('sha256',session()->getId().'|'.$event_id.'|'.microtime(true));
-    $order=app(PaymentOrderService::class)->createFromPricing($event->id,$event->organizer_id,$pricing['ticket_amount'],$tax,$idem,$snapshot);
+    $order=app(PaymentOrderService::class)->createFromPricing($event->id,$event->organizer_id,$ticketAmount,$tax,$idem,$snapshot);
     $order->customer_snapshot=['customer_id'=>(\Illuminate\Support\Facades\Auth::guard('customer')->id() ?: 'guest'),'fname'=>$request->fname,'lname'=>$request->lname,'email'=>$request->email,'phone'=>$request->phone,
-      'country'=>$request->country,'state'=>$request->state,'city'=>$request->city,'zip_code'=>$request->zip_code,'address'=>$request->address,'event_date'=>$request->event_date];
+      'country'=>$request->country,'state'=>$request->state,'city'=>$request->city,'zip_code'=>$request->zip_code,'address'=>$request->address,'event_date'=>$request->event_date ?: Session::get('event_date')];
     $order->save(); $gateway=app(RazorpayRouteService::class)->createOrder($order);
     $notifyURL=route('event_booking.razorpay.notify');
     $webInfo=DB::table('basic_settings')->select('website_title')->first();

@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
  *  - every mapped route needs the matching staff permission;
  *  - money, KYC, settlement, withdrawal and account routes are organizer-only;
  *  - event-scoped routes require an assignment to that event;
- *  - POS selling goes through the staff POS so sales carry the staff member and an open shift.
+ *  - POS sales by staff are recorded against the staff member and their open shift (BoxOfficeController).
  */
 class EnsureOrganizerStaffRbac
 {
@@ -26,8 +26,6 @@ class EnsureOrganizerStaffRbac
         if ($staff->must_change_password) return redirect()->route('staff.password.edit');
 
         $name = (string) optional($request->route())->getName();
-        if ($name === 'organizer.boxoffice.index') return redirect()->route('staff.boxoffice.index');
-        if ($name === 'organizer.boxoffice.store') abort(403, 'Team members sell from the Staff POS so each sale is linked to you and your shift.');
 
         $permission = $this->permissionFor($name, $request->method());
         $allowed = $permission === 'access.console'

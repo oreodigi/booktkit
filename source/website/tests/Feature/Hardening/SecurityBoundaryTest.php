@@ -101,8 +101,7 @@ class SecurityBoundaryTest extends TestCase
         $this->actingAsStaff($staff)->post(route('organizer.payments.preference'), ['preference' => 'razorpay_split'])->assertForbidden();
         $this->actingAsStaff($staff)->post(route('organizer.payouts.kyc.save'), [])->assertForbidden();
         $this->actingAsStaff($staff)->post(route('organizer.withdraw.send-request'), [])->assertForbidden();
-        $this->actingAsStaff($staff)->post(route('organizer.boxoffice.store'), [])->assertForbidden();
-        $this->actingAsStaff($staff)->get(route('organizer.boxoffice.index'))->assertRedirect(route('staff.boxoffice.index'));
+        $this->actingAsStaff($staff)->post(route('organizer.boxoffice.store'), ['event_id' => $event->id + 999, 'location_id' => 1])->assertForbidden();
         $this->actingAsStaff($staff)->post(route('organizer.update_password'), [])->assertForbidden();
     }
 

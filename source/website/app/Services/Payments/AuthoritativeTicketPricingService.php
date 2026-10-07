@@ -19,7 +19,10 @@ class AuthoritativeTicketPricingService {
    }
    $ticket=Ticket::where('event_id',$eventId)->whereKey($item['ticket_id'])->firstOrFail(); if($qty<1) throw ValidationException::withMessages(['items'=>'Ticket quantity must be at least 1.']);
    if($ticket->ticket_available_type==='limited' && (int)$ticket->ticket_available<$qty) throw ValidationException::withMessages(['items'=>'Requested ticket quantity is no longer available.']);
+   $seat=null;
+   if(!$passQuote && !empty($item['seat_id'])){ $seat=$this->seatLine($ticket,$item); $qty=1; }
    if($passQuote) $unit=$passQuote['unit_price']/100;
+   elseif($seat) $unit=$seat['price'];
    elseif($ticket->pricing_type==='free') $unit=0;
    elseif($ticket->pricing_type==='normal') $unit=(float)$ticket->price;
    else {
@@ -42,9 +45,21 @@ class AuthoritativeTicketPricingService {
     }
    }
    $subtotal+=$line; $discount+=min($line,$lineDiscount); $quantity+=$qty;
-   $snapshot[]=['ticket_id'=>$ticket->id,'variation'=>$item['variation']??null,'quantity'=>$qty,'unit_price'=>(int)round($unit*100),'line_total'=>$line,'discount'=>min($line,$lineDiscount),'pass_product_id'=>$passQuote['pass_product_id']??null,'pass_name'=>$passQuote['pass_name']??null,'pass_type'=>$passQuote['pass_type']??null,'event_date_ids'=>$passQuote['event_date_ids']??[],'admissions_per_holder'=>$passQuote['admissions_per_holder']??1];
+   $snapshot[]=['ticket_id'=>$ticket->id,'variation'=>$item['variation']??null,'quantity'=>$qty,'unit_price'=>(int)round($unit*100),'line_total'=>$line,'discount'=>min($line,$lineDiscount),'pass_product_id'=>$passQuote['pass_product_id']??null,'pass_name'=>$passQuote['pass_name']??null,'pass_type'=>$passQuote['pass_type']??null,'event_date_ids'=>$passQuote['event_date_ids']??[],'admissions_per_holder'=>$passQuote['admissions_per_holder']??1]+($seat?['seat_id'=>$seat['seat_id'],'seat_name'=>$seat['seat_name'],'slot_id'=>$seat['slot_id'],'slot_name'=>$seat['slot_name'],'slot_unique_id'=>$seat['slot_unique_id']]:[]);
   }
   return ['event'=>$event,'items'=>$snapshot,'quantity'=>$quantity,'subtotal'=>$subtotal,'discount'=>$discount,'ticket_amount'=>max(0,$subtotal-$discount)];
+ }
+ /**
+  * A seat-map line: the seat must belong to this ticket's map, be active and unsold.
+  * Price comes from the map (per-seat price for seat slots, slot price for area slots).
+  */
+ public function seatLine(Ticket $ticket,array $item): array {
+  $slot=\App\Models\Event\Slot::whereKey((int)($item['slot_id']??0))->where('event_id',$ticket->event_id)->where('ticket_id',$ticket->id)->first();
+  $seat=$slot?\App\Models\Event\SlotSeats::whereKey((int)$item['seat_id'])->where('slot_id',$slot->id)->first():null;
+  if(!$slot||!$seat||(int)$slot->is_deactive===1||(int)$seat->is_deactive===1) throw ValidationException::withMessages(['items'=>'The selected seat is not available.']);
+  if(in_array((int)$seat->id,array_map('intval',app(\App\Services\BookingServices::class)->getBookedSlot($ticket->event_id)['seat_ids']??[]),true)) throw ValidationException::withMessages(['items'=>'Seat '.$seat->name.' has just been booked by someone else.']);
+  $price=$ticket->pricing_type==='free'?0:(float)((int)$slot->type===1?$seat->price:$slot->price);
+  return ['seat_id'=>(int)$seat->id,'seat_name'=>$seat->name,'slot_id'=>(int)$slot->id,'slot_name'=>$slot->name,'slot_unique_id'=>(int)$slot->slot_unique_id,'price'=>$price];
  }
  /** Events must be published (online channels) and not yet ended. POS may sell unpublished, counter-only events. */
  private function assertSellable(Event $event,string $channel): void {

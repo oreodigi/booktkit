@@ -14,7 +14,9 @@ class EventPassService
   if(!Schema::hasTable('event_pass_products')) throw ValidationException::withMessages(['pass'=>'Event passes are not enabled.']);
   $pass=EventPassProduct::where('event_id',$eventId)->where('active',1)->whereKey((int)($selection['pass_product_id']??0))->firstOrFail();
   $channels=$pass->sales_channels?:['web','mobile','pos','box_office'];
-  if(!in_array($channel,$channels,true)) throw ValidationException::withMessages(['pass'=>'This pass is not sold through this channel.']);
+  // 'pos' and 'box_office' name the same counter channel.
+  $aliases=in_array($channel,['pos','box_office'],true)?['pos','box_office']:[$channel];
+  if(!array_intersect($aliases,$channels)) throw ValidationException::withMessages(['pass'=>'This pass is not sold through this channel.']);
   if($quantity<1||$quantity>(int)$pass->max_per_order) throw ValidationException::withMessages(['pass'=>'Invalid pass quantity.']);
   if($pass->inventory_type==='limited' && ((int)$pass->inventory_quantity-(int)$pass->sold_quantity)<$quantity) throw ValidationException::withMessages(['pass'=>'Requested pass quantity is no longer available.']);
   $eligible=$pass->dates()->pluck('event_dates.id')->map(fn($v)=>(int)$v)->all();
@@ -26,6 +28,14 @@ class EventPassService
   return ['pass_product_id'=>$pass->id,'pass_name'=>$pass->name,'pass_type'=>$pass->pass_type,'ticket_id'=>$pass->ticket_id,'quantity'=>$quantity,'unit_price'=>(int)$pass->price,'line_total'=>(int)$pass->price*$quantity,'event_date_ids'=>$selected,'admissions_per_holder'=>(int)$pass->admissions_per_holder];
  }
 
+ /** Returns pass stock after a void/cancellation (never below zero). */
+ public function release(int $passProductId,int $quantity): void
+ {
+  if(!$passProductId||$quantity<1) return;
+  $pass=EventPassProduct::whereKey($passProductId)->lockForUpdate()->first();
+  if(!$pass) return;
+  $pass->sold_quantity=max(0,(int)$pass->sold_quantity-$quantity);$pass->save();
+ }
  public function consume(int $passProductId,int $quantity): void
  {
   if(!$passProductId) return;
