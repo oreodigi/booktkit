@@ -44,13 +44,12 @@ class BoxOfficeSaleInput
     {
         $eventId = (int) $r->input('event_id');
         $settings = self::settings($organizerId, $eventId ?: null);
-        $emailRequired = $r->boolean('deliver_email') || (bool) $settings['auto_email_ticket'];
 
         $d = $r->validate([
             'sale_uuid' => 'required|uuid', 'event_id' => 'required|integer', 'location_id' => 'required|integer',
             'customer_name' => [$settings['require_customer_name'] ? 'required' : 'nullable', 'string', 'max:120'],
             'customer_phone' => [$settings['require_customer_phone'] ? 'required' : 'nullable', 'string', 'max:30'],
-            'customer_email' => [$emailRequired ? 'required' : 'nullable', 'email', 'max:190'],
+            'customer_email' => ['required', 'email', 'max:190'],
             'customer_age' => 'nullable|integer|min:1|max:120',
             'aadhaar_number' => $settings['allow_aadhaar'] ? 'nullable|digits:12' : 'prohibited',
             'aadhaar_document' => $settings['allow_aadhaar'] ? 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120' : 'prohibited',
