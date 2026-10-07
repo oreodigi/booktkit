@@ -110,6 +110,9 @@ class BookingController extends Controller
       ]);
     }
 
+    if (app(\App\Services\Events\CommercialRecordGuard::class)->bookingIsCommercial($booking)) {
+      return response()->json(['success' => false, 'message' => 'Paid or ticketed bookings cannot be deleted.'], 422);
+    }
     // first, delete the attachment
     @unlink(public_path('assets/admin/file/attachments/') . $booking->attachment);
 
@@ -139,6 +142,7 @@ class BookingController extends Controller
         ]);
       }
 
+      if (app(\App\Services\Events\CommercialRecordGuard::class)->bookingIsCommercial($booking)) continue;
       // first, delete the attachment
       @unlink(public_path('assets/admin/file/attachments/') . $booking->attachment);
 

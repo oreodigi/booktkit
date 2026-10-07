@@ -12,6 +12,7 @@ use App\Services\Payments\PaymentLedgerService;
 use App\Services\Payments\AuthoritativeTicketPricingService;
 use App\Services\Payments\BookingFinalizationService;
 use App\Jobs\Payments\TransferOrganizerPayment;
+use App\Services\Payments\PaymentCaptureService;
 class PaymentController extends Controller {
  public function createRazorpayOrder(Request $r, PaymentOrderService $orders, RazorpayRouteService $razorpay, AuthoritativeTicketPricingService $pricing){
   $data=$r->validate([
@@ -36,28 +37,38 @@ class PaymentController extends Controller {
   $taxPaise=(int)round($quote['ticket_amount']*$taxRate/100);
   $snapshot=['items'=>$quote['items'],'quantity'=>$quote['quantity'],'subtotal'=>$quote['subtotal'],'discount'=>$quote['discount'],'tax_rate'=>$taxRate,'sales_channel'=>$channel];
   $order=$orders->createFromPricing($event->id,$event->organizer_id,$quote['ticket_amount'],$taxPaise,$data['idempotency_key'],$snapshot);
-  if(!$order->customer_snapshot){ $order->customer_snapshot=$data['customer']; $order->save(); }
+  if(!$order->customer_snapshot){
+   // Booking ownership comes from authentication only, never from the request body.
+   $customer=$data['customer']; $customer['customer_id']=self::authenticatedCustomerId($r) ?: 'guest';
+   $order->customer_snapshot=$customer; $order->save();
+  }
   $gateway=$razorpay->createOrder($order);
   return response()->json(['success'=>true,'payment_order'=>$order->uuid,'gateway_order_id'=>$gateway['id'],'amount'=>$order->customer_total,'currency'=>$order->currency,
    'breakdown'=>['ticket_amount'=>$order->ticket_amount,'platform_fee'=>$order->platform_fee,'additional_fees'=>$order->additional_fee_amount,'tax'=>$order->tax_amount,'customer_total'=>$order->customer_total,'organizer_amount'=>$order->organizer_amount,'fee_bearer'=>$order->fee_bearer,'sales_channel'=>$order->sales_channel,'settlement_mode'=>$order->settlement_mode]]);
  }
- public function verifyRazorpay(Request $r,RazorpayRouteService $razorpay,PaymentLedgerService $ledger,BookingFinalizationService $bookings){
+ public function verifyRazorpay(Request $r,RazorpayRouteService $razorpay,PaymentCaptureService $capture){
   $data=$r->validate(['payment_order'=>'required|uuid','razorpay_payment_id'=>'required|string','razorpay_signature'=>'required|string']);
-  try { return DB::transaction(function() use($data,$razorpay,$ledger,$bookings){
-   $order=PaymentOrder::where('uuid',$data['payment_order'])->lockForUpdate()->firstOrFail();
-   if($order->status==='paid') return response()->json(['success'=>true,'status'=>'paid','idempotent'=>true]);
-   $razorpay->verifyCheckout($order,$data['razorpay_payment_id'],$data['razorpay_signature']);
-   $order->update(['gateway_payment_id'=>$data['razorpay_payment_id'],'status'=>'paid','paid_at'=>now()]);
-   $booking=$bookings->finalize($order);
-   $ledger->recordPaid($order);
-   if($order->settlement_mode==='razorpay_split') {
-    DB::afterCommit(fn()=>TransferOrganizerPayment::dispatch($order->id));
-   }
-   return response()->json(['success'=>true,'status'=>'paid','booking_id'=>$booking->booking_id]);
-  }); } catch(\Razorpay\Api\Errors\SignatureVerificationError $e) {
-   return response()->json(['success'=>false,'message'=>'Invalid payment signature.'],422);
-  } catch(\Throwable $e) {
-   report($e); return response()->json(['success'=>false,'message'=>'Payment verification failed.'],422);
+  $order=PaymentOrder::where('uuid',$data['payment_order'])->firstOrFail();
+  if($order->booking_id){
+   $booking=\App\Models\Event\Booking::find($order->booking_id);
+   return response()->json(['success'=>true,'status'=>'paid','idempotent'=>true,'booking_id'=>optional($booking)->booking_id]);
   }
+  try { $razorpay->verifyCheckout($order,$data['razorpay_payment_id'],$data['razorpay_signature']); }
+  catch(\Razorpay\Api\Errors\SignatureVerificationError $e){ return response()->json(['success'=>false,'message'=>'Invalid payment signature.'],422); }
+  catch(\Throwable $e){ report($e); return response()->json(['success'=>false,'message'=>'Payment verification failed.'],422); }
+  try { $booking=$capture->complete($order,$data['razorpay_payment_id']); }
+  catch(\Throwable $e){
+   report($e);
+   return response()->json(['success'=>false,'status'=>PaymentCaptureService::UNFINALIZED,'message'=>'Payment received but the booking could not be completed. It will be completed or refunded automatically.'],409);
+  }
+  return response()->json(['success'=>true,'status'=>'paid','booking_id'=>$booking->booking_id]);
+ }
+
+ private static function authenticatedCustomerId(Request $r): ?int {
+  foreach(['sanctum','customer'] as $guard){
+   try { $u=\Illuminate\Support\Facades\Auth::guard($guard)->user(); } catch(\Throwable $e){ $u=null; }
+   if($u instanceof \App\Models\Customer) return (int)$u->id;
+  }
+  return null;
  }
 }

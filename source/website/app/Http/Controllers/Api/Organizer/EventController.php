@@ -1080,114 +1080,28 @@ class EventController extends Controller
   public function destroy($id)
   {
     $organizer_id = Auth::guard('organizer_sanctum')->user()->id;
-    $event = Event::with('ticket')->where([['id', $id], ['organizer_id', $organizer_id]])->first();
+    $event = Event::where([['id', $id], ['organizer_id', $organizer_id]])->first();
     if (!$event) {
-      return response()->json([
-        'success' => false,
-        'message' => "You are not authorized to access this event."
-      ]);
+      return response()->json(['success' => false, 'message' => "You are not authorized to access this event."]);
     }
-
-    @unlink(public_path('assets/admin/img/event/thumbnail/') . $event->thumbnail);
-
-    $event_contents = EventContent::where('event_id', $event->id)->get();
-    foreach ($event_contents as $event_content) {
-      $event_content->delete();
+    if (!app(\App\Services\Events\EventDeletionService::class)->delete($event)) {
+      return response()->json(['success' => false, 'message' => __(\App\Services\Events\EventDeletionService::BLOCKED_MESSAGE)], 422);
     }
-    $event_images = EventImage::where('event_id', $event->id)->get();
-    foreach ($event_images as $event_image) {
-      @unlink(public_path('assets/admin/img/event-gallery/') . $event_image->image);
-      $event_image->delete();
-    }
-
-    //bookings
-    $bookings = $event->booking()->get();
-    foreach ($bookings as $booking) {
-      // first, delete the attachment
-      @unlink(public_path('assets/admin/file/attachments/') . $booking->attachment);
-
-      // second, delete the invoice
-      @unlink(public_path('assets/admin/file/invoices/') . $booking->invoice);
-
-      $booking->delete();
-    }
-
-    //tickets
-    $tickets = $event->tickets()->get();
-    foreach ($tickets as $ticket) {
-      $ticket->delete();
-    }
-
-    //wishlists
-    $wishlists = $event->wishlists()->get();
-    foreach ($wishlists as $wishlist) {
-      $wishlist->delete();
-    }
-
-    // finally delete the course
-    $event->delete();
-
-    return response()->json([
-      'success' => true,
-      'message' => __('Event Deleted Successfully!')
-    ]);
+    return response()->json(['success' => true, 'message' => __('Event Deleted Successfully!')]);
   }
   //bulk_delete
   public function bulk_delete(Request $request)
   {
     $organizer_id = Auth::guard('organizer_sanctum')->user()->id;
-    foreach ($request->ids as $id) {
-      $event = Event::with('ticket')->where([['id', $id], ['organizer_id', $organizer_id]])->first();
+    $kept = 0;
+    foreach ((array) $request->ids as $id) {
+      $event = Event::where([['id', $id], ['organizer_id', $organizer_id]])->first();
       if (!$event) {
-        return response()->json([
-          'success' => false,
-          'message' => "You are not authorized to access this event."
-        ]);
+        return response()->json(['success' => false, 'message' => "You are not authorized to access this event."]);
       }
-
-      @unlink(public_path('assets/admin/img/event/thumbnail/') . $event->thumbnail);
-
-      $event_contents = EventContent::where('event_id', $event->id)->get();
-      foreach ($event_contents as $event_content) {
-        $event_content->delete();
-      }
-      $event_images = EventImage::where('event_id', $event->id)->get();
-      foreach ($event_images as $event_image) {
-        @unlink(public_path('assets/admin/img/event-gallery/') . $event_image->image);
-        $event_image->delete();
-      }
-
-      //bookings
-      $bookings = $event->booking()->get();
-      foreach ($bookings as $booking) {
-        // first, delete the attachment
-        @unlink(public_path('assets/admin/file/attachments/') . $booking->attachment);
-
-        // second, delete the invoice
-        @unlink(public_path('assets/admin/file/invoices/') . $booking->invoice);
-
-        $booking->delete();
-      }
-
-      //tickets
-      $tickets = $event->tickets()->get();
-      foreach ($tickets as $ticket) {
-        $ticket->delete();
-      }
-
-      //wishlists
-      $wishlists = $event->wishlists()->get();
-      foreach ($wishlists as $wishlist) {
-        $wishlist->delete();
-      }
-
-      // finally delete the course
-      $event->delete();
+      if (!app(\App\Services\Events\EventDeletionService::class)->delete($event)) $kept++;
     }
-    return response()->json([
-      'success' => true,
-      'message' => __('Event Deleted Successfully!')
-    ]);
+    return response()->json(['success' => $kept === 0, 'message' => $kept ? __(':count event(s) with bookings or payments were kept; set them to inactive instead.', ['count' => $kept]) : __('Event Deleted Successfully!')]);
   }
   public function editTicketSetting($id)
   {

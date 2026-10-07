@@ -7,6 +7,7 @@ use App\Models\Payments\PaymentTransfer;
 use App\Models\Payments\OrganizerPaymentProfile;
 use App\Services\Payments\RazorpayWebhookService;
 use App\Services\Payments\PaymentReconciliationService;
+use App\Services\Payments\PaymentCaptureService;
 class RazorpayWebhookController extends Controller {
  public function handle(Request $r,RazorpayWebhookService $webhooks,PaymentReconciliationService $reconcile){
   try { $payload=$webhooks->verify($r->getContent(),$r->header('X-Razorpay-Signature')); }
@@ -15,7 +16,15 @@ class RazorpayWebhookController extends Controller {
   $type=$payload['event']??''; $payment=$payload['payload']['payment']['entity']??null; $transfer=$payload['payload']['transfer']['entity']??null;
   if($payment && !empty($payment['id'])){
    $o=PaymentOrder::where('gateway_payment_id',$payment['id'])->orWhere('gateway_order_id',$payment['order_id']??'')->first();
-   if($o){ if($type==='payment.captured' && $o->status!=='paid') $o->update(['gateway_payment_id'=>$payment['id'],'status'=>'captured_unfinalized']);
+   if($o){
+    if(in_array($type,['payment.captured','order.paid'],true) && !$o->booking_id){
+     // Signed webhook: complete the booking even if the customer closed the browser after paying.
+     $matches=(string)($payment['order_id']??'')===(string)$o->gateway_order_id && (int)($payment['amount']??-1)===(int)$o->customer_total
+      && strtoupper((string)($payment['currency']??''))===strtoupper((string)$o->currency) && ($payment['status']??'')==='captured';
+     if($matches){ try { app(PaymentCaptureService::class)->complete($o,(string)$payment['id']); } catch(\Throwable $e){ report($e); } }
+     else app(PaymentCaptureService::class)->markUnfinalized($o,(string)$payment['id'],new \RuntimeException('Captured payment does not match the BookTKIT payment order.'));
+     $o->refresh();
+    }
     if(in_array($type,['refund.processed','payment.refunded'],true)) $o->update(['refund_status'=>(($payment['amount_refunded']??0)>=$o->customer_total?'full':'partial'),'refunded_amount'=>$payment['amount_refunded']??$o->refunded_amount]);
     $reconcile->reconcile($o); }
   }

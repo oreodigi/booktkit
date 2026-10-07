@@ -14,17 +14,18 @@ use Illuminate\Support\Facades\Schema;
 
 class AccessControlService
 {
-    public function scan(string $token, string $actorType, int $actorId, ?string $deviceName = null, ?string $ip = null, string $direction = 'entry', ?int $gateId = null, bool $override = false, ?string $overrideReason = null): array
+    public function scan(string $token, string $actorType, int $actorId, ?string $deviceName = null, ?string $ip = null, string $direction = 'entry', ?int $gateId = null, bool $override = false, ?string $overrideReason = null, ?int $eventId = null): array
     {
         if ($override && (!$overrideReason || mb_strlen($overrideReason) < 5)) return $this->deny('Supervisor override requires a reason', 'override_reason_required');
         if (!in_array($direction, ['entry', 'exit'], true)) return $this->deny('Invalid admission direction', 'invalid_direction');
         if (!Schema::hasTable('issued_tickets')) return $this->deny('Invalid ticket', 'invalid_token');
 
-        return DB::transaction(function () use ($token, $actorType, $actorId, $deviceName, $ip, $direction, $gateId, $override, $overrideReason) {
+        return DB::transaction(function () use ($token, $actorType, $actorId, $deviceName, $ip, $direction, $gateId, $override, $overrideReason, $eventId) {
             [$ticket, $credential, $source] = $this->resolve($token);
             if (!$ticket || !$ticket->booking) return $this->deny('Invalid ticket or credential', 'invalid_token');
 
             $booking = $ticket->booking;
+            if ($eventId && (int) $ticket->event_id !== (int) $eventId) return $this->deny('This ticket is for a different event', 'wrong_event', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
             $gate = $gateId ? DB::table('event_gates')->where('id',$gateId)->where('event_id',$ticket->event_id)->where('active',1)->first() : null;
             if ($gateId && !$gate) return $this->deny('Invalid gate for this event','invalid_gate',$ticket,$credential,$direction,$actorType,$actorId,$deviceName,$ip);
             if ($gate && $gate->mode !== 'entry_exit' && $gate->mode !== $direction) return $this->deny('This gate does not allow '.strtoupper($direction),'gate_direction_denied',$ticket,$credential,$direction,$actorType,$actorId,$deviceName,$ip);
@@ -35,6 +36,9 @@ class AccessControlService
             if (!in_array($booking->paymentStatus, ['completed', 'free'], true)) return $this->deny('Ticket payment is not valid', 'invalid_payment', $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
             if ($ticket->status !== 'active') return $this->deny('Ticket is '.$ticket->status, 'ticket_'.$ticket->status, $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
             $eventDateId=null;
+            if (!$ticket->pass_product_id && !$override && ($window = $this->outsideEventWindow((int) $ticket->event_id))) {
+                return $this->deny($window[0], $window[1], $ticket, $credential, $direction, $actorType, $actorId, $deviceName, $ip);
+            }
             if ($ticket->pass_product_id && Schema::hasTable('pass_entitlements')) {
                 $today=now()->toDateString();
                 $entitlement=PassEntitlement::where('issued_ticket_id',$ticket->id)->where('status','active')->whereHas('eventDate',fn($q)=>$q->whereDate('start_date','<=',$today)->where(function($d)use($today){$d->whereNull('end_date')->orWhereDate('end_date','>=',$today);} ))->orderBy('event_date_id')->first();
@@ -109,6 +113,28 @@ class AccessControlService
                 'override' => $override,
             ];
         }, 3);
+    }
+
+    /**
+     * Non-pass tickets are admissible from the event's first day until its last session ends
+     * (plus a grace period). Returns [message, reason] when outside that window.
+     */
+    private function outsideEventWindow(int $eventId): ?array
+    {
+        $event = DB::table('events')->where('id', $eventId)->first(['date_type', 'start_date', 'end_date_time']);
+        if (!$event) return null;
+        $firstDay = $event->date_type === 'multiple' && Schema::hasTable('event_dates')
+            ? DB::table('event_dates')->where('event_id', $eventId)->min('start_date')
+            : $event->start_date;
+        $today = now()->startOfDay();
+        try {
+            if ($firstDay && \Carbon\Carbon::parse($firstDay)->startOfDay()->gt($today)) return ['This ticket is not valid until the event date', 'wrong_date'];
+            $grace = max(0, (int) config('booktkit.admission_grace_hours', 6));
+            if ($event->end_date_time && \Carbon\Carbon::parse($event->end_date_time)->addHours($grace)->isPast()) return ['This event has ended', 'event_ended'];
+        } catch (\Throwable $e) {
+            return null; // Unparseable legacy dates never block admission.
+        }
+        return null;
     }
 
     private function resolve(string $token): array

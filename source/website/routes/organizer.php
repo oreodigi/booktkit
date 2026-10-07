@@ -33,13 +33,13 @@ Route::get('organizer/pwa/', 'BackEnd\Organizer\OrganizerController@pwa')->name(
 Route::post('organizer/check-qrcode/', 'BackEnd\Organizer\OrganizerController@check_qrcode')->name('check-qrcode');
 
 Route::post('/ai/generate/content', 'BackEnd\Organizer\AiContentController@generateContent')
-  ->middleware(['auth:organizer', 'organizer.ai.system', 'organizer.ai.quota'])
+  ->middleware(['auth:organizer', 'organizer.staff.rbac', 'organizer.ai.system', 'organizer.ai.quota'])
   ->name('organizer.ai.generate.content');
 Route::post('/organizer/ai/generate-slider-images', 'BackEnd\Organizer\AiImageController@generateSliderImages')
-  ->middleware(['auth:organizer', 'organizer.ai.system', 'organizer.ai.quota'])
+  ->middleware(['auth:organizer', 'organizer.staff.rbac', 'organizer.ai.system', 'organizer.ai.quota'])
   ->name('organizer.ai.generate.slider.images');
   Route::post('/ai/generate/image', 'BackEnd\Organizer\AiImageController@generateImage')
-  ->middleware(['auth:organizer', 'organizer.ai.system', 'organizer.ai.quota'])
+  ->middleware(['auth:organizer', 'organizer.staff.rbac', 'organizer.ai.system', 'organizer.ai.quota'])
   ->name('organizer.ai.generate.category.image');
 
 Route::get('organizers/email/verify', 'BackEnd\Organizer\OrganizerController@confirm_email');
@@ -57,8 +57,8 @@ Route::prefix('/organizer')->group(function () {
   });
 
   Route::get('/logout', 'BackEnd\Organizer\OrganizerController@logout')->name('organizer.logout');
-  Route::get('/change-password', 'BackEnd\Organizer\OrganizerController@change_password')->name('organizer.change.password');
-  Route::post('/update-password', 'BackEnd\Organizer\OrganizerController@updated_password')->name('organizer.update_password');
+  Route::get('/change-password', 'BackEnd\Organizer\OrganizerController@change_password')->middleware(['auth:organizer', 'organizer.staff.rbac'])->name('organizer.change.password');
+  Route::post('/update-password', 'BackEnd\Organizer\OrganizerController@updated_password')->middleware(['auth:organizer', 'organizer.staff.rbac'])->name('organizer.update_password');
 });
 
 Route::prefix('/organizer/ai-token-purchase')->group(function () {
@@ -239,7 +239,7 @@ Route::prefix('/organizer')->middleware('auth:organizer', 'Deactive:organizer', 
   });
 });
 
-Route::prefix('/organizer')->middleware(['auth:organizer'])->group(function () {
+Route::prefix('/organizer')->middleware(['auth:organizer', 'Deactive:organizer', 'EmailStatus:organizer', 'organizer.staff.rbac'])->group(function () {
   Route::get('/payments-settlements', 'BackEnd\Organizer\PaymentCenterController@index')->name('organizer.payments.index');
   Route::post('/payments-settlements/preference', 'BackEnd\Organizer\PaymentCenterController@preference')->name('organizer.payments.preference');
 });

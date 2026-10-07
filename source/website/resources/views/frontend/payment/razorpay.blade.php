@@ -4,6 +4,9 @@
   <input type="hidden" name="razorpayPaymentId" id="razorpay_payment_id">
 
   <input type="hidden" name="razorpaySignature" id="razorpay_signature">
+  <input type="hidden" name="razorpayOrderId" id="razorpay_order_id">
+  @isset($paymentOrderUuid)<input type="hidden" name="payment_order" value="{{ $paymentOrderUuid }}">@endisset
+  @csrf
 </form>
 
 <script>
@@ -18,6 +21,7 @@
   options.handler = function (response) {
     document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
     document.getElementById('razorpay_signature').value = response.razorpay_signature;
+    document.getElementById('razorpay_order_id').value = response.razorpay_order_id || '';
 
     document.razorpayform.submit();
   };

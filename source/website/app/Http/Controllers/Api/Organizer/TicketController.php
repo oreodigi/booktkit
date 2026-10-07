@@ -96,7 +96,6 @@ class TicketController extends Controller
   //store
   public function store(Request $request)
   {
-    Log::info($request->all());
 
     $rules = [
       'pricing_type_2'             => 'required',
@@ -333,7 +332,6 @@ class TicketController extends Controller
   //update
   public function update(Request $request)
   {
-    Log::info($request->all());
 
     $rules = [
       'pricing_type_2'             => 'required',
@@ -551,6 +549,9 @@ class TicketController extends Controller
 
 
     $ticket = Ticket::where('id', $request->id)->first();
+    if (app(\App\Services\Events\CommercialRecordGuard::class)->ticketHasSales($ticket)) {
+      return response()->json(['success' => false, 'message' => 'This ticket has sales or passes linked to it, so it cannot be deleted.'], 422);
+    }
     $ticket_contents = TicketContent::where('ticket_id', $ticket->id)->get();
     $variation_contents = VariationContent::where('ticket_id', $ticket->id)->get();
     if (count($ticket_contents) > 0) {
@@ -598,6 +599,7 @@ class TicketController extends Controller
         ], 403);
       }
 
+      if (app(\App\Services\Events\CommercialRecordGuard::class)->ticketHasSales($ticket)) continue;
       $ticket_contents = TicketContent::where('ticket_id', $ticket->id)->get();
       $variation_contents = VariationContent::where('ticket_id', $ticket->id)->get();
       if (count($ticket_contents) > 0) {

@@ -23,11 +23,17 @@ class TicketDeliveryService
             $tickets = app(TicketIssuanceService::class)->ensureForBooking($booking);
             if (empty($tickets)) return false;
 
-            $qrDir = public_path('assets/admin/qrcodes/');
+            // QR images are rendered from a private temporary folder and removed after the PDF is built;
+            // the PDF itself gets an unguessable file name (booking ids are predictable).
+            $qrDir = storage_path('app/ticket-qr-tmp/');
             $invoiceDir = public_path('assets/admin/file/invoices/');
-            @mkdir($qrDir, 0775, true); @mkdir($invoiceDir, 0775, true);
-            foreach ($tickets as $ticket) {
-                QrCode::size(240)->margin(1)->generate($ticket['token'], $qrDir . 'secure_' . $ticket['uuid'] . '.svg');
+            @mkdir($qrDir, 0770, true); @mkdir($invoiceDir, 0775, true);
+            $qrFiles = [];
+            foreach ($tickets as $i => $ticket) {
+                $qrFile = $qrDir . 'secure_' . $ticket['uuid'] . '.svg';
+                QrCode::size(240)->margin(1)->generate($ticket['token'], $qrFile);
+                $tickets[$i]['qr_path'] = $qrFile;
+                $qrFiles[] = $qrFile;
             }
 
             $language = Language::where('is_default', 1)->first();
@@ -35,17 +41,29 @@ class TicketDeliveryService
             $eventInfo = EventContent::where('event_id', $booking->event_id)->where('language_id', $language->id)->first();
             $websiteInfo = Basic::first(); $issuedTickets = $tickets;
             $width = '50%'; $float = 'right'; $mb = '35px'; $ml = '18px';
-            $fileName = $booking->booking_id . '.pdf';
+            $fileName = self::invoiceFileName($booking);
 
-            Pdf::loadView('frontend.event.invoice', compact('booking', 'event', 'eventInfo', 'width', 'float', 'mb', 'ml', 'language', 'websiteInfo', 'issuedTickets') + ['bookingInfo' => $booking])
-                ->save($invoiceDir . $fileName);
+            try {
+                Pdf::loadView('frontend.event.invoice', compact('booking', 'event', 'eventInfo', 'width', 'float', 'mb', 'ml', 'language', 'websiteInfo', 'issuedTickets') + ['bookingInfo' => $booking])
+                    ->save($invoiceDir . $fileName);
+            } finally {
+                foreach ($qrFiles as $qrFile) @unlink($qrFile);
+            }
+            $previous = (string) $booking->invoice;
             $booking->invoice = $fileName; $booking->save();
+            if ($previous !== '' && $previous !== $fileName) @unlink($invoiceDir . basename($previous));
             $this->send($booking, $eventInfo, $event, $invoiceDir . $fileName);
             return true;
         } catch (\Throwable $e) {
             Log::error('Ticket delivery failed', ['booking_id' => $booking->id, 'error' => $e->getMessage()]);
             report($e); return false;
         }
+    }
+
+    /** Unguessable PDF name: public booking reference plus 128 random bits. */
+    public static function invoiceFileName(Booking $booking): string
+    {
+        return preg_replace('/[^A-Za-z0-9\-]/', '', (string) $booking->booking_id) . '-' . bin2hex(random_bytes(16)) . '.pdf';
     }
 
     private function send(Booking $booking, $eventInfo, Event $event, string $attachment): void

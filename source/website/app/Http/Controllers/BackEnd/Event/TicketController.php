@@ -259,7 +259,10 @@ class TicketController extends Controller
   //destroy
   public function destroy(Request $request)
   {
-    $ticket = Ticket::where('id', $request->id)->first();
+    $ticket = Ticket::findOrFail($request->id);
+    if (app(\App\Services\Events\CommercialRecordGuard::class)->ticketHasSales($ticket)) {
+      return redirect()->back()->with('warning', __('This ticket has sales or passes linked to it, so it cannot be deleted. Set its availability to 0 to stop selling it.'));
+    }
     $ticket_contents = TicketContent::where('ticket_id', $ticket->id)->get();
     $variation_contents = VariationContent::where('ticket_id', $ticket->id)->get();
     if (count($ticket_contents) > 0) {
@@ -287,8 +290,9 @@ class TicketController extends Controller
   {
     $ids = $request->ids;
 
-    foreach ($ids as $id) {
+    foreach ((array) $ids as $id) {
       $ticket = Ticket::find($id);
+      if (!$ticket || app(\App\Services\Events\CommercialRecordGuard::class)->ticketHasSales($ticket)) continue;
       $ticket->delete();
     }
     Session::flash('success', 'Deleted Successfully');

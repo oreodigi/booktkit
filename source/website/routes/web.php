@@ -13,19 +13,20 @@ Route::get('/offline', 'FrontEnd\HomeController@offline');
 Route::post('/push-notification/store-endpoint', 'FrontEnd\PushNotificationController@store');
 // Route::get('/test-pdf', 'FrontEnd\HomeController@testPDF');
 
-Route::get('/migrate', function () {
-  Artisan::call('migrate');
-});
+// Migrations run only through the deployment runner (deploy/README.md); there is no HTTP migration route.
 
 Route::get('login', function () {
   return view('frontend.organizer.login');
 })->name('login');
 
 // cron job for check iyzico payment
-Route::get('/check-payment', 'CronJobController@checkIyzicoPendingPayment')->name('cron.check.payment');
-Route::get('/send-ticket', 'CronJobController@sendTicket')->name('cron.send.ticket');
-
-Route::get('/send-push-notification-phone', 'CronJobController@sendPushNotificationPhone')->name('cron.send.push_notification_phone');
+// Legacy HTTP cron endpoints. They are disabled unless CRON_HTTP_TOKEN is configured and supplied
+// (?token=...). Prefer `php artisan schedule:run` from the server crontab.
+Route::middleware('cron.token')->group(function () {
+  Route::get('/check-payment', 'CronJobController@checkIyzicoPendingPayment')->name('cron.check.payment');
+  Route::get('/send-ticket', 'CronJobController@sendTicket')->name('cron.send.ticket');
+  Route::get('/send-push-notification-phone', 'CronJobController@sendPushNotificationPhone')->name('cron.send.push_notification_phone');
+});
 
 Route::get('midtrans/cancel', 'FrontEnd\HomeController@midtrans_cancel')->name('midtrans_cancel'); // banking er IPN
 Route::get('myfatoorah/callback', 'FrontEnd\HomeController@myfatoorah_callback')->name('myfatoorah_callback');

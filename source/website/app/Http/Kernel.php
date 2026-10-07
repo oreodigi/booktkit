@@ -74,5 +74,6 @@ class Kernel extends HttpKernel
     'organizer.ai.system' => \App\Http\Middleware\EnsureOrganizerAiSystemEnabled::class,
     'staff.assignment' => \App\Http\Middleware\EnsureStaffAssignment::class,
     'organizer.staff.rbac' => \App\Http\Middleware\EnsureOrganizerStaffRbac::class,
+    'cron.token' => \App\Http\Middleware\EnsureCronToken::class,
   ];
 }

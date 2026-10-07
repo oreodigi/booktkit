@@ -175,10 +175,19 @@ class EventController extends Controller
       $this->deleteManagedGeneratedImage($resolvedPath);
     }
 
+    $ownedEventId = null;
+    if ($request->filled('event_id')) {
+      $ownedEventId = Event::whereKey((int) $request->event_id)->where('organizer_id', Auth::guard('organizer')->id())->value('id');
+      if (!$ownedEventId) {
+        @unlink($savePath);
+        return response()->json(['status' => 'error', 'message' => 'Event not found.'], 404);
+      }
+    }
     $pi = new EventImage;
-    $pi->event_id = $request->event_id ?? null;
+    $pi->event_id = $ownedEventId;
     $pi->image = $filename;
     $pi->save();
+    if (!$ownedEventId) \App\Support\GalleryUploadRegistry::remember((int) $pi->id);
 
     return response()->json([
       'status'  => 'success',
@@ -298,8 +307,10 @@ class EventController extends Controller
 
   public function imagermv(Request $request)
   {
-    $pi = EventImage::where('id', $request->fileid)->first();
-    @unlink(public_path('assets/admin/img/event-gallery/') . $pi->image);
+    // Removing an upload that is not yet attached: only the uploader's session may do it.
+    $pi = EventImage::whereKey((int) $request->fileid)->whereNull('event_id')->first();
+    if (!$pi || !\App\Support\GalleryUploadRegistry::owns((int) $pi->id)) abort(404);
+    @unlink(public_path('assets/admin/img/event-gallery/') . basename($pi->image));
     $pi->delete();
     return $pi->id;
   }
@@ -365,11 +376,8 @@ class EventController extends Controller
    */
   public function updateStatus(Request $request, $id)
   {
-    $event = Event::find($id);
-
-    if (Auth::guard('organizer')->user()->id != $event->organizer_id) {
-      return back();
-    }
+    $request->validate(['status' => 'required|in:0,1']);
+    $event = Event::whereKey($id)->where('organizer_id', Auth::guard('organizer')->id())->firstOrFail();
 
     if ((int)$request['status'] === 1 && !app(PaidEventPayoutGuard::class)->canPublish($event)) {
       Session::flash('warning', 'Complete Payouts & KYC before publishing an event with paid tickets. Free events can be published immediately.');
@@ -377,7 +385,7 @@ class EventController extends Controller
     }
 
     $event->update([
-      'status' => $request['status']
+      'status' => (string) $request['status']
     ]);
     Session::flash('success', 'Updated Successfully');
 
@@ -392,22 +400,11 @@ class EventController extends Controller
    */
   public function updateFeatured(Request $request, $id)
   {
-    $event = Event::find($id);
-    if (Auth::guard('organizer')->user()->id != $event->organizer_id) {
-      return back();
-    }
-
-    if ($request['is_featured'] == 'yes') {
-      $event->is_featured = 'yes';
-      $event->save();
-
-      Session::flash('success', 'Updated Successfully');
-    } else {
-      $event->is_featured = 'no';
-      $event->save();
-
-      Session::flash('success', 'Updated Successfully');
-    }
+    $request->validate(['is_featured' => 'required|in:yes,no']);
+    $event = Event::whereKey($id)->where('organizer_id', Auth::guard('organizer')->id())->firstOrFail();
+    $event->is_featured = $request['is_featured'];
+    $event->save();
+    Session::flash('success', 'Updated Successfully');
 
     return redirect()->back();
   }
@@ -427,24 +424,20 @@ class EventController extends Controller
   }
   public function imagedbrmv(Request $request)
   {
-    $pi = EventImage::where('id', $request->fileid)->first();
-    $event_id = $pi->event_id;
-    $image_count = EventImage::where('event_id', $event_id)->get()->count();
-    if ($image_count > 1) {
-      @unlink(public_path('assets/admin/img/event-gallery/') . $pi->image);
-      $pi->delete();
-      return $pi->id;
-    } else {
+    $organizerId = Auth::guard('organizer')->id();
+    $pi = EventImage::whereKey((int) $request->fileid)
+      ->whereIn('event_id', Event::where('organizer_id', $organizerId)->select('id'))->firstOrFail();
+    if (EventImage::where('event_id', $pi->event_id)->count() <= 1) {
       return 'false';
     }
-    @unlink(public_path('assets/admin/img/event-gallery/') . $pi->image);
+    @unlink(public_path('assets/admin/img/event-gallery/') . basename($pi->image));
     $pi->delete();
     return $pi->id;
   }
   public function images($portid)
   {
-    $images = EventImage::where('event_id', $portid)->get();
-    return $images;
+    $event = Event::whereKey((int) $portid)->where('organizer_id', Auth::guard('organizer')->id())->firstOrFail();
+    return EventImage::where('event_id', $event->id)->get();
   }
 
   public function update(EventFormRequest $request, EventFormService $service)
@@ -463,99 +456,21 @@ class EventController extends Controller
    */
   public function destroy($id)
   {
-    $event = Event::find($id);
-    if (!$event) abort(404);
-    if ((int) Auth::guard('organizer')->id() !== (int) $event->organizer_id) abort(403);
-
-    @unlink(public_path('assets/admin/img/event/thumbnail/') . $event->thumbnail);
-
-    $event_contents = EventContent::where('event_id', $event->id)->get();
-    foreach ($event_contents as $event_content) {
-      $event_content->delete();
+    $event = Event::whereKey($id)->where('organizer_id', Auth::guard('organizer')->id())->firstOrFail();
+    if (!app(\App\Services\Events\EventDeletionService::class)->delete($event)) {
+      return redirect()->back()->with('warning', __(\App\Services\Events\EventDeletionService::BLOCKED_MESSAGE));
     }
-    $event_images = EventImage::where('event_id', $event->id)->get();
-    foreach ($event_images as $event_image) {
-      @unlink(public_path('assets/admin/img/event-gallery/') . $event_image->image);
-      $event_image->delete();
-    }
-
-    //bookings
-    $bookings = $event->booking()->get();
-    foreach ($bookings as $booking) {
-      // first, delete the attachment
-      @unlink(public_path('assets/admin/file/attachments/') . $booking->attachment);
-
-      // second, delete the invoice
-      @unlink(public_path('assets/admin/file/invoices/') . $booking->invoice);
-
-      $booking->delete();
-    }
-
-    //tickets
-    $tickets = $event->tickets()->get();
-    foreach ($tickets as $ticket) {
-      $ticket->delete();
-    }
-
-    //wishlists
-    $wishlists = $event->wishlists()->get();
-    foreach ($wishlists as $wishlist) {
-      $wishlist->delete();
-    }
-
-    // finally delete the course
-    $event->delete();
-
     return redirect()->back()->with('success', 'Deleted Successfully');
   }
   //bulk_delete
   public function bulk_delete(Request $request)
   {
-    foreach ($request->ids as $id) {
-      $event = Event::find($id);
-      if (Auth::guard('organizer')->user()->id != $event->organizer_id) {
-        return back();
-      }
-
-      @unlink(public_path('assets/admin/img/event/thumbnail/') . $event->thumbnail);
-
-      $event_contents = EventContent::where('event_id', $event->id)->get();
-      foreach ($event_contents as $event_content) {
-        $event_content->delete();
-      }
-      $event_images = EventImage::where('event_id', $event->id)->get();
-      foreach ($event_images as $event_image) {
-        @unlink(public_path('assets/admin/img/event-gallery/') . $event_image->image);
-        $event_image->delete();
-      }
-
-      //bookings
-      $bookings = $event->booking()->get();
-      foreach ($bookings as $booking) {
-        // first, delete the attachment
-        @unlink(public_path('assets/admin/file/attachments/') . $booking->attachment);
-
-        // second, delete the invoice
-        @unlink(public_path('assets/admin/file/invoices/') . $booking->invoice);
-
-        $booking->delete();
-      }
-
-      //tickets
-      $tickets = $event->tickets()->get();
-      foreach ($tickets as $ticket) {
-        $ticket->delete();
-      }
-      //wishlists
-      $wishlists = $event->wishlists()->get();
-      foreach ($wishlists as $wishlist) {
-        $wishlist->delete();
-      }
-
-      // finally delete the course
-      $event->delete();
+    $kept = 0;
+    foreach ((array) $request->ids as $id) {
+      $event = Event::whereKey($id)->where('organizer_id', Auth::guard('organizer')->id())->first();
+      if ($event && !app(\App\Services\Events\EventDeletionService::class)->delete($event)) $kept++;
     }
-    Session::flash('success', 'Deleted Successfully');
+    Session::flash($kept ? 'warning' : 'success', $kept ? __(':count event(s) with bookings or payments were kept; set them to inactive instead.', ['count' => $kept]) : 'Deleted Successfully');
     return response()->json(['status' => 'success'], 200);
   }
   public function editTicketSetting($id)
@@ -569,7 +484,8 @@ class EventController extends Controller
 
     $ticket_image = $request->file('ticket_image');
     $ticket_logo = $request->file('ticket_logo');
-    $in = $request->all();
+    // Ticket settings may only change ticket presentation, never status, owner, type or access rules.
+    $in = [];
     $instructions = Purifier::clean($request->instructions);
     $event = Event::where('organizer_id', Auth::guard('organizer')->id())->findOrFail($request->event_id);
     if ($request->boolean('remove_ticket_image') && $event->ticket_image) {
@@ -595,9 +511,7 @@ class EventController extends Controller
       $in['ticket_logo'] = $filename;
     }
     $in['instructions'] = $instructions;
-    unset($in['remove_ticket_image'], $in['remove_ticket_logo']);
-
-    $event->update($in);
+    $event->update(array_intersect_key($in, array_flip(['ticket_image', 'ticket_logo', 'instructions'])));
     Session::flash('success', 'Ticket settings saved. Add tickets for your event.');
 
     $language = Language::where('is_default', 1)->first() ?: Language::firstOrFail();

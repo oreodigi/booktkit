@@ -21,6 +21,13 @@ use Illuminate\Support\Facades\Validator;
 
 class SlotSeatController extends Controller
 {
+  use \App\Http\Controllers\Concerns\GuardsSeatMapOwnership;
+
+  public function __construct()
+  {
+    $this->guardSeatMapOwnership('organizer_sanctum');
+  }
+
   public function allSlot(Request $request)
   {
     $event_id = $request->event_id;
@@ -586,7 +593,7 @@ class SlotSeatController extends Controller
       if ($request->slot_type == 1) {
         $updateData['price'] = $price_keys[$id] ?? 0.00;
       }
-      SlotSeats::query()->where('id', $id)->update($updateData);
+      SlotSeats::query()->where('id', $id)->where('slot_id', (int) $request->slot_id)->update($updateData);
     }
 
     if ($request->slot_type == 1) {

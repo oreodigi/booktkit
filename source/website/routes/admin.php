@@ -10,7 +10,7 @@ use App\Http\Controllers\BackEnd\Event\CategoryController;
 */
 
 Route::get('admin/pwa/', 'BackEnd\AdminController@pwa')->name('admin.pwa.new');
-Route::post('admin/check-qrcode/', 'BackEnd\AdminController@check_qrcode')->name('admin.check-qrcode');
+Route::post('admin/check-qrcode/', 'BackEnd\AdminController@check_qrcode')->middleware('auth:admin')->name('admin.check-qrcode');
 Route::get('admin/get-state-city/{id}', 'BackEnd\Event\EventController@city_state')->name('get.city.state');
 Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function () {
   // admin redirect to dashboard route
@@ -216,24 +216,24 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
   });
 
   // Box Office / POS administration
-  Route::get('/box-office-settings', 'BackEnd\\AdminBoxOfficeSettingsController@edit')->name('admin.boxoffice.settings');
-  Route::put('/box-office-settings', 'BackEnd\\AdminBoxOfficeSettingsController@update')->name('admin.boxoffice.settings.update');
+  Route::get('/box-office-settings', 'BackEnd\\AdminBoxOfficeSettingsController@edit')->middleware('permission:Event Bookings')->name('admin.boxoffice.settings');
+  Route::put('/box-office-settings', 'BackEnd\\AdminBoxOfficeSettingsController@update')->middleware('permission:Event Bookings')->name('admin.boxoffice.settings.update');
 
   // Organizer workforce oversight
-  Route::get('/organizer-workforce', 'BackEnd\\OrganizerWorkforceController@index')->name('admin.organizer_workforce.index');
-  Route::put('/organizer-workforce/{id}', 'BackEnd\\OrganizerWorkforceController@update')->name('admin.organizer_workforce.update');
-  Route::post('/organizer-workforce/{id}/reset-password', 'BackEnd\\OrganizerWorkforceController@resetPassword')->name('admin.organizer_workforce.reset_password');
-  Route::delete('/organizer-workforce/{id}', 'BackEnd\\OrganizerWorkforceController@destroy')->name('admin.organizer_workforce.destroy');
-  Route::post('/organizer-workforce/{id}/impersonate', 'BackEnd\\OrganizerWorkforceController@impersonate')->name('admin.organizer_workforce.impersonate');
+  Route::get('/organizer-workforce', 'BackEnd\\OrganizerWorkforceController@index')->middleware('permission:Organizer Mangement')->name('admin.organizer_workforce.index');
+  Route::put('/organizer-workforce/{id}', 'BackEnd\\OrganizerWorkforceController@update')->middleware('permission:Organizer Mangement')->name('admin.organizer_workforce.update');
+  Route::post('/organizer-workforce/{id}/reset-password', 'BackEnd\\OrganizerWorkforceController@resetPassword')->middleware('permission:Organizer Mangement')->name('admin.organizer_workforce.reset_password');
+  Route::delete('/organizer-workforce/{id}', 'BackEnd\\OrganizerWorkforceController@destroy')->middleware('permission:Organizer Mangement')->name('admin.organizer_workforce.destroy');
+  Route::post('/organizer-workforce/{id}/impersonate', 'BackEnd\\OrganizerWorkforceController@impersonate')->middleware('permission:Organizer Mangement')->name('admin.organizer_workforce.impersonate');
 
   // Mobile Homepage Studio
-  Route::get('/mobile-home', 'BackEnd\\HomePage\\MobileHomeStudioController@index')->name('admin.mobile_home.index');
-  Route::post('/mobile-home/templates', 'BackEnd\\HomePage\\MobileHomeStudioController@storeTemplate')->name('admin.mobile_home.template.store');
-  Route::post('/mobile-home/campaigns', 'BackEnd\\HomePage\\MobileHomeStudioController@storeCampaign')->name('admin.mobile_home.campaign.store');
-  Route::get('/mobile-home/campaigns/{campaign}/edit', 'BackEnd\\HomePage\\MobileHomeStudioController@edit')->name('admin.mobile_home.edit');
-  Route::post('/mobile-home/campaigns/{campaign}', 'BackEnd\\HomePage\\MobileHomeStudioController@update')->name('admin.mobile_home.update');
-  Route::post('/mobile-home/campaigns/{campaign}/publish', 'BackEnd\\HomePage\\MobileHomeStudioController@publish')->name('admin.mobile_home.publish');
-  Route::post('/mobile-home/campaigns/{campaign}/toggle', 'BackEnd\\HomePage\\MobileHomeStudioController@toggle')->name('admin.mobile_home.toggle');
+  Route::get('/mobile-home', 'BackEnd\\HomePage\\MobileHomeStudioController@index')->middleware('permission:Mobile Interface')->name('admin.mobile_home.index');
+  Route::post('/mobile-home/templates', 'BackEnd\\HomePage\\MobileHomeStudioController@storeTemplate')->middleware('permission:Mobile Interface')->name('admin.mobile_home.template.store');
+  Route::post('/mobile-home/campaigns', 'BackEnd\\HomePage\\MobileHomeStudioController@storeCampaign')->middleware('permission:Mobile Interface')->name('admin.mobile_home.campaign.store');
+  Route::get('/mobile-home/campaigns/{campaign}/edit', 'BackEnd\\HomePage\\MobileHomeStudioController@edit')->middleware('permission:Mobile Interface')->name('admin.mobile_home.edit');
+  Route::post('/mobile-home/campaigns/{campaign}', 'BackEnd\\HomePage\\MobileHomeStudioController@update')->middleware('permission:Mobile Interface')->name('admin.mobile_home.update');
+  Route::post('/mobile-home/campaigns/{campaign}/publish', 'BackEnd\\HomePage\\MobileHomeStudioController@publish')->middleware('permission:Mobile Interface')->name('admin.mobile_home.publish');
+  Route::post('/mobile-home/campaigns/{campaign}/toggle', 'BackEnd\\HomePage\\MobileHomeStudioController@toggle')->middleware('permission:Mobile Interface')->name('admin.mobile_home.toggle');
 
   Route::prefix('/home-page')->middleware('permission:Home Page')->group(function () {
     Route::get('/event-features-section', 'BackEnd\HomePage\EventFeatureController@index')->name('admin.home_page.event_features_section');
@@ -281,7 +281,7 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
 
 
 
-  Route::get('send-mail-template',  'BackEnd\Organizer\OrganizerManagementController@send_mail_template')->name('send.mail-tempalte');
+  Route::get('send-mail-template',  'BackEnd\Organizer\OrganizerManagementController@send_mail_template')->middleware('permission:Organizer Mangement')->name('send.mail-tempalte');
 
   // organizer management route start
   Route::prefix('/organizer-management')->middleware('permission:Organizer Mangement')->group(function () {
@@ -355,7 +355,7 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
       Route::get('/secret-login', 'BackEnd\CustomerManagementController@secret_login')->name('admin.customer_management.secret_login');
     });
   });
-  Route::post('bulk/delete-customer', 'BackEnd\CustomerManagementController@bulkDestroy')->name('admin.customer_management.bulk_delete_customer');
+  Route::post('bulk/delete-customer', 'BackEnd\CustomerManagementController@bulkDestroy')->middleware('permission:Customer Management')->name('admin.customer_management.bulk_delete_customer');
   // organizer management route end
 
 
@@ -379,8 +379,8 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
 
 
   //shop related routes are goes here=====
-  Route::get('product/setting', 'BackEnd\ShopManagement\ProductController@settings')->name('admin.product.setting');
-  Route::post('product/setting/update', 'BackEnd\ShopManagement\ProductController@setting_update')->name('admin.product.setting.update');
+  Route::get('product/setting', 'BackEnd\ShopManagement\ProductController@settings')->middleware('permission:Shop Management')->name('admin.product.setting');
+  Route::post('product/setting/update', 'BackEnd\ShopManagement\ProductController@setting_update')->middleware('permission:Shop Management')->name('admin.product.setting.update');
 
 
 
@@ -434,8 +434,8 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
   });
 
   // language management route start
-  Route::get('/edit-keywords', 'BackEnd\LanguageController@adminKeywordsEdit')->name('admin.edit_admin_keywords');
-  Route::post('/update-keywords', 'BackEnd\LanguageController@adminKeywordsUpdate')->name('admin.update_admin_keywords');
+  Route::get('/edit-keywords', 'BackEnd\LanguageController@adminKeywordsEdit')->middleware('permission:Language Management')->name('admin.edit_admin_keywords');
+  Route::post('/update-keywords', 'BackEnd\LanguageController@adminKeywordsUpdate')->middleware('permission:Language Management')->name('admin.update_admin_keywords');
 
   Route::prefix('/language-management')->middleware('permission:Language Management')->group(function () {
     Route::get('', 'BackEnd\LanguageController@index')->name('admin.language_management');
@@ -844,26 +844,26 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
   });
   // footer route end
   // subscriber route start
-  Route::get('/subscribers', 'BackEnd\User\SubscriberController@index')->name('admin.user_management.subscribers');
+  Route::get('/subscribers', 'BackEnd\User\SubscriberController@index')->middleware('permission:Basic Settings')->name('admin.user_management.subscribers');
 
   Route::post(
     '/subscriber/{id}/delete',
     'BackEnd\User\SubscriberController@destroy'
-  )->name('admin.user_management.subscriber.delete');
+  )->middleware('permission:Basic Settings')->name('admin.user_management.subscriber.delete');
 
   Route::post(
     '/bulk-delete-subscriber',
     'BackEnd\User\SubscriberController@bulkDestroy'
-  )->name('admin.user_management.bulk_delete_subscriber');
+  )->middleware('permission:Basic Settings')->name('admin.user_management.bulk_delete_subscriber');
 
-  Route::get('/mail-for-subscribers', 'BackEnd\User\SubscriberController@writeEmail')->name('admin.user_management.mail_for_subscribers');
+  Route::get('/mail-for-subscribers', 'BackEnd\User\SubscriberController@writeEmail')->middleware('permission:Basic Settings')->name('admin.user_management.mail_for_subscribers');
 
   Route::post(
     '/subscribers/send-email',
     'BackEnd\User\SubscriberController@sendEmail'
-  )->name('admin.user_management.subscribers.send_email');
+  )->middleware('permission:Basic Settings')->name('admin.user_management.subscribers.send_email');
 
-  Route::prefix('/push-notification')->group(function () {
+  Route::prefix('/push-notification')->middleware('permission:Basic Settings')->group(function () {
     Route::get('/settings', 'BackEnd\User\PushNotificationController@settings')->name('admin.user_management.push_notification.settings');
 
     Route::post('/update-settings', 'BackEnd\User\PushNotificationController@updateSettings')->name('admin.user_management.push_notification.update_settings');

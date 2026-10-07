@@ -893,23 +893,28 @@ class EventController extends Controller
 
     $currencyInfo = $this->getCurrencyInfo();
 
-    $total = $request->total;
-    $discount = $request->discount;
-    $total_early_bird_dicount = $request->total_early_bird_dicount;
-    $tax_amount = $request->tax;
+    // Price, free status and payment status are decided by the server (Payments V2 rules);
+    // client-sent total/tax/discount/paymentStatus are ignored.
+    try {
+      $decision = app(\App\Services\Payments\LegacyAppBookingVerifier::class)->decide($request->all());
+    } catch (\Illuminate\Validation\ValidationException $e) {
+      return response()->json(['status' => false, 'validation_errors' => $e->errors()], 422);
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+      return response()->json(['status' => false, 'message' => 'Event or ticket not found.'], 404);
+    }
+    $total = $decision['price'];
+    $discount = $decision['discount'];
+    $total_early_bird_dicount = $decision['discount'];
+    $tax_amount = $decision['tax'];
 
     $basicSetting = Basic::select('commission')->first();
     $commission_amount = ($total * $basicSetting->commission) / 100;
 
-    $paymentStatus = $request->paymentStatus;
-    if (empty($paymentStatus)) {
-      $paymentStatus = $request->gatewayType == 'online' ? 'completed' : 'pending';
-    }
+    $paymentStatus = $decision['status'];
 
-    $customerId = $request->customer_id;
-    if (empty($customerId)) {
-      $customerId = 'guest';
-    }
+    // Ownership comes from the authenticated customer token only.
+    $authCustomer = Auth::guard('sanctum')->user();
+    $customerId = $authCustomer instanceof \App\Models\Customer ? $authCustomer->id : 'guest';
 
     $arrData = array(
       'event_id' => $request->event_id,
@@ -924,13 +929,19 @@ class EventController extends Controller
       'country' => $request->country,
       'state' => $request->state,
       'city' => $request->city,
-      'zip_code' => $request->city,
+      'zip_code' => $request->zip_code,
       'address' => $request->address,
+      'gateway_payment_id' => $decision['gateway_payment_id'],
       'paymentMethod' => $request->gateway,
       'gatewayType' => Str::lower($request->gatewayType),
       'paymentStatus' => $paymentStatus,
       'event_date' => $request->event_date,
-      'selTickets' => $request->selTickets,
+      // Line prices come from the server quote, never from the app.
+      'selTickets' => empty($request->selTickets) ? $request->selTickets : collect($decision['quote']['items'])->map(fn ($i) => [
+        'ticket_id' => $i['ticket_id'], 'qty' => $i['quantity'], 'name' => $i['pass_name'] ?? ($i['variation'] ?? 'Ticket'),
+        'price' => $i['unit_price'] / 100, 'early_bird_dicount' => $i['quantity'] ? $i['discount'] / 100 / $i['quantity'] : 0,
+        'pass_product_id' => $i['pass_product_id'] ?? null, 'event_date_ids' => $i['event_date_ids'] ?? [],
+      ])->all(),
       'attachmentFile' => isset($filename) ? $filename : null,
       'fcm_token' => $request->fcm_token,
       'price' => $total,
@@ -943,35 +954,16 @@ class EventController extends Controller
     );
 
     $bookingInfo = $this->storeData($arrData);
+    if (!$bookingInfo instanceof Booking) {
+      return response()->json(['status' => false, 'message' => 'The booking could not be created.'], 422);
+    }
+    if ($paymentStatus === 'free') {
+      app(\App\Services\Tickets\TicketDeliveryService::class)->deliver($bookingInfo);
+    }
 
-    if (!is_null($bookingInfo) && $request->gatewayType == 'online' && $paymentStatus == 'completed') {
-      $ticket = DB::table('basic_settings')->select('how_ticket_will_be_send')->first();
-      if ($ticket->how_ticket_will_be_send == 'instant') {
-        // generate an invoice in pdf format
-        $booking_controller = new BookingController();
-        $invoice = $booking_controller->generateInvoice($bookingInfo, $bookingInfo->event_id);
-        //unlink qr code
-        if (!is_null($bookingInfo->variation)) {
-          //generate qr code for without wise ticket
-          $variations = json_decode($bookingInfo->variation, true);
-          foreach ($variations as $variation) {
-            @unlink(public_path('assets/admin/qrcodes/') . $bookingInfo->booking_id . '__' . $variation['unique_id'] . '.svg');
-          }
-        } else {
-          //generate qr code for without wise ticket
-          for ($i = 1; $i <= $bookingInfo->quantity; $i++) {
-            @unlink(public_path('assets/admin/qrcodes/') . $bookingInfo->booking_id . '__' . $i .  '.svg');
-          }
-        }
-        // then, update the invoice field info in database
-        $bookingInfo->invoice = $invoice;
-        $bookingInfo->save();
-
-        // send a mail to the customer with the invoice
-        $booking_controller->sendMail($bookingInfo);
-      } else {
-        BookingInvoiceJob::dispatch($bookingInfo->id)->delay(now()->addSeconds(10));
-      }
+    if ($paymentStatus == 'completed') {
+      // Secure issued-ticket QR codes (the only ones the scanner accepts).
+      app(\App\Services\Tickets\TicketDeliveryService::class)->deliver($bookingInfo);
 
       //earning revenue
       $this->earning_revenue($bookingInfo);
@@ -1172,10 +1164,11 @@ class EventController extends Controller
         'event_date' => $info['event_date'],
         'conversation_id' => array_key_exists('conversation_id', $info) ? $info['conversation_id'] : null,
         'fcm_token' => array_key_exists('fcm_token', $info) ? $info['fcm_token'] : null,
-      ]);
+      ] + (!empty($info['gateway_payment_id']) ? ['gateway_payment_id' => $info['gateway_payment_id']] : []));
 
       return $booking;
     } catch (\Exception $e) {
+      report($e);
       return response()->json([
         'status' => false,
         'message' => $e->getMessage()

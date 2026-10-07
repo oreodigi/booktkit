@@ -20,6 +20,8 @@ use App\Services\Tickets\TicketAdmissionService;
 
 class AdminScannerController extends Controller
 {
+  use \App\Http\Controllers\Concerns\ScannerTicketStats;
+
   /* ********************************
      * Submit login for authentication
      * ********************************/
@@ -71,7 +73,7 @@ class AdminScannerController extends Controller
   }
   public function check_qrcode(Request $request, TicketAdmissionService $admission)
   {
-    $request->validate(['booking_id' => 'required|string|max:255','direction'=>'nullable|in:entry,exit','gate_id'=>'nullable|integer','override'=>'nullable|boolean','override_reason'=>'nullable|string|max:255']);
+    $request->validate(['booking_id' => 'required|string|max:255','direction'=>'nullable|in:entry,exit','gate_id'=>'nullable|integer','override'=>'nullable|boolean','override_reason'=>'nullable|string|max:255','event_id'=>'nullable|integer']);
     $admin = Auth::guard('admin_sanctum')->user();
 
     return response()->json($admission->admit(
@@ -83,7 +85,8 @@ class AdminScannerController extends Controller
       $request->input('direction','entry'),
       $request->integer('gate_id') ?: null,
       $request->boolean('override'),
-      $request->input('override_reason')
+      $request->input('override_reason'),
+      $request->integer('event_id') ?: null
     ));
   }
 
@@ -133,54 +136,7 @@ class AdminScannerController extends Controller
 
     $bookings = Booking::whereIn('event_id', $ids)->get();
 
-    $information['total_attendees_tickets'] = $bookings->sum('quantity');
-    $information['total_scanned_tickets'] = $bookings->map(function ($booking) {
-      if (!is_null($booking->scanned_tickets)) {
-        $scanned_tickets = json_decode($booking->scanned_tickets, true);
-        return count($scanned_tickets);
-      } else {
-        return 0;
-      }
-    })->sum();
-    $information['total_unscanned_tickets'] = $information['total_attendees_tickets'] - $information['total_scanned_tickets'];
-
-    $all_tickets = $bookings->map(function ($booking) use (&$tickets) {
-      $tickets = [];
-      if (!is_null($booking->variation)) {
-        $variations = json_decode($booking->variation, true);
-        foreach ($variations as $variation) {
-          $tickets[] = [
-            'booking_id' => $booking->booking_id,
-            'event_id' => $booking->event_id,
-            'event_name' => optional($booking->event)->title,
-            'ticket_name' => $variation['name'],
-            'ticket_id' => $variation['unique_id'],
-            'customer_phone' => $booking->phone,
-            'payment_status' => $booking->paymentStatus,
-            'scan_status' => !is_null($booking->scanned_tickets) ? (in_array($variation['unique_id'], json_decode($booking->scanned_tickets, true)) ? 'scanned' : 'unscanned') : 'unscanned',
-          ];
-        }
-      } else {
-        foreach (range(1, $booking->quantity) as $index) {
-          $tickets[] = [
-            'booking_id' => $booking->booking_id,
-            'event_name' => optional($booking->event)->title,
-            'event_id' => $booking->event_id,
-            'ticket_id' => $index,
-            'ticket_name' => null,
-            'customer_phone' => $booking->phone,
-            'payment_status' => $booking->paymentStatus,
-            'scan_status' => !is_null($booking->scanned_tickets) ? (in_array($index, json_decode($booking->scanned_tickets, true)) ? 'scanned' : 'unscanned') : 'unscanned',
-          ];
-        }
-      }
-      return $tickets;
-    })->flatten(1)   // all array merge
-      ->values();
-
-    $information['scanned_tickets'] = $all_tickets->where('scan_status', 'scanned')->values();
-    $information['unscanned_tickets'] = $all_tickets->where('scan_status', 'unscanned')->values();
-    $information['all_tickets'] = $all_tickets;
+    $information = array_merge($information, $this->scannerTicketStats($bookings));
 
     return response()->json([
       'status' => 'success',

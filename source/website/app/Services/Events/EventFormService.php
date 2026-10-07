@@ -185,7 +185,12 @@ class EventFormService
         BoxOfficeLocation::where('event_id',$event->id)->whereNotIn('name',$names)->delete();
     }
 
-    private function attachGallery(Event $event, array $ids): void { EventImage::whereIn('id',$ids)->whereNull('event_id')->update(['event_id'=>$event->id]); }
+    private function attachGallery(Event $event, array $ids): void
+    {
+        // Only uploads made in this session can be attached, so nobody can claim another organizer's images by id.
+        $ids = \App\Support\GalleryUploadRegistry::filter($ids);
+        if ($ids) EventImage::whereIn('id', $ids)->whereNull('event_id')->update(['event_id' => $event->id]);
+    }
     private function duplicateAsset(?string $filename,string $dir,array &$created): ?string {
         if (!$filename) return $filename; $directory=public_path($dir); $source=$directory.$filename; if(!is_file($source)) return $filename;
         @mkdir($directory,0775,true); $ext=pathinfo($filename,PATHINFO_EXTENSION); $name=uniqid('event-copy-',true).($ext?'.'.$ext:''); $dest=$directory.$name;

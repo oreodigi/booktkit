@@ -68,7 +68,14 @@ class EventBookingController extends Controller
   //updatePaymentStatus
   public function updatePaymentStatus(Request $request, $id)
   {
-    $booking = Booking::where('id', $id)->first();
+    $request->validate(['payment_status' => 'required|in:completed,pending,rejected']);
+    $booking = Booking::where('id', $id)->firstOrFail();
+    $statusService = app(\App\Services\Bookings\BookingStatusService::class);
+    if ($reason = $statusService->manualChangeBlockedReason($booking)) {
+      return redirect()->back()->with('warning', $reason);
+    }
+    $fromStatus = (string) $booking->paymentStatus;
+    if ($fromStatus === $request['payment_status']) return redirect()->back();
 
     if ($request['payment_status'] == 'completed') {
       $booking->update([
@@ -87,15 +94,8 @@ class EventBookingController extends Controller
       $earning->save();
 
 
-      $ticket = DB::table('basic_settings')->select('how_ticket_will_be_send')->first();
-
-      if ($ticket->how_ticket_will_be_send == 'instant') {
-
-        $invoice = $this->generateInvoice($booking);
-
-        $booking->update([
-          'invoice' => $invoice
-        ]);
+      // Legacy accounting runs once on approval; secure tickets are emailed below.
+      {
 
         $bookingInfo = $booking;
 
@@ -130,11 +130,8 @@ class EventBookingController extends Controller
         }
         //end unlink qr code
 
-        $this->sendMail($request, $booking, 'Booking approved');
-      } else {
-
-        BookingBackendInvoiceJob::dispatch($id)->delay(now()->addSeconds(10));
       }
+      $statusService->deliverTickets($booking);
     } else if ($request['payment_status'] == 'pending') {
       $booking->update([
         'paymentStatus' => 'pending'
@@ -239,6 +236,9 @@ class EventBookingController extends Controller
       }
     }
 
+
+    $statusService->audit($booking, $fromStatus, $request['payment_status'], 'admin', (int) optional(\Illuminate\Support\Facades\Auth::guard('admin')->user())->id);
+    $statusService->syncTickets($booking->fresh(), 'payment_' . $request['payment_status']);
 
     $firebase_admin_json = DB::table('basic_settings')
       ->where('uniqid', 12345)
@@ -393,37 +393,31 @@ class EventBookingController extends Controller
 
   public function destroy($id)
   {
-    $Booking = Booking::find($id);
-
-    // first, delete the attachment
-    @unlink(public_path('assets/admin/file/attachments/') . $Booking->attachment);
-
-    // second, delete the invoice
-    @unlink(public_path('assets/admin/file/invoices/') . $Booking->invoice);
-
-    $Booking->delete();
+    $booking = Booking::findOrFail($id);
+    if (app(\App\Services\Events\CommercialRecordGuard::class)->bookingIsCommercial($booking)) {
+      return redirect()->back()->with('warning', __('Paid or ticketed bookings cannot be deleted. Reject an offline booking, void a Box Office sale or refund an online payment instead.'));
+    }
+    @unlink(public_path('assets/admin/file/attachments/') . basename((string) $booking->attachmentFile));
+    @unlink(public_path('assets/admin/file/invoices/') . basename((string) $booking->invoice));
+    $booking->delete();
 
     return redirect()->back()->with('success', 'Booking deleted successfully!');
   }
 
   public function bulkDestroy(Request $request)
   {
-    $ids = $request->ids;
-
-    foreach ($ids as $id) {
+    $guard = app(\App\Services\Events\CommercialRecordGuard::class);
+    $kept = 0;
+    foreach ((array) $request->ids as $id) {
       $booking = Booking::find($id);
-
-      // first, delete the attachment
-      @unlink(public_path('assets/admin/file/attachments/') . $booking->attachment);
-
-      // second, delete the invoice
-      @unlink(public_path('assets/admin/file/invoices/') . $booking->invoice);
-
+      if (!$booking) continue;
+      if ($guard->bookingIsCommercial($booking)) { $kept++; continue; }
+      @unlink(public_path('assets/admin/file/attachments/') . basename((string) $booking->attachmentFile));
+      @unlink(public_path('assets/admin/file/invoices/') . basename((string) $booking->invoice));
       $booking->delete();
     }
 
-    Session::flash('success', 'Deleted Successfully');
-
+    Session::flash($kept ? 'warning' : 'success', $kept ? __(':count paid or ticketed booking(s) were kept; the rest were deleted.', ['count' => $kept]) : 'Deleted Successfully');
     return response()->json(['status' => 'success'], 200);
   }
 

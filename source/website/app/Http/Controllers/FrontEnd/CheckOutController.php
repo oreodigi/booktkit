@@ -32,7 +32,7 @@ class CheckOutController extends Controller
       $request->merge(['quantity'=>[$qty]]);
       Session::put('selTickets',[['ticket_id'=>$quote['ticket_id'],'name'=>$quote['pass_name'],'qty'=>$qty,'price'=>$quote['unit_price']/100,'early_bird_dicount'=>0,'pass_product_id'=>$quote['pass_product_id'],'event_date_ids'=>$quote['event_date_ids'],'pass_type'=>$quote['pass_type']]]);
       Session::put('total',$quote['line_total']/100);Session::put('sub_total',$quote['line_total']/100);Session::put('quantity',$qty);Session::put('total_early_bird_dicount',0);Session::put('discount',null);
-      $event=EventContent::join('events','events.id','event_contents.event_id')->where('events.id',$request->event_id)->select('events.*','event_contents.title','event_contents.slug','event_contents.city','event_contents.address','event_contents.country')->firstOrFail();Session::put('event',$event);Session::put('event_date',implode(',',$quote['event_date_ids']));Session::put('online_gateways',OnlineGateway::where('status',1)->get());Session::put('offline_gateways',OfflineGateway::where('status',1)->orderBy('serial_number','asc')->get());
+      $event=EventContent::join('events','events.id','event_contents.event_id')->where('events.id',$request->event_id)->select('events.*','event_contents.title','event_contents.slug','event_contents.city','event_contents.address','event_contents.country')->firstOrFail();Session::put('event',$event);Session::put('event_date',implode(',',$quote['event_date_ids']));Session::put('online_gateways',OnlineGateway::where('status',1)->where('keyword','razorpay')->get());Session::put('offline_gateways',OfflineGateway::where('status',1)->orderBy('serial_number','asc')->get());
       if(!Auth::guard('customer')->check() && (int) optional($basic)->event_guest_checkout_status !== 1) return redirect()->route('customer.login',['redirectPath'=>'event_checkout']);
       return redirect()->route('check-out');
     }
@@ -136,72 +136,39 @@ class CheckOutController extends Controller
 
 
     if ($event->event_type == 'online') {
-      //**************** stock check start *************** */
-      $stock = StockCheck($request->event_id, $request->quantity);
-      if ($stock == 'error') {
-        $check = true;
+      // Online events sell exactly one server-managed ticket. Price, free/paid status and
+      // early-bird come from the database, never from the posted form.
+      $onlineTicket = Ticket::where('event_id', $request->event_id)->orderBy('id')->first();
+      $qty = (int) (is_array($request->quantity) ? array_sum(array_map('intval', $request->quantity)) : $request->quantity);
+      if (!$onlineTicket || $qty < 1) {
+        return back()->with(['alert-type' => 'error', 'message' => 'Please Select at least one ticket']);
       }
-
-      //*************** stock check end **************** */
-
-      if ($request->pricing_type == 'normal') {
-        $price = Ticket::where('event_id', $request->event_id)->select('price', 'early_bird_discount', 'early_bird_discount_amount', 'early_bird_discount_type', 'early_bird_discount_date', 'early_bird_discount_time', 'ticket_available', 'ticket_available_type', 'max_ticket_buy_type', 'max_buy_ticket')->first();
-        $information['quantity'] = $request->quantity;
-        $total = $request->quantity * $price->price;
-
-        //check guest checkout status enable or not
-        if ($event_guest_checkout_status != 1) {
-          //check max buy by customer
-          $max_buy = isTicketPurchaseOnline($request->event_id, $price->max_buy_ticket);
-          if ($max_buy['status'] == 'true') {
-            $check = true;
-          } else {
-            $check = false;
-          }
-        } else {
-          $check = false;
-        }
-
-        if ($price->early_bird_discount == 'enable') {
-
-          $start = Carbon::parse($price->early_bird_discount_date . $price->early_bird_discount_time);
-          $end = Carbon::parse($price->early_bird_discount_date . $price->early_bird_discount_time);
-          $today = Carbon::now();
-          if ($today <= ($end)) {
-            if ($price->early_bird_discount_type == 'fixed') {
-              $early_bird_dicount = $price->early_bird_discount_amount;
-            } else {
-              $early_bird_dicount = ($price->early_bird_discount_amount * $total) / 100;
-            }
-          } else {
-            $early_bird_dicount = 0;
-          }
-        } else {
-          $early_bird_dicount = 0;
-        }
-
-        Session::put('total_early_bird_dicount', $early_bird_dicount * $request->quantity);
-        $information['total'] = $total;
-        Session::put('total', $total);
-        Session::put('sub_total', $total);
-        Session::put('quantity', $request->quantity);
-      } elseif ($request->pricing_type == 'free') {
-        $price = Ticket::where('event_id', $request->event_id)->select('max_buy_ticket')->first();
-        //check guest checkout status enable or not
-        if ($event_guest_checkout_status != 1) {
-          //check max buy by customer
-          $max_buy = isTicketPurchaseOnline($request->event_id, $price->max_buy_ticket);
-          if ($max_buy['status'] == 'true') {
-            $check = true;
-          }
-        }
-
-        $information['quantity'] = $request->quantity;
-        $information['total'] = 0;
-        Session::put('total', 0);
-        Session::put('sub_total', 0);
-        Session::put('quantity', $request->quantity);
+      if (StockCheck($request->event_id, $qty) == 'error') {
+        return back()->with(['alert-type' => 'error', 'message' => __('Tickets are not available in the requested quantity.')]);
       }
+      if ($event_guest_checkout_status != 1 && Auth::guard('customer')->check()) {
+        $max_buy = isTicketPurchaseOnline($request->event_id, $onlineTicket->max_buy_ticket);
+        if ($max_buy['status'] == 'true') $check = true;
+      }
+      $isFree = $onlineTicket->pricing_type === 'free';
+      $unit = $isFree ? 0 : (float) $onlineTicket->price;
+      $early_bird_dicount = 0;
+      if (!$isFree && $onlineTicket->early_bird_discount == 'enable' && Carbon::now() <= Carbon::parse($onlineTicket->early_bird_discount_date . $onlineTicket->early_bird_discount_time)) {
+        $early_bird_dicount = $onlineTicket->early_bird_discount_type == 'fixed'
+          ? (float) $onlineTicket->early_bird_discount_amount
+          : ($unit * (float) $onlineTicket->early_bird_discount_amount) / 100;
+      }
+      $total = $unit * $qty;
+      Session::put('selTickets', [[
+        'ticket_id' => $onlineTicket->id, 'name' => $onlineTicket->title ?: 'Ticket', 'qty' => $qty,
+        'price' => $unit, 'early_bird_dicount' => $early_bird_dicount, 'type' => $isFree ? 'free' : 'normal',
+      ]]);
+      Session::put('total_early_bird_dicount', min($total, $early_bird_dicount * $qty));
+      $information['quantity'] = $qty;
+      $information['total'] = $total;
+      Session::put('total', $total);
+      Session::put('sub_total', $total);
+      Session::put('quantity', $qty);
     } else {
       $tickets = Ticket::where('event_id', $request->event_id)->select('id', 'title', 'pricing_type', 'price', 'variations', 'early_bird_discount', 'early_bird_discount_amount', 'early_bird_discount_type', 'early_bird_discount_date', 'early_bird_discount_time', 'normal_ticket_slot_unique_id', 'normal_ticket_slot_enable', 'free_tickete_slot_enable', 'free_tickete_slot_unique_id')->get();
       $ticketArr = [];
@@ -407,7 +374,8 @@ class CheckOutController extends Controller
       ->first();
 
     Session::put('event', $event);
-    $online_gateways = OnlineGateway::where('status', 1)->get();
+    // Event checkout runs on Payments V2 (Razorpay) only; other legacy gateways are not offered.
+    $online_gateways = OnlineGateway::where('status', 1)->where('keyword', 'razorpay')->get();
     $offline_gateways = OfflineGateway::where('status', 1)->orderBy('serial_number', 'asc')->get();
     Session::put('online_gateways', $online_gateways);
     Session::put('offline_gateways', $offline_gateways);

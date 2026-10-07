@@ -19,6 +19,7 @@ use App\Services\Payments\PaymentOrderService;
 use App\Services\Payments\RazorpayRouteService;
 use App\Services\Payments\PaymentLedgerService;
 use App\Services\Payments\BookingFinalizationService;
+use App\Services\Payments\PaymentCaptureService;
 use App\Models\Payments\PaymentOrder;
 use App\Models\Payments\OrganizerPaymentProfile;
 
@@ -58,33 +59,38 @@ class RazorpayController extends Controller
     $checkoutData=['key'=>$this->key,'amount'=>$order->customer_total,'currency'=>$order->currency,'name'=>$webInfo->website_title,
       'description'=>'Event Booking Via Razorpay','prefill'=>['name'=>$request->fname.' '.$request->lname,'email'=>$request->email,'contact'=>$request->phone],'order_id'=>$gateway['id']];
     $jsonData=json_encode($checkoutData); session(['event_id'=>$event_id,'booktkitPaymentOrder'=>$order->uuid]);
-    return view('frontend.payment.razorpay',compact('jsonData','notifyURL'));
+    $paymentOrderUuid=$order->uuid;
+    return view('frontend.payment.razorpay',compact('jsonData','notifyURL','paymentOrderUuid'));
   }
 
   public function notify(Request $request)
   {
-    $eventId=session('event_id'); $uuid=session('booktkitPaymentOrder');
-    $order=PaymentOrder::where('uuid',$uuid)->firstOrFail();
-    try {
-      app(RazorpayRouteService::class)->verifyCheckout($order,$request->razorpayPaymentId,$request->razorpaySignature);
-      $booking=DB::transaction(function() use($order,$request){
-        $locked=PaymentOrder::whereKey($order->id)->lockForUpdate()->first();
-        if($locked->status==='paid' && $locked->booking_id) return \App\Models\Event\Booking::findOrFail($locked->booking_id);
-        $locked->update(['gateway_payment_id'=>$request->razorpayPaymentId,'status'=>'paid','paid_at'=>now()]);
-        $booking=app(BookingFinalizationService::class)->finalize($locked);
-        app(PaymentLedgerService::class)->recordPaid($locked);
-        return $booking;
-      });
-      $profile=OrganizerPaymentProfile::where('organizer_id',$order->organizer_id)->first();
-      if($order->settlement_mode==='razorpay_split' && $profile && $profile->canSplit()){
-        try { app(RazorpayRouteService::class)->transferToOrganizer($order->fresh(),$profile->razorpay_account_id); } catch(\Throwable $e) { report($e); }
-      }
-      session()->forget(['event_id','selTickets','arrData','paymentId','discount','razorpayOrderId','booktkitPaymentOrder']);
-      return redirect()->route('event_booking.complete',['id'=>$eventId,'booking_id'=>$booking->id]);
-    } catch(\Throwable $e) {
-      report($e); session()->forget(['booktkitPaymentOrder']);
-      return redirect()->route('event_booking.cancel',['id'=>$eventId])->with('error','Payment verification failed.');
+    // Identify the order from the signed checkout response, falling back to the session. The Razorpay
+    // signature binds payment id to gateway order id, so a forged order reference cannot verify.
+    $uuid = (string) ($request->input('payment_order') ?: session('booktkitPaymentOrder'));
+    $order = PaymentOrder::where('uuid', $uuid)->first();
+    if (!$order && $request->filled('razorpayOrderId')) {
+      $order = PaymentOrder::where('gateway_order_id', (string) $request->input('razorpayOrderId'))->first();
     }
+    if (!$order) {
+      return redirect()->route('index')->with(['alert-type' => 'error', 'message' => __('We could not find this payment. If you were charged, your tickets will be emailed once the payment is confirmed.')]);
+    }
+    $eventId = $order->event_id;
+    try {
+      app(RazorpayRouteService::class)->verifyCheckout($order, (string) $request->razorpayPaymentId, (string) $request->razorpaySignature);
+    } catch (\Throwable $e) {
+      report($e); session()->forget(['booktkitPaymentOrder']);
+      return redirect()->route('event_booking.cancel', ['id' => $eventId])->with('error', 'Payment verification failed.');
+    }
+    try {
+      $booking = app(PaymentCaptureService::class)->complete($order, (string) $request->razorpayPaymentId);
+    } catch (\Throwable $e) {
+      report($e); session()->forget(['booktkitPaymentOrder']);
+      return redirect()->route('index')->with(['alert-type' => 'error', 'message' => __('Your payment was received but the booking could not be completed automatically. Our team has been alerted and will confirm your tickets or refund you.')]);
+    }
+    \App\Support\BookingConfirmationAccess::grant($booking);
+    session()->forget(['event_id','selTickets','arrData','paymentId','discount','razorpayOrderId','booktkitPaymentOrder']);
+    return redirect()->route('event_booking.complete', ['id' => $eventId, 'booking_id' => $booking->id]);
   }
 
 }

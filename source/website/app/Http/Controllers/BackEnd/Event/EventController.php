@@ -134,6 +134,7 @@ class EventController extends Controller
     $pi->event_id = $request->event_id ?? null;
     $pi->image = $filename;
     $pi->save();
+    if (!$pi->event_id) \App\Support\GalleryUploadRegistry::remember((int) $pi->id);
 
     return response()->json([
       'status'  => 'success',
@@ -272,105 +273,21 @@ class EventController extends Controller
    */
   public function destroy($id)
   {
-    $event = Event::find($id);
-
-    @unlink(public_path('assets/admin/img/event/thumbnail/') . $event->thumbnail);
-
-    $event_contents = EventContent::where('event_id', $event->id)->get();
-    foreach ($event_contents as $event_content) {
-      $event_content->delete();
+    $event = Event::findOrFail($id);
+    if (!app(\App\Services\Events\EventDeletionService::class)->delete($event)) {
+      return redirect()->back()->with('warning', __(\App\Services\Events\EventDeletionService::BLOCKED_MESSAGE));
     }
-    $event_images = EventImage::where('event_id', $event->id)->get();
-    foreach ($event_images as $event_image) {
-      @unlink(public_path('assets/admin/img/event-gallery/') . $event_image->image);
-      $event_image->delete();
-    }
-
-    //bookings
-    $bookings = $event->booking()->get();
-    foreach ($bookings as $booking) {
-      // first, delete the attachment
-      @unlink(public_path('assets/admin/file/attachments/') . $booking->attachment);
-
-      // second, delete the invoice
-      @unlink(public_path('assets/admin/file/invoices/') . $booking->invoice);
-
-      $booking->delete();
-    }
-
-    //tickets
-    $tickets = $event->tickets()->get();
-    foreach ($tickets as $ticket) {
-      $ticket->delete();
-    }
-    //wishlists
-    $wishlists = $event->wishlists()->get();
-    foreach ($wishlists as $wishlist) {
-      $wishlist->delete();
-    }
-
-    //dates
-    $dates = $event->dates()->get();
-    foreach ($dates as $date) {
-      $date->delete();
-    }
-
-    // finally delete the event
-    $event->delete();
-
     return redirect()->back()->with('success', 'Deleted Successfully');
   }
   //bulk_delete
   public function bulk_delete(Request $request)
   {
-    foreach ($request->ids as $id) {
+    $kept = 0;
+    foreach ((array) $request->ids as $id) {
       $event = Event::find($id);
-
-      @unlink(public_path('assets/admin/img/event/thumbnail/') . $event->thumbnail);
-
-      $event_contents = EventContent::where('event_id', $event->id)->get();
-      foreach ($event_contents as $event_content) {
-        $event_content->delete();
-      }
-      $event_images = EventImage::where('event_id', $event->id)->get();
-      foreach ($event_images as $event_image) {
-        @unlink(public_path('assets/admin/img/event-gallery/') . $event_image->image);
-        $event_image->delete();
-      }
-
-      //bookings
-      $bookings = $event->booking()->get();
-      foreach ($bookings as $booking) {
-        // first, delete the attachment
-        @unlink(public_path('assets/admin/file/attachments/') . $booking->attachment);
-
-        // second, delete the invoice
-        @unlink(public_path('assets/admin/file/invoices/') . $booking->invoice);
-
-        $booking->delete();
-      }
-
-      //tickets
-      $tickets = $event->tickets()->get();
-      foreach ($tickets as $ticket) {
-        $ticket->delete();
-      }
-
-      //wishlists
-      $wishlists = $event->wishlists()->get();
-      foreach ($wishlists as $wishlist) {
-        $wishlist->delete();
-      }
-
-      //dates
-      $dates = $event->dates()->get();
-      foreach ($dates as $date) {
-        $date->delete();
-      }
-      // finally delete the event
-      $event->delete();
+      if ($event && !app(\App\Services\Events\EventDeletionService::class)->delete($event)) $kept++;
     }
-    Session::flash('success', 'Deleted Successfully');
+    Session::flash($kept ? 'warning' : 'success', $kept ? __(':count event(s) with bookings or payments were kept; set them to inactive instead.', ['count' => $kept]) : 'Deleted Successfully');
     return response()->json(['status' => 'success'], 200);
   }
   public function editTicketSetting($id)
@@ -410,7 +327,7 @@ class EventController extends Controller
     }
     $in['instructions'] = $instructions;
 
-    $event->update($in);
+    $event->update(array_intersect_key($in, array_flip(['ticket_image', 'ticket_logo', 'instructions'])));
     Session::flash('success', 'Updated Successfully');
 
     return response()->json(['status' => 'success'], 200);

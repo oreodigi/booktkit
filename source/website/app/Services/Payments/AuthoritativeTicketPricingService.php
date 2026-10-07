@@ -8,6 +8,8 @@ use Illuminate\Validation\ValidationException;
 class AuthoritativeTicketPricingService {
  public function quote(int $eventId,array $items,string $channel='web'): array {
   $event=Event::findOrFail($eventId); $subtotal=0; $discount=0; $quantity=0; $snapshot=[];
+  $this->assertSellable($event,$channel);
+  $perProduct=[];
   foreach($items as $item){
    $qty=(int)$item['quantity'];
    $passQuote=null;
@@ -27,6 +29,10 @@ class AuthoritativeTicketPricingService {
     if(($variant['ticket_available_type']??null)==='limited' && (int)($variant['ticket_available']??0)<$qty) throw ValidationException::withMessages(['items'=>'Requested ticket variation is no longer available.']);
     $unit=(float)$variant['price'];
    }
+   // Max per order is enforced per ticket (or variation) across all lines of this order.
+   $limitKey=$ticket->id.'|'.($passQuote ? 'pass:'.$passQuote['pass_product_id'] : (string)($item['variation']??''));
+   $perProduct[$limitKey]=($perProduct[$limitKey]??0)+$qty;
+   if(!$passQuote) $this->assertMaxPerOrder($ticket,$item['variation']??null,$perProduct[$limitKey]);
    $line=(int)round($unit*100)*$qty; $lineDiscount=0;
    if($ticket->early_bird_discount==='enable' && $ticket->early_bird_discount_date && $ticket->early_bird_discount_time){
     $deadline=Carbon::parse($ticket->early_bird_discount_date.' '.$ticket->early_bird_discount_time);
@@ -39,5 +45,19 @@ class AuthoritativeTicketPricingService {
    $snapshot[]=['ticket_id'=>$ticket->id,'variation'=>$item['variation']??null,'quantity'=>$qty,'unit_price'=>(int)round($unit*100),'line_total'=>$line,'discount'=>min($line,$lineDiscount),'pass_product_id'=>$passQuote['pass_product_id']??null,'pass_name'=>$passQuote['pass_name']??null,'pass_type'=>$passQuote['pass_type']??null,'event_date_ids'=>$passQuote['event_date_ids']??[],'admissions_per_holder'=>$passQuote['admissions_per_holder']??1];
   }
   return ['event'=>$event,'items'=>$snapshot,'quantity'=>$quantity,'subtotal'=>$subtotal,'discount'=>$discount,'ticket_amount'=>max(0,$subtotal-$discount)];
+ }
+ /** Events must be published (online channels) and not yet ended. POS may sell unpublished, counter-only events. */
+ private function assertSellable(Event $event,string $channel): void {
+  $online=!in_array($channel,['pos','box_office'],true);
+  if($online && (string)$event->status!=='1') throw ValidationException::withMessages(['event'=>'This event is not available for booking.']);
+  if($event->end_date_time && Carbon::parse($event->end_date_time)->isPast()) throw ValidationException::withMessages(['event'=>'This event has ended.']);
+ }
+ private function assertMaxPerOrder(Ticket $ticket,?string $variation,int $qty): void {
+  $max=null;
+  if($ticket->pricing_type==='variation'){
+   $v=collect(json_decode($ticket->variations,true)?:[])->first(fn($x)=>(string)($x['name']??'')===(string)$variation);
+   if($v && ($v['max_ticket_buy_type']??null)==='limited' && (int)($v['v_max_ticket_buy']??0)>0) $max=(int)$v['v_max_ticket_buy'];
+  } elseif($ticket->max_ticket_buy_type==='limited' && (int)$ticket->max_buy_ticket>0) $max=(int)$ticket->max_buy_ticket;
+  if($max!==null && $qty>$max) throw ValidationException::withMessages(['items'=>"You can buy at most {$max} of this ticket per order."]);
  }
 }

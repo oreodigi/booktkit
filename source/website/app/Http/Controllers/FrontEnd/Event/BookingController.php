@@ -25,6 +25,7 @@ use App\Http\Controllers\FrontEnd\PaymentGateway\XenditController;
 use App\Http\Controllers\FrontEnd\PaymentGateway\YocoController;
 use App\Jobs\BookingInvoiceJob;
 use App\Services\Tickets\TicketDeliveryService;
+use App\Services\Payments\AuthoritativeTicketPricingService;
 use App\Services\Events\EventPassService;
 use App\Services\Tickets\TicketIssuanceService;
 use App\Models\BasicSettings\Basic;
@@ -113,135 +114,84 @@ class BookingController extends Controller
       return back()->with($notification);
     }
 
-    // payment
-    if ($request->total != 0 || Session::get('sub_total') != 0) {
-      if (!$request->exists('gateway')) {
+    // The server quote decides whether money is due; client totals, price types and event JSON are ignored.
+    if (!$event || (int) $event->id !== (int) $id) {
+      return redirect()->route('index')->with(['alert-type' => 'error', 'message' => __('Your checkout session expired. Please select your tickets again.')]);
+    }
+    $items = collect(Session::get('selTickets', []))->filter(fn ($x) => (int) ($x['qty'] ?? 0) > 0)->map(function ($x) {
+      return ['ticket_id' => (int) $x['ticket_id'], 'quantity' => (int) $x['qty'], 'variation' => ($x['pass_product_id'] ?? null) ? null : ($x['name'] ?? null), 'pass_product_id' => $x['pass_product_id'] ?? null, 'event_date_ids' => $x['event_date_ids'] ?? []];
+    })->values()->all();
+    if (empty($items)) {
+      return back()->with(['alert-type' => 'error', 'message' => __('Please select at least one ticket.')]);
+    }
+    try {
+      $quote = app(AuthoritativeTicketPricingService::class)->quote((int) $id, $items, 'web');
+    } catch (\Illuminate\Validation\ValidationException $e) {
+      return back()->with(['alert-type' => 'error', 'message' => collect($e->errors())->flatten()->first() ?: __('These tickets are no longer available.')]);
+    }
+
+    if ((int) $quote['ticket_amount'] > 0) {
+      if (!$request->filled('gateway')) {
         Session::flash('error', 'Please select a payment method.');
         return redirect()->back();
-      } else if ($request['gateway'] == 'paypal') {
-        $paypal = new PayPalController();
-
-        return $paypal->bookingProcess($request, $id);
-      } else if ($request['gateway'] == 'razorpay') {
-        $razorpay = new RazorpayController();
-
-        return $razorpay->bookingProcess($request, $id);
-      } else if ($request['gateway'] == 'instamojo') {
-        $instamojo = new InstamojoController();
-
-        return $instamojo->bookingProcess($request, $id);
-      } else if ($request['gateway'] == 'paystack') {
-        $paystack = new PaystackController();
-
-        return $paystack->bookingProcess($request, $id);
-      } else if ($request['gateway'] == 'flutterwave') {
-        $flutterwave = new FlutterwaveController();
-
-        return $flutterwave->bookingProcess($request, $id);
-      } else if ($request['gateway'] == 'mercadopago') {
-        $mercadopago = new MercadoPagoController();
-
-        return $mercadopago->bookingProcess($request, $id);
-      } else if ($request['gateway'] == 'mollie') {
-        $mollie = new MollieController();
-
-        return $mollie->bookingProcess($request, $id);
-      } else if ($request['gateway'] == 'stripe') {
-        $stripe = new StripeController();
-
-        return $stripe->bookingProcess($request, $id);
-      } else if ($request['gateway'] == 'paytm') {
-        $paytm = new PaytmController();
-
-        return $paytm->bookingProcess($request, $id);
-      } else if ($request['gateway'] == 'midtrans') {
-        Session::put('midtrans_payment_type', 'event');
-        $paytm = new MidtransController();
-
-        return $paytm->makePayment($request, $id);
-      } else if ($request['gateway'] == 'iyzico') {
-        $paytm = new IyzipayController();
-
-        return $paytm->makePayment($request, $id);
-      } else if ($request['gateway'] == 'paytabs') {
-        $paytabs = new PaytabsController();
-
-        return $paytabs->makePayment($request, $id);
-      } else if ($request['gateway'] == 'toyyibpay') {
-        $toyyibpay = new ToyyibpayController();
-
-        return $toyyibpay->makePayment($request, $id);
-      } else if ($request['gateway'] == 'phonepe') {
-        $phonepe = new PhonepeController();
-
-        return $phonepe->makePayment($request, $id);
-      } else if ($request['gateway'] == 'yoco') {
-        $yoco = new YocoController();
-
-        return $yoco->makePayment($request, $id);
-      } else if ($request['gateway'] == 'xendit') {
-        $xindit = new XenditController();
-
-        return $xindit->makePayment($request, $id);
-      } else if ($request['gateway'] == 'myfatoorah') {
-        $xindit = new MyFatoorahController();
-
-        return $xindit->makePayment($request, $id);
-      } else if ($request['gateway'] == 'perfect_money') {
-        $perfect_money = new PerfectMoneyController();
-
-        return $perfect_money->makePayment($request, $id);
-      } else {
-        $offline = new OfflineController();
-        return $offline->bookingProcess($request, $id);
       }
-    } else {
-      try {
-        $event = json_decode($request->event, true);
-        $arrData = array(
-          'event_id' => $event['id'],
-          'price' => 0,
-          'tax' => 0,
-          'commission' => 0,
-          'quantity' => $request->quantity,
-          'discount' => 0,
-          'total_early_bird_dicount' => 0,
-          'currencyText' => null,
-          'currencyTextPosition' => null,
-          'currencySymbol' => null,
-          'currencySymbolPosition' => null,
-          'fname' => $request->fname,
-          'lname' => $request->lname,
-          'email' => $request->email,
-          'phone' => $request->phone,
-          'country' => $request->country,
-          'state' => $request->state,
-          'city' => $request->city,
-          'zip_code' => $request->city,
-          'address' => $request->address,
-          'paymentMethod' => null,
-          'gatewayType' => null,
-          'paymentStatus' => 'free',
-          'event_date' => Session::get('event_date')
-        );
-
-
-        $bookingInfo = $this->storeData($arrData);
-
-
-        // Deliver the same secure one-time QR credentials used by the scanner.
-        app(TicketDeliveryService::class)->deliver($bookingInfo);
-
-        $request->session()->forget('event_id');
-        $request->session()->forget('selTickets');
-        $request->session()->forget('arrData');
-        $request->session()->forget('discount');
-
-
-        return redirect()->route('event_booking.complete', ['id' => $event['id'], 'booking_id' => $bookingInfo->id, 'via' => 'offline']);
-      } catch (\Throwable $th) {
-        return view('errors.404');
+      if ($request['gateway'] === 'razorpay') {
+        return (new RazorpayController())->bookingProcess($request, $id);
       }
+      // Only offline methods configured and enabled by the admin are accepted besides Razorpay.
+      if (\App\Models\PaymentGateway\OfflineGateway::whereKey($request['gateway'])->where('status', 1)->exists()) {
+        return (new OfflineController())->bookingProcess($request, $id);
+      }
+      return back()->with(['alert-type' => 'error', 'message' => __('This payment method is not available.')]);
+    }
+
+    // Free booking: every selected line is free (or fully discounted) according to the server.
+    $request->validate(['fname' => 'required|string|max:100', 'lname' => 'nullable|string|max:100', 'email' => 'required|email|max:190', 'phone' => 'nullable|string|max:30']);
+    try {
+      $arrData = array(
+        'event_id' => (int) $id,
+        'price' => 0,
+        'tax' => 0,
+        'commission' => 0,
+        'quantity' => $quote['quantity'],
+        'discount' => 0,
+        'total_early_bird_dicount' => 0,
+        'currencyText' => null,
+        'currencyTextPosition' => null,
+        'currencySymbol' => null,
+        'currencySymbolPosition' => null,
+        'fname' => $request->fname,
+        'lname' => $request->lname,
+        'email' => $request->email,
+        'phone' => $request->phone,
+        'country' => $request->country,
+        'state' => $request->state,
+        'city' => $request->city,
+        'zip_code' => $request->zip_code,
+        'address' => $request->address,
+        'paymentMethod' => null,
+        'gatewayType' => null,
+        'paymentStatus' => 'free',
+        'event_date' => Session::get('event_date')
+      );
+
+      $bookingInfo = DB::transaction(fn () => $this->storeData($arrData));
+      if (!$bookingInfo) {
+        return back()->with(['alert-type' => 'error', 'message' => __('These tickets are no longer available.')]);
+      }
+
+      // Deliver the same secure one-time QR credentials used by the scanner.
+      app(TicketDeliveryService::class)->deliver($bookingInfo);
+
+      $request->session()->forget('event_id');
+      $request->session()->forget('selTickets');
+      $request->session()->forget('arrData');
+      $request->session()->forget('discount');
+
+      return redirect()->route('event_booking.complete', ['id' => (int) $id, 'booking_id' => $bookingInfo->id, 'via' => 'offline']);
+    } catch (\Throwable $th) {
+      report($th);
+      return view('errors.404');
     }
   }
 
@@ -396,6 +346,7 @@ class BookingController extends Controller
       ]);
 
       app(TicketIssuanceService::class)->ensureForBooking($booking);
+      \App\Support\BookingConfirmationAccess::grant($booking);
       return $booking;
     } catch (\Exception $th) {
     }
@@ -417,8 +368,12 @@ class BookingController extends Controller
 
     $booking = Booking::where('id', $booking_id)->where('event_id', $id)->firstOrFail();
 
-    // Do not expose another customer's booking/ticket credentials by changing the URL id.
-    if (Auth::guard('customer')->check() && (string) $booking->customer_id !== (string) Auth::guard('customer')->id()) {
+    // The page shows live ticket QR codes: only the owning customer or the browser session
+    // that just completed this checkout may open it (booking ids are sequential).
+    if (!\App\Support\BookingConfirmationAccess::allows($booking)) {
+      if (!Auth::guard('customer')->check()) {
+        return redirect()->route('customer.login')->with(['alert-type' => 'info', 'message' => __('Please log in to view this booking. Your tickets were also sent by email.')]);
+      }
       abort(403);
     }
 
