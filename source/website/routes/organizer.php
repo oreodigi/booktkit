@@ -20,6 +20,7 @@ Route::prefix('staff')->group(function () {
     Route::get('change-password','StaffAuthController@editPassword')->name('staff.password.edit');
     Route::post('change-password','StaffAuthController@updatePassword')->name('staff.password.update');
     Route::post('logout','StaffAuthController@logout')->name('staff.logout');
+    Route::post('impersonation/end','StaffAuthController@endImpersonation')->name('staff.impersonation.end');
   });
 });
 
@@ -91,6 +92,7 @@ Route::prefix('/organizer')->middleware('auth:organizer', 'Deactive:organizer', 
   Route::post('/access-control/batches', 'BackEnd\\Organizer\\AccessCredentialController@createBatch')->name('organizer.access.batch');
   Route::post('/access-control/assign', 'BackEnd\\Organizer\\AccessCredentialController@assign')->name('organizer.access.assign');
   Route::post('/access-control/replace', 'BackEnd\\Organizer\\AccessCredentialController@replace')->name('organizer.access.replace');
+  Route::post('/access-control/revoke', 'BackEnd\\Organizer\\AccessCredentialController@revoke')->name('organizer.access.revoke');
   Route::post('/access-control/zones', 'BackEnd\\Organizer\\AccessCredentialController@createZone')->name('organizer.access.zone');
   Route::post('/access-control/gates', 'BackEnd\\Organizer\\AccessCredentialController@createGate')->name('organizer.access.gate');
   Route::get('/box-office/reports', 'BackEnd\\Organizer\\BoxOfficeReportController@index')->name('organizer.boxoffice.reports.index');

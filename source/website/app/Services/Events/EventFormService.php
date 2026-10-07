@@ -2,6 +2,8 @@
 
 namespace App\Services\Events;
 
+use Illuminate\Support\Facades\Schema;
+
 use App\Models\Event;
 use App\Models\Language;
 use Illuminate\Support\Facades\DB;
@@ -48,6 +50,48 @@ class EventFormService
         });
     }
 
+    /**
+     * Copies the rest of an event's setup so a duplicate is ready to sell: ticket names, counters,
+     * access policy, zones, gates and pass products (with their dates). Sales history never copies;
+     * pass sold counts start at zero.
+     */
+    private function duplicateConfiguration(Event $source, Event $copy, array $ticketMap, array $dateMap): void
+    {
+        $now = now();
+        $clone = function (string $table, string $fk, $oldId, $newId, array $override = [], array $drop = []) use ($now) {
+            if (!Schema::hasTable($table)) return [];
+            $map = [];
+            foreach (DB::table($table)->where($fk, $oldId)->get() as $row) {
+                $data = array_diff_key((array) $row, array_flip(array_merge(['id'], $drop)));
+                $data = array_merge($data, [$fk => $newId], array_map(fn ($v) => is_callable($v) ? $v($row) : $v, $override));
+                if (array_key_exists('created_at', $data)) $data['created_at'] = $now;
+                if (array_key_exists('updated_at', $data)) $data['updated_at'] = $now;
+                $map[$row->id] = DB::table($table)->insertGetId($data);
+            }
+            return $map;
+        };
+        foreach ($ticketMap as $oldTicket => $newTicket) {
+            $clone('ticket_contents', 'ticket_id', $oldTicket, $newTicket);
+            $clone('variation_contents', 'ticket_id', $oldTicket, $newTicket);
+        }
+        $clone('box_office_locations', 'event_id', $source->id, $copy->id);
+        $clone('event_access_policies', 'event_id', $source->id, $copy->id);
+        $zoneMap = $clone('event_access_zones', 'event_id', $source->id, $copy->id);
+        $clone('event_gates', 'event_id', $source->id, $copy->id, ['zone_id' => fn ($row) => $row->zone_id ? ($zoneMap[$row->zone_id] ?? null) : null]);
+        if (Schema::hasTable('event_pass_products')) {
+            foreach (DB::table('event_pass_products')->where('event_id', $source->id)->get() as $pass) {
+                if (!isset($ticketMap[$pass->ticket_id])) continue;
+                $data = array_diff_key((array) $pass, ['id' => 1]);
+                $data = array_merge($data, ['event_id' => $copy->id, 'ticket_id' => $ticketMap[$pass->ticket_id], 'uuid' => (string) \Illuminate\Support\Str::uuid(),
+                    'sold_quantity' => 0, 'created_at' => $now, 'updated_at' => $now]);
+                $newPass = DB::table('event_pass_products')->insertGetId($data);
+                foreach (DB::table('event_pass_dates')->where('pass_product_id', $pass->id)->get() as $pd) {
+                    if (isset($dateMap[$pd->event_date_id])) DB::table('event_pass_dates')->insert(['pass_product_id' => $newPass, 'event_date_id' => $dateMap[$pd->event_date_id], 'created_at' => $now, 'updated_at' => $now]);
+                }
+            }
+        }
+    }
+
     public function duplicateEvent(Event $source, EventActor $actor): Event
     {
         $actor->assertOwns($source);
@@ -67,7 +111,8 @@ class EventFormService
                     $new=$content->replicate(); $new->event_id=$copy->id; $new->title=$content->title.' - Copy';
                     $new->slug=createSlug($new->title.'-'.$copy->id); $new->google_calendar_id=null; $new->save();
                 });
-                foreach ($source->dates as $date) { $new=$date->replicate(); $new->event_id=$copy->id; $new->save(); }
+                $dateMap=[];
+                foreach ($source->dates as $date) { $new=$date->replicate(); $new->event_id=$copy->id; $new->save(); $dateMap[$date->id]=$new->id; }
                 foreach ($source->galleries as $gallery) {
                     $new=$gallery->replicate(); $new->event_id=$copy->id;
                     $new->image=$this->duplicateAsset($gallery->image,'assets/admin/img/event-gallery/',$createdFiles); $new->save();
@@ -78,7 +123,9 @@ class EventFormService
                     $new->free_tickete_slot_enable=0; $new->free_tickete_slot_unique_id=null;
                     $new->variations=$this->stripSlotIdentifiers($new->variations);
                     if (array_key_exists('trans_vars',$new->getAttributes())) $new->trans_vars=$this->stripSlotIdentifiers($new->trans_vars); $new->save();
+                    $ticketMap[$ticket->id]=$new->id;
                 }
+                $this->duplicateConfiguration($source, $copy, $ticketMap ?? [], $dateMap);
                 return $copy->fresh(['dates','galleries','tickets']);
             });
         } catch (\Throwable $e) {
@@ -133,7 +180,11 @@ class EventFormService
 
     private function syncDates(Event $event, array $data, bool $updating): void
     {
-        if (($data['date_type'] ?? null)==='single') { EventDates::where('event_id',$event->id)->delete(); return; }
+        if (($data['date_type'] ?? null)==='single') {
+            $existing=EventDates::where('event_id',$event->id)->get();
+            if ($updating) $this->assertDatesRemovable($event,$existing);
+            EventDates::where('event_id',$event->id)->delete(); return;
+        }
         $seen=[]; $firstDuration=null; $lastEnd=null;
         foreach (($data['m_start_date'] ?? []) as $i=>$date) {
             $start=Carbon::parse($date.' '.$data['m_start_time'][$i]); $end=Carbon::parse($data['m_end_date'][$i].' '.$data['m_end_time'][$i]);
@@ -143,7 +194,11 @@ class EventFormService
             if ($row) { $row->update($values); $seen[]=$row->id; } else { $row=EventDates::create($values); $seen[]=$row->id; }
             $firstDuration ??= $values['duration']; if (!$lastEnd || $end->gt($lastEnd)) $lastEnd=$end;
         }
-        if ($updating) EventDates::where('event_id',$event->id)->whereNotIn('id',$seen)->delete();
+        if ($updating) {
+            $removed=EventDates::where('event_id',$event->id)->whereNotIn('id',$seen)->get();
+            $this->assertDatesRemovable($event,$removed);
+            EventDates::whereIn('id',$removed->pluck('id'))->delete();
+        }
         $event->update(['duration'=>$firstDuration,'end_date_time'=>$lastEnd]);
     }
 
@@ -176,14 +231,47 @@ class EventFormService
 
     private function syncBoxOfficeLocations(Event $event, array $data): void
     {
-        if (!$event->box_office_enabled) { BoxOfficeLocation::where('event_id',$event->id)->delete(); return; }
-        $names=[];
-        foreach (($data['box_office_locations'] ?? []) as $location) {
-            $name=trim((string)($location['name'] ?? '')); if ($name==='') continue; $names[]=$name;
-            BoxOfficeLocation::updateOrCreate(['event_id'=>$event->id,'name'=>$name],['address'=>$location['address']??null,'active'=>(bool)($location['active']??true)]);
+        // Counters keep their id across renames. A counter with sales, shifts, holds or staff
+        // assignments is deactivated instead of deleted so its history stays intact.
+        $keep=[];
+        if ($event->box_office_enabled) {
+            foreach (($data['box_office_locations'] ?? []) as $location) {
+                $name=trim((string)($location['name'] ?? '')); if ($name==='') continue;
+                $values=['name'=>$name,'address'=>$location['address']??null,'active'=>(bool)($location['active']??true)];
+                $row=!empty($location['id']) ? BoxOfficeLocation::where('event_id',$event->id)->whereKey((int)$location['id'])->first() : null;
+                $row ??= BoxOfficeLocation::where('event_id',$event->id)->where('name',$name)->whereNotIn('id',$keep)->first();
+                if ($row) $row->update($values); else $row=BoxOfficeLocation::create(['event_id'=>$event->id]+$values);
+                $keep[]=$row->id;
+            }
         }
-        BoxOfficeLocation::where('event_id',$event->id)->whereNotIn('name',$names)->delete();
+        foreach (BoxOfficeLocation::where('event_id',$event->id)->whereNotIn('id',$keep)->get() as $old) {
+            if ($this->locationIsReferenced((int)$old->id)) $old->update(['active'=>false]); else $old->delete();
+        }
     }
+
+    private function locationIsReferenced(int $locationId): bool
+    {
+        foreach (['box_office_sales'=>'location_id','box_office_shifts'=>'location_id','box_office_holds'=>'location_id','organizer_staff_assignments'=>'box_office_location_id','bookings'=>'box_office_location_id'] as $table=>$column) {
+            if (Schema::hasTable($table) && DB::table($table)->where($column,$locationId)->exists()) return true;
+        }
+        return false;
+    }
+
+    /** Sessions with pass entitlements, admissions, scans or bookings cannot be removed. */
+    public function assertDatesRemovable(Event $event, $dates): void
+    {
+        foreach ($dates as $date) {
+            $used = (Schema::hasTable('pass_entitlements') && DB::table('pass_entitlements')->where('event_date_id',$date->id)->exists())
+                || (Schema::hasTable('event_pass_dates') && DB::table('event_pass_dates')->where('event_date_id',$date->id)->exists())
+                || (Schema::hasTable('ticket_admission_states') && DB::table('ticket_admission_states')->where('event_date_id',$date->id)->exists())
+                || (Schema::hasTable('access_scans') && DB::table('access_scans')->where('event_date_id',$date->id)->exists())
+                || DB::table('bookings')->where('event_id',$event->id)->whereIn('paymentStatus',['completed','free','pending'])->where('event_date','like',$date->start_date.'%')->exists();
+            if ($used) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['m_start_date'=>'The session on '.$date->start_date.' has bookings, passes or admissions and cannot be removed or changed to a different schedule type.']);
+            }
+        }
+    }
+
 
     private function attachGallery(Event $event, array $ids): void
     {

@@ -1011,6 +1011,8 @@ class EventController extends Controller
       ], 403);
     }
 
+    try { app(\App\Services\Events\EventFormService::class)->assertDatesRemovable($event, collect([$date])); }
+    catch (\Illuminate\Validation\ValidationException $e) { return response()->json(['success' => false, 'message' => collect($e->errors())->flatten()->first()], 422); }
     $date->delete();
 
     return response()->json([

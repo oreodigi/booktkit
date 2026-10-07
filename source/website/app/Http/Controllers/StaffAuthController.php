@@ -24,4 +24,10 @@ class StaffAuthController extends Controller {
  public function editPassword(){return view('staff.change-password');}
  public function updatePassword(Request $r){$d=$r->validate(['current_password'=>'required','password'=>'required|string|min:8|confirmed']);$s=auth('staff')->user();if(!Hash::check($d['current_password'],$s->password))return back()->withErrors(['current_password'=>'Current password is incorrect.']);$s->update(['password'=>Hash::make($d['password']),'must_change_password'=>false]);return redirect()->route('staff.home');}
  public function logout(Request $r){Auth::guard('staff')->logout();Auth::guard('organizer')->logout();$r->session()->invalidate();$r->session()->regenerateToken();return redirect()->route('organizer.login');}
+ public function endImpersonation(Request $r){
+  $adminId=session('staff_impersonated_by_admin'); $staff=auth('staff')->user();
+  if($adminId && $staff) \App\Models\StaffAuditLog::create(['organizer_id'=>$staff->organizer_id,'staff_id'=>$staff->id,'admin_id'=>$adminId,'action'=>'admin_impersonation_ended','ip'=>$r->ip()]);
+  Auth::guard('staff')->logout(); $r->session()->forget('staff_impersonated_by_admin');
+  return $adminId ? redirect()->route('admin.organizer_workforce.index') : redirect()->route('organizer.login');
+ }
 }

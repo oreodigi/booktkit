@@ -33,6 +33,7 @@ class EventFormRequest extends FormRequest
             'box_office_locations.*.name' => ['required_with:box_office_locations','string','max:255'],
             'box_office_locations.*.address' => ['required_with:box_office_locations','string','max:500'],
             'box_office_locations.*.active' => ['nullable','boolean'],
+            'box_office_locations.*.id' => ['nullable','integer'],
             'date_type' => ['required', Rule::in(['single','multiple'])],
             'status' => ['required'],
             'is_featured' => ['required'],
@@ -100,6 +101,10 @@ class EventFormRequest extends FormRequest
             $eventId=(int)$this->input('event_id');
             if ($eventId && $this->input('event_type') && ($event=Event::find($eventId)) && $event->event_type !== $this->input('event_type') && $event->booking()->exists()) {
                 $validator->errors()->add('event_type','Event type cannot be changed after bookings exist.');
+            } elseif ($eventId && $this->input('event_type') && ($event=Event::find($eventId)) && $event->event_type !== $this->input('event_type')
+                && in_array('online', [$event->event_type, $this->input('event_type')], true) && $event->tickets()->exists()) {
+                // Online events have one auto-managed ticket; switching to/from online would overwrite or orphan tickets.
+                $validator->errors()->add('event_type','Delete this event\'s tickets before switching between an online and a physical event.');
             }
         });
     }

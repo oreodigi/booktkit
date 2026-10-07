@@ -143,7 +143,7 @@
                                     <div id="boxOfficeLocations">
                                       @foreach ($event->boxOfficeLocations as $i => $location)
                                       <div class="row mb-2 box-office-location-row">
-                                        <div class="col-md-5"><input class="form-control" name="box_office_locations[{{ $i }}][name]" value="{{ optional($location)->name }}" placeholder="{{ __('Counter name') }}" required></div>
+                                        <div class="col-md-5">@if(optional($location)->id)<input type="hidden" name="box_office_locations[{{ $i }}][id]" value="{{ $location->id }}">@endif<input class="form-control" name="box_office_locations[{{ $i }}][name]" value="{{ optional($location)->name }}" placeholder="{{ __('Counter name') }}" required></div>
                                         <div class="col-md-6"><input class="form-control" name="box_office_locations[{{ $i }}][address]" value="{{ optional($location)->address }}" placeholder="{{ __('Counter address') }}"></div>
                                         <div class="col-md-1"><button type="button" class="btn btn-danger remove-box-office-location">&times;</button></div>
                                       </div>

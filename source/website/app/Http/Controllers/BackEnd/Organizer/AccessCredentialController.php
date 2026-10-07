@@ -81,7 +81,7 @@ class AccessCredentialController extends Controller
         $organizerId = auth('organizer')->id();
         $data = $request->validate([
             'event_id' => 'required|integer',
-            'credential_type' => ['required', Rule::in(['qr_wristband','rfid_card','nfc_wristband','qr_badge','physical_id'])],
+            'credential_type' => ['required', Rule::in(\App\Services\Access\CredentialAssignmentService::TYPES)],
             'batch_code' => 'required|string|max:80',
             'identifiers' => 'required|string|max:200000',
         ]);
@@ -98,7 +98,8 @@ class AccessCredentialController extends Controller
         $ticket = $this->resolveTicket($data['ticket_reference'], $organizerId);
         $credential = $inventory->resolve($data['credential_identifier']);
         abort_unless($credential && (int) $credential->organizer_id === $organizerId, 404);
-        $assignment->assign($ticket->id, $credential->id, 'organizer', $organizerId);
+        [$actorType, $actorId] = $this->actor();
+        $assignment->assign($ticket->id, $credential->id, $actorType, $actorId);
         return back()->with('success', 'Credential assigned and activated.');
     }
 
@@ -129,7 +130,8 @@ class AccessCredentialController extends Controller
             ? (int) $ticketType->replacement_fee_paise
             : (int) data_get($policy?->metadata, 'replacement_fee_paise', 0);
         if($fee>0 && empty($data['payment_reference'])) return back()->withErrors(['payment_reference'=>'Replacement fee payment must be recorded before activating the new credential.']);
-        $replacement->replace($ticket->id,$credential->id,$data['reason'],'organizer',$organizerId,$fee,$data['payment_reference']??null);
+        [$actorType, $actorId] = $this->actor();
+        $replacement->replace($ticket->id,$credential->id,$data['reason'],$actorType,$actorId,$fee,$data['payment_reference']??null);
         return back()->with('success', 'Old credential revoked and replacement activated.');
     }
     public function createZone(Request $request)
@@ -151,12 +153,41 @@ class AccessCredentialController extends Controller
         return back()->with('success','Gate created.');
     }
 
+    public function revoke(Request $request, CredentialInventoryService $inventory, CredentialAssignmentService $assignment)
+    {
+        $organizerId = (int) auth('organizer')->id();
+        $data = $request->validate([
+            'credential_identifier' => 'required|string|max:255',
+            'reason' => ['required', Rule::in(['lost', 'stolen', 'damaged', 'misuse', 'refunded', 'other'])],
+        ]);
+        $credential = $inventory->resolve($data['credential_identifier']);
+        abort_unless($credential && (int) $credential->organizer_id === $organizerId, 404);
+        $this->assertStaffEvent((int) $credential->event_id);
+        [$actorType, $actorId] = $this->actor();
+        $assignment->revoke($credential->id, $data['reason'], $actorType, $actorId);
+        return back()->with('success', 'Credential revoked. It will be refused at every gate.');
+    }
+
+    /** Team members act as themselves, so audits show who issued, replaced or revoked. */
+    private function actor(): array
+    {
+        $staff = auth('staff')->user();
+        return $staff ? ['staff', (int) $staff->id] : ['organizer', (int) auth('organizer')->id()];
+    }
+
+    private function assertStaffEvent(int $eventId): void
+    {
+        $staff = auth('staff')->user();
+        if ($staff && !$staff->assignedToEvent($eventId)) abort(403, 'You are not assigned to this event.');
+    }
+
     private function resolveTicket(string $reference, int $organizerId): IssuedTicket
     {
         $query = IssuedTicket::where('organizer_id', $organizerId);
-        if (str_starts_with($reference, 'btk_')) {
-            return $query->where('token_hash', hash('sha256', $reference))->firstOrFail();
-        }
-        return $query->where('uuid', $reference)->firstOrFail();
+        $ticket = str_starts_with($reference, 'btk_')
+            ? $query->where('token_hash', hash('sha256', $reference))->firstOrFail()
+            : $query->where('uuid', $reference)->firstOrFail();
+        $this->assertStaffEvent((int) $ticket->event_id);
+        return $ticket;
     }
 }

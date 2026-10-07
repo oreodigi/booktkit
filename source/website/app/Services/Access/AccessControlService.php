@@ -22,6 +22,9 @@ class AccessControlService
 
         return DB::transaction(function () use ($token, $actorType, $actorId, $deviceName, $ip, $direction, $gateId, $override, $overrideReason, $eventId) {
             [$ticket, $credential, $source] = $this->resolve($token);
+            if (!$ticket && $credential && !in_array($credential->status, ['assigned', 'active'], true)) {
+                return $this->deny('Credential is '.$credential->status, 'credential_'.$credential->status);
+            }
             if (!$ticket || !$ticket->booking) return $this->deny('Invalid ticket or credential', 'invalid_token');
 
             $booking = $ticket->booking;
