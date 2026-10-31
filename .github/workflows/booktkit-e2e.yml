@@ -1,8 +1,6 @@
 name: BookTKIT E2E
 run-name: 'Staging ${{ inputs.suite || ''all'' }} ${{ inputs.request_id }}'
 on:
-  schedule:
-    - cron: '30 20 * * *'
   workflow_dispatch:
     inputs:
       suite:
